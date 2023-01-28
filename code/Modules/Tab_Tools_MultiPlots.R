@@ -1,0 +1,238 @@
+#####          TOOLS               ######## 
+#####     MultiPlot Tab            ######## 
+#####                              ######## 
+
+##### MultiPlot UI Module ----
+MultiPlotsUI <- function(id) {
+  tagList(
+    fluidRow(
+      column(3,
+        box(title = htmltools::span(icon("fa-light fa-gears"), " Settings"),
+            width = NULL, status = "primary",solidHeader = T,collapsible = F,
+          fluidRow(
+            column(6,style='padding-left:12px; padding-right:3px;',
+              pickerInput(NS(id,"plotType"),
+                          "  Plot Type",
+                          choices = NULL,
+                          width = NULL)
+            ),
+            column(6,style='padding-left:3px; padding-right:12px;',
+              conditionalPanel("input.gene_cluster == 'gene'",ns=NS(id),
+                pickerInput(NS(id,"colPal"),
+                            "  Col Pallette",
+                            choices = c("viridis","red","blue"),
+                            width = NULL)
+              ),
+              conditionalPanel("input.gene_cluster == 'cluster'",ns=NS(id),
+                pickerInput(NS(id,"colPal_cluster"),
+                            "  Col Pallette",
+                            choices = c("red","blue"),
+                            width = NULL)
+              )
+            )
+          ),
+          conditionalPanel("input.gene_cluster == 'gene'",ns=NS(id),
+            fluidRow(
+              column(12,style='padding-left:12px; padding-right:12px;',
+                     align="center",
+                switchInput(NS(id,"GL_T"),
+                            label = "Upload GeneList",
+                            size = "small",
+                            width = NULL,
+                            labelWidth = "100px"),
+              )
+            ),
+            tabsetPanel(id = NS(id,"switcher"), type = "hidden", selected = "panel1",
+              tabPanelBody("panel1",
+                fluidRow(
+                  column(11, style='padding-left:0px; padding-right:2px;',
+                   selectizeInput(NS(id,"gen_exp"),
+                                   label=NULL,
+                                   choices = NULL, 
+                                   options = list(maxItems = 10,
+                                                  maxOptions = 20,
+                                                  placeholder = 'Please select genes to plot'),
+                                   width = NULL,
+                                   multiple=T)
+                  ),
+                  column(1, style='padding-left:2px; padding-right:2px; padding-top:4px',
+                    actionBttn((NS(id,"action")),
+                               label = NULL,
+                               style = "unite",
+                               color = "primary",
+                               size = "xs",
+                               icon = icon("fa-solid fa-play"))
+                  )
+                )
+              ),
+              tabPanelBody("panel2",
+                fluidRow(
+                  column(12, style='padding-left:0px; padding-right:0px;',
+                    fileInput(NS(id,'listGenes'), label = NULL, multiple = T, 
+                              accept = c("txt/csv", "text/comma-separated-values,
+                                        text/plain", ".csv", ".xlsx"),
+                              buttonLabel = "Search", 
+                              placeholder = "Select Gene list"),
+                    htmlOutput(NS(id,"missingGenes"))
+                  )
+                )
+              )
+            )
+          ),
+          conditionalPanel("input.gene_cluster == 'cluster'",ns=NS(id),
+            fluidRow(
+              column(12,style='padding-left:12px; padding-right:12px;',
+                pickerInput(inputId = NS(id,"partitionType"),
+                            label = "Partition",
+                            choices = NULL
+                )
+              )
+            ),
+            fluidRow(
+              column(10, style='padding-left:12px; padding-right:2px;',
+                     selectizeInput(NS(id,"clusterType"), "Clusters",
+                                    choices = NULL, 
+                                    options = list(placeholder = 'Please select an option below'),
+                                    multiple=T)
+              ),
+              column(2, style='padding-left:2px; padding-right:12px; padding-top:28px',
+                     align="center",
+                     actionBttn((NS(id,"actionButton")),
+                                label = NULL,
+                                style = "unite",
+                                color = "primary",
+                                size = "xs",
+                                icon = icon("fa-solid fa-play"))
+              )
+            )
+          )
+        )
+      ),
+      column(9,
+        tabBox(id = NS(id,"gene_cluster"),
+               selected = "gene",
+               width = NULL,
+          tabPanel("by Gene Expression",value = "gene",
+            plotOutput(NS(id,"plot_gene"),
+                       height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
+          ),
+          tabPanel("by Cluster",value = "cluster",
+            plotOutput(NS(id,"plot_cluster"),
+                      height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
+          )
+        )
+      )
+    )
+  )
+}
+
+##### MultiPlot Server Module ----
+MultiPlotsServer <- function(id,sce) {
+  moduleServer(id, function(input,output,session) {
+    
+    ### Observe Events ----
+    observeEvent(ignoreInit = T,input$GL_T,{
+      if(input$GL_T) {
+        updateTabsetPanel(inputId = "switcher", selected = "panel2")
+      } else{
+        updateTabsetPanel(inputId = "switcher", selected = "panel1")
+      }
+    })
+    
+    updateSelectizeInput(session, 'gen_exp', choices = rownames(sce), server = TRUE)
+ 
+    dimVector <- reactive({
+      sapply(reducedDims(x = sce),FUN = ncol) 
+    })
+    
+    observeEvent(dimVector(),{
+      updatePickerInput(session,inputId = "plotType", choices = rev(names(which(dimVector() == 2  | dimVector() > 3))))
+    })
+    
+    updatePickerInput(session, 'partitionType', 
+                      choices = names(colData(sce))[sapply(colData(sce), is.factor)])
+    
+    observeEvent(input$partitionType,{
+      updateSelectizeInput(session,inputId = "clusterType",
+                           choices = levels(colData(sce)[,input$partitionType]),
+                           server = TRUE)
+    }) 
+    
+    
+    ### Gen selected & data preparation ----
+    #### Selected Gene -----
+    
+    genes.L <- eventReactive(input$action,{
+      req(input$GL_T == F)
+      req(input$gen_exp)
+      input$gen_exp
+    })
+    
+    #### Gene List Uploaded  -----
+    genes.GL <- eventReactive(input$listGenes,{
+      req(input$listGenes)
+      GL <- genesList(dataPath = input$listGenes)
+      no.genes <- GL[!(GL %in% rownames(sce))] #Keep the missing values
+      genes <- GL[(GL %in% rownames(sce))]
+      
+      list(genes = genes,miss= no.genes)
+    })
+    
+    output$missingGenes <- renderText({
+      req(length(genes.GL()$miss)>0)
+      paste('<b style="color:red;">The following genes were not found in the dataset:<b><br>', 
+            paste(genes.GL()$miss,
+                  collapse = ", ")
+      )
+    })
+    
+    
+    #### Plots ----
+    list_plots <- reactive({
+      req(!is.null(input$plotType))
+      if(input$GL_T){
+        req(length(genes.GL()$genes) > 0)
+        feature <- genes.GL()$genes
+      } else { 
+        req(!is.null(genes.L()))
+        feature <- genes.L() 
+      }
+      
+       list_plots <- list()
+       for(i in 1:length(feature)){
+         list_plots[[feature[i]]] <- plotReducedDim(object = sce, dimred = input$plotType,ncomponents = 2, colour_by=feature[i]) + ggtitle(feature[i]) 
+         
+       }
+      list_plots
+    })
+    
+    output$plot_gene <- renderPlot({
+      f_plot <- list_plots()
+      if(input$colPal != "viridis"){
+      for(i in 1:length(f_plot)){
+        f_plot[[i]] <- f_plot[[i]] +  scale_color_continuous(low="lightgrey",high=input$colPal) + labs(color=names(f_plot)[i])
+      }
+      }
+      
+      plot_grid(plotlist = f_plot)
+    })
+    
+    list_cluster_plot <- eventReactive(c(input$actionButton,input$plotType,input$colPal_cluster),{
+      req(length(input$clusterType) > 0)
+      req(!is.null(input$plotType))
+      f_plot <- list()
+      for(i in 1:length(input$clusterType)){
+        f_plot[[i]] <- reducedDimPlot_cluster(sce = sce,reducedDim = input$plotType,partition = input$partitionType,
+                                              cluster = input$clusterType[i],alpha = 0.5,palette = input$colPal_cluster)
+      }
+      f_plot
+    })
+    
+    output$plot_cluster <- renderPlot({
+      plot_grid(plotlist = list_cluster_plot())
+    })
+    
+
+  })
+}
+

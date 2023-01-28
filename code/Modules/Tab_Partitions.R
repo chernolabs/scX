@@ -1,0 +1,300 @@
+#####                              ######## 
+#####        Partition Tab         ######## 
+#####                              ######## 
+
+##### Cluster UI Module ----
+Clusters_UI <- function(id) {
+  tagList(
+    fluidRow(
+      column(3,
+        box(title = htmltools::span(icon("fa-light fa-gears"), " Settings"),
+            width = NULL, status = "primary",solidHeader = T,collapsible = T,
+          fluidRow(
+            column(6, 
+                   style='padding-left:12px; padding-right:3px;',
+                   align="center",
+              pickerInput(NS(id,"partitionType1"),
+                          "Partition 1",
+                          choices = NULL)),
+            column(6,
+                   style='padding-left:3px; padding-right:12px;',
+                   align="center",
+              pickerInput(NS(id,"partitionType2"),
+                          "Partition 2",
+                          choices = NULL)
+            )
+          ),
+          conditionalPanel("(input.barplot_matrix == 'barplot' && (input.wrap || input.partitionType2 == 'None')) || input.barplot_matrix == 'matrix'", ns=NS(id),  
+            prettySwitch(NS(id,"showFreq"),
+                       label="Hide Labels",
+                       value = F,
+                       status = "primary",
+                       fill = TRUE
+            )
+          ),
+          conditionalPanel("input.barplot_matrix == 'barplot'", ns=NS(id),  
+            conditionalPanel("input.wrap || input.partitionType2 == 'None'",ns=NS(id),
+              prettySwitch(NS(id,"freq"),
+                           label= "Proportions",
+                           value = F,
+                           status = "primary",
+                           fill = TRUE
+              )
+            ),
+            conditionalPanel("input.partitionType2 != 'None'",ns=NS(id),
+              prettySwitch(NS(id,"wrap"),
+                           label="Wrap",
+                           value = F,
+                           status = "primary",
+                           fill = TRUE
+              )
+            )
+          ),
+          conditionalPanel("input.barplot_matrix == 'matrix' && input.partitionType2 != 'None'",ns=NS(id),
+             htmlOutput(NS(id,"randValue")),
+             radioGroupButtons(inputId = NS(id,"Metric"), 
+                               label="",
+                               choices = c("Count", "Jaccard"),
+                               direction = "horizontal",
+                               justified = T,
+                               individual=F)
+          )
+        )
+      ),
+      column(9,
+        tabBox(id = NS(id,"barplot_matrix"),
+               selected = "barplot",
+               width = NULL,
+          tabPanel("BarPlot",value = "barplot",
+            plotOutput(NS(id,"plot_cluster"),
+                     height = "100vh") %>% withSpinner()
+          ),
+          tabPanel("Matrix",value = "matrix",
+            plotOutput(NS(id,"plot_matrix"),
+                       height = "100vh") %>% withSpinner()
+          )
+        )
+      )
+    )
+  )
+}
+
+##### Cluster Server Module ----
+Clusters_Server <- function(id,sce) {
+  moduleServer(id, function(input,output,session) {
+    
+    ### Observe Events ----
+    
+    updatePickerInput(session,inputId = "partitionType1", 
+                        choices = names(colData(sce))[sapply(colData(sce), is.factor)])
+    
+    observeEvent(input$partitionType1,ignoreInit = T,{
+      req(input$partitionType1)
+      prt <- names(colData(sce))[sapply(colData(sce), is.factor)]
+      
+      updatePickerInput(session,inputId = "partitionType2", 
+                        choices = c("None",prt[-(match(input$partitionType1,prt))])
+      )
+    })
+    
+    observeEvent(input$partitionType2, {
+      if(input$partitionType2 == "None"){
+        hideTab(inputId = "barplot_matrix", target = "matrix")  
+      } else {
+        showTab(inputId = "barplot_matrix", target = "matrix")
+      }
+    })
+    
+    #### Plots ----
+    OrderPartReact <- eventReactive(c(input$partitionType1,
+                                      input$partitionType2),{
+      req(input$partitionType1)
+      req(input$partitionType2)
+      if(input$partitionType2 == "None"){
+        Col.and.Order(partition = input$partitionType1, sce=sce)
+      } else {
+        Col.and.Order(partition = input$partitionType2, sce=sce)
+      }
+    })
+    
+    BarplotData <- reactive({
+      if(input$partitionType2 == "None"){
+      df <- data.frame(Partition1 = colData(sce)[,input$partitionType1]) %>%
+          group_by(Partition1) %>% summarise(Val =n()) %>% 
+          mutate(Freq = Val / sum(Val)) %>% as.data.frame
+      df
+      } else {
+      df <- data.frame(Partition1 = colData(sce)[,input$partitionType1],
+                   Partition2 = colData(sce)[,input$partitionType2]) %>%
+            group_by(Partition1,Partition2) %>% 
+            summarise(Val = n()) 
+      
+      }
+      df$Partition1 <- factor(df$Partition1,levels=rev(levels(df$Partition1)))
+      df
+    })
+    
+    ### BarPlots ----
+    
+    output$plot_cluster <- renderPlot({
+      req(input$partitionType1)  
+      req(input$partitionType2)  
+      req(input$barplot_matrix == "barplot")
+      if(input$partitionType2 == "None"){
+        ### Simple BarPlot ----
+              ### Proportion ----
+        if(input$freq){
+          g  <- ggplot(BarplotData(),
+                       aes(x= Partition1,
+                           fill= Partition1,
+                           y= Freq)) +
+                       geom_bar(stat = "identity") + 
+                       coord_flip() +
+                       scale_fill_manual(values=OrderPartReact()$colPart) +
+                       theme(legend.position = "none") +
+                       ylab("Relative Frequencies") + 
+                       xlab(input$partitionType1)
+          if(!(input$showFreq)){
+            g <- g + geom_text( aes(label=round(Freq,2)), position = position_stack(vjust = 0.85))
+          }
+        } else {
+              #### Counts ----
+          g  <-  ggplot(BarplotData(),
+                        aes(x=Partition1,
+                            fill=Partition1,
+                            y= Val)) +
+           geom_bar(stat = "identity") + 
+                       coord_flip() +
+                       scale_fill_manual(values=OrderPartReact()$colPart) +
+                       theme(legend.position = "none") +
+                       ylab("Absolute Frequencies") + 
+                       xlab(input$partitionType1)
+          if(!(input$showFreq)){
+            g <- g + geom_text( aes(label=round(Val,2)), position = position_stack(vjust = 0.85))
+          }
+        }
+        ### 2 partitons BarPlot ----
+      } else {
+          if(input$wrap) {
+            if(input$freq){
+              df <- BarplotData() %>% group_by(Partition2) %>% 
+                              mutate(Freq = Val / sum(Val))
+              
+              g  <- ggplot(df,aes(x = Partition1,
+                                  fill=Partition2,
+                                  y = Freq)) +
+                geom_bar(stat = "identity") +
+                facet_grid(.~Partition2) +
+                coord_flip() + 
+                xlab(input$partitionType1) + 
+                ylab("Proportion") +
+                scale_fill_manual(values=OrderPartReact()$colPart) +
+                theme(axis.text.x = element_text(angle = 45,
+                                                 vjust = 1,
+                                                 hjust=1),
+                      legend.position = "none")
+              if(!(input$showFreq)){
+                g <- g + geom_text( aes(label=round(Freq,2),y = (max(Freq)/2)))
+              }
+            } else {
+              g  <- ggplot(BarplotData(),
+                     aes(x = Partition1,
+                         fill=Partition2,
+                         y = Val)) +
+                  geom_bar(stat = "identity") +
+                  facet_grid(.~Partition2) +
+                  coord_flip() + 
+                  scale_fill_manual(values=OrderPartReact()$colPart)  +
+                  theme(axis.text.x = element_text(angle = 45,
+                                                   vjust = 1,
+                                                   hjust=1),
+                        legend.position = "none")
+              if(!(input$showFreq)){
+                g <- g + geom_text( aes(label=round(Val,2),y = (max(Val)/2)))
+              }
+            }  
+          } else {
+            df  <- df <- BarplotData() %>%
+                           group_by(Partition1) %>% 
+                           mutate(Freq = Val / sum(Val))
+            
+            df$Partition2 <- factor(df$Partition2,
+                                    levels=rev(levels(df$Partition2)))
+            g  <- ggplot(df,
+                   aes(x= Partition1,
+                       fill=Partition2,
+                       y= Freq)) +
+              geom_bar( position = "fill",
+                        stat = 'identity') + 
+              coord_flip() +
+              xlab(input$partitionType1) + 
+              ylab("Proportion") + 
+              scale_fill_manual(values=OrderPartReact()$colPart) + 
+              labs(fill = input$partitionType2)
+          }
+          
+        }
+      
+      g
+      # if(input$freq & (input$partitionType2 == "None" | input$wrap)){
+      #   g <- g  + geom_text(stat='prop', aes(label=..prop..), position = position_stack(vjust = 0.85))
+      #    } else{
+      #      g <- g  + geom_text(stat='count', aes(label=..count..), position = position_stack(vjust = 0.85))
+      #    }
+      #  }
+      # 
+      # g
+      
+    })
+    
+    #### Matrix  -----
+    #### Metric ----
+    
+    output$randValue <- renderText({
+      req(input$partitionType1)  
+      req(input$partitionType2 != "None")
+      req(input$barplot_matrix == "matrix")
+      rand <- pairwiseRand(colData(sce)[,input$partitionType1],
+                   colData(sce)[,input$partitionType2],
+                   mode="index")
+      paste('<b style="color:black;">Rand index:',round(rand,2),'<b><br>')
+    })
+    output$plot_matrix <- renderPlot({
+      req(input$partitionType1)  
+      req(input$partitionType2 != "None")
+      req(input$barplot_matrix == "matrix")
+      
+      if(input$Metric == "Count"){
+        tab <- table(colData(sce)[,input$partitionType1],
+                     colData(sce)[,input$partitionType2])
+        # tab <- log10(tab+10)
+        col <- viridis::viridis(100)
+      } else if (input$Metric == "Jaccard"){
+        tab <- linkClustersMatrix(colData(sce)[,input$partitionType1],
+                                  colData(sce)[,input$partitionType2],
+                                  denominator = "union")
+        col <- viridis::viridis(100)
+      } 
+      # else if (input$Metric == "Rand"){
+      #   tab <- pairwiseRand(colData(sce)[,input$partitionType1],
+      #                       colData(sce)[,input$partitionType2],
+      #                       mode="ratio")
+      #   col <- viridis::magma(100) 
+      # }
+      
+      Heatmap(tab, name = input$Metric,
+              col = col,
+              cluster_rows = F,
+              cluster_columns = F,
+              show_row_names = T,
+              show_column_names = T,
+              row_title = input$partitionType1,
+              column_title = input$partitionType2,
+              cell_fun = if(!(input$showFreq)){set_val(tab = tab)} else{NULL}
+      )
+      
+      
+    })
+    
+  })
+}
