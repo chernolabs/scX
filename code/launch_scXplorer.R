@@ -1,0 +1,264 @@
+library(shinydashboard)
+library(shiny)
+library(plotly)
+library(ggplot2)
+library(scran)
+library(shinyWidgets)
+library(dplyr)
+library(ggcorrplot)
+library(rvest)
+library(shinyFeedback)
+library(ttutils)
+library(glue)
+library(scales)
+library(scater)
+library(RColorBrewer)
+library(dendextend)
+library(tools)
+library(DT)
+library(stringr)
+require(shinyjs)
+require(SingleCellExperiment)
+options(bitmapType='cairo')
+library(shinydashboard)
+library(shiny)
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(highcharter)
+library(htmltools)
+library(lubridate)
+library(stringr)
+library(withr)
+library(treemap)
+library(plotly)
+library(DT)
+library(shinyBS)
+library(shinyjs)
+library(WDI)
+library(geosphere)
+library(magrittr)
+library(shinyWidgets)
+options(spinner.color="#006272")
+library(timevis)
+library(bslib)
+library(showtext)
+library(thematic)
+library(shinycssloaders)
+library(shinycustomloader)
+library(shinydisconnect)
+library(ComplexHeatmap)
+library(bluster)
+## Server -----
+launch_scXplorer <- function(cseo,dataset_name='scXplorer'){
+  theme_set(theme_bw())
+  source('code/Functions/Functions.R')
+  source('code/Modules/Tab_Summary.R')
+  source('code/Modules/Tab_Markers.R')
+  source('code/Modules/Tab_NMarkers.R')
+  source('code/Modules/Tab_Expression.R')
+  source('code/Modules/Tab_CoExp.R')
+  source('code/Modules/Tab_DiffExpression.R')
+  source('code/Modules/Tab_Partitions.R')
+  source('code/Modules/Tab_Tools_MultiPlots.R')
+  source('code/Modules/Tab_Tools_ViolinGL.R')
+  # source('code/SingleUI.R') #This allows to change the name
+  # source('code/SingleServer.R')
+  server <- function(input, output,session) {
+    observeEvent(input$button.config,{
+      QC_Server("qc",sce = cseo$SCE)  
+      markersServer(id="markers",sce=cseo$SCE,ldf = cseo$ldf,point.size = input$point.size)
+      N_markersServer(id="n_markers",sce=cseo$SCE,point.size = input$point.size)
+      ExpressionServer(id="Exp",sce=cseo$SCE,point.size = input$point.size)
+      COExpServer(id="Co-exp",sce=cseo$SCE,point.size = input$point.size)
+      VolcanoServer(id="volcano",sce=cseo$SCE,sce.markers = cseo$sce.markers)
+      VT_Server(id = "tools",sce =cseo$SCE)
+      MultiPlotsServer(id = "MP",sce =cseo$SCE)
+      Clusters_Server("cluster",sce = cseo$SCE)                                                                                                                                                                                                     
+    })
+  }
+  
+  #### ShinyDashboard ----
+  #### Header ----
+  path_git <- "https://www.leloir.org.ar/biologia-de-sistemas-integrativa?area=bioinformatica-y-biologia-computacional"
+  path_button <- "https://www.youtube.com/watch?v=OeVv7zc358E"
+  
+  header <- 
+    dashboardHeader(title = HTML(dataset_name), 
+                    disable = FALSE, 
+                    titleWidth  = 250)
+  
+  #### SideBar ----
+  siderbar <- 
+    dashboardSidebar(
+      width = 250,
+      useShinyjs(),
+      sidebarMenu(
+        id = 'sidebar',
+        style = "position: relative; overflow: visible;",
+        HTML(
+          paste0(
+            "<br>","<a href='",
+            path_git,
+            "' target='_blank'><img style =
+                      'display: block; margin-left: auto; margin-right: auto;'
+                      src='scXplorer-03.png' width = '186'></a>",
+            "<br>",
+            paste0(
+              "<p style = 'text-align: center;'><small><a href='",
+              path_button,
+              "' target='_blank'>Click here to listen to a temaiken</a></small></p>"
+            ),
+            "<br>"
+          )
+        ),
+        tags$style("@import url(https://use.fontawesome.com/releases/v6.2.0/css/all.css);"),
+        menuItem("Global Options", tabName = "globalTab", icon = icon("fa-regular fa-globe")),
+        div( id = 'sidebar_global',
+             conditionalPanel("input.sidebar === 'globalTab'",
+                              sliderInput(inputId = "point.size",
+                                          label = "Point size ScatterPlots",
+                                          min = 5,max = 50,value = 20),
+                              fluidRow(column=12, align = "right",
+                                       style='padding-left:12px; padding-right:12px;',
+                                       actionBttn(inputId = "button.config",
+                                                  label = "Apply", 
+                                                  style = "stretch",
+                                                  color = "primary")
+                              )
+             )
+        ),
+        menuItem("Summary", tabName = "smryTab", icon = icon("fa-regular fa-bookmark"),selected = T),              
+        menuItem("Markers", tabName = "markersTab",
+                 icon = icon('fa-solid fa-location-dot'), startExpanded = F,
+                 menuSubItem('Cluster markers', tabName = "markers_cluster",
+                             icon = icon('fa-solid fa-map-location-dot')
+                 ),
+                 menuSubItem('Find new markers', tabName = "markers_new",
+                             icon = icon('fa-solid fa-magnifying-glass-location')
+                 )
+        ),
+        menuItem("Gene Expression", tabName = "g_expTab",
+                 icon = icon('fa-solid fa-chart-simple'), startExpanded = F,
+                 menuSubItem('Expression', tabName = "g_exp",
+                             icon = icon('fa-solid fa-signal')
+                 ),
+                 menuSubItem('Co-expression', tabName = "g_coexp",
+                             icon = icon('fa-regular fa-clone'))
+        ),
+        menuItem("Differential Expression", tabName = "volcanoTab",
+                 icon = icon("fa-solid fa-chart-column")
+        ),
+        menuItem("Partitions", tabName = "clustersTab",
+                 icon = icon("fa-solid fa-circle-nodes")
+        ),
+        menuItem("Tools", tabName = "toolsTab",
+                 icon = icon("fa-solid fa-toolbox"), startExpanded = F,
+                 menuSubItem('Violin Gene List', tabName = "t_VGL",
+                             icon = icon('fa-solid fa-wrench')
+                 ),
+                 menuSubItem('MultiPlots', tabName = "t_MP",
+                             icon = icon('fa-solid fa-hammer')
+                 )
+        )
+      )
+    )
+  #### Body ----
+  body <- 
+    dashboardBody( 
+      useSweetAlert(),
+      
+      ### Styling ----
+      tags$head(
+        tags$link(rel="shortcut icon", href="scXplorer-03.ico"),
+        tags$script(glue('document.title = {dataset_name}')),
+        tags$style(
+          HTML(".tab-content { padding-left: 20px; padding-right: 30px; }")
+        ),
+        tags$style(
+          HTML('/* change size of icons in sub-menu items */
+               .sidebar .sidebar-menu .treeview-menu>li>a>.fa {
+               font-size: 15px;
+               }
+               .sidebar .sidebar-menu .treeview-menu>li>a>.glyphicon {
+               font-size: 13px;
+               }
+               /* Hide icons in sub-menu items */
+               .sidebar .sidebar-menu .treeview>a>.fa-angle-left {
+               display: none;
+               }'
+          )
+        ),
+        tags$style(
+          HTML("hr {border-top: 1px solid #000000;}")
+        ),
+        ## to not show error message in shiny
+        tags$style(
+          HTML(".shiny-output-error { visibility: hidden; }")
+        ),
+        tags$style(
+          HTML(".shiny-output-error:before { visibility: hidden; }")
+        ),
+        ## heand dropdown menu size
+        tags$style(
+          HTML('.navbar-custom-menu>.navbar-nav>li:last-child>.dropdown-menu 
+               { width:10px; font-size:10px; padding:1px; margin:1px;}')
+        ),
+        tags$style(HTML('.navbar-custom-menu> .navbar-nav> li:last-child > .dropdown-menu > h4 
+                        {width:0px; font-size:0px; padding:0px; margin:0px;}')
+        ),
+        tags$style(HTML('.navbar-custom-menu> .navbar-nav> li:last-child > .dropdown-menu > p 
+                        {width:0px; font-size:0px; padding:0px; margin:0px;}')
+        )
+      ),
+      ### Main -----
+      tabItems(
+        tabItem(tabName = "smryTab",
+                QC_UI(id="qc")
+        ),
+        tabItem(tabName = "markers_cluster",
+                HTML('<h4><span style="font-family:Trebuchet MS,Helvetica,sans-serif"><strong><span style="color:#4e5f70">Cluster markers</span></strong></span></h4>'),
+                markersUI(id="markers")
+        ),
+        tabItem(tabName = "markers_new",
+                HTML('<h4><span style="font-family:Trebuchet MS,Helvetica,sans-serif"><strong><span style="color:#4e5f70">Find new markers</span></strong></span></h4>'),
+                N_markersUI(id="n_markers")
+        ),
+        tabItem(tabName = "g_exp",
+                HTML('<h4><span style="font-family:Trebuchet MS,Helvetica,sans-serif"><strong><span style="color:#4e5f70">Expression</span></strong></span></h4>'),
+                ExpressionUI(id="Exp")
+        ),
+        tabItem(tabName = "g_coexp",
+                HTML('<h4><span style="font-family:Trebuchet MS,Helvetica,sans-serif"><strong><span style="color:#4e5f70">Co-Expression</span></strong></span></h4>'),
+                COExpUI(id="Co-exp")
+        ),
+        tabItem(tabName = "volcanoTab",
+                HTML('<h4><span style="font-family:Trebuchet MS,Helvetica,sans-serif"><strong><span style="color:#4e5f70">Differential Expression</span></strong></span></h4>'),
+                VolcanoUI(id="volcano")
+        ),
+        tabItem(tabName = "clustersTab",
+                HTML('<h4><span style="font-family:Trebuchet MS,Helvetica,sans-serif"><strong><span style="color:#4e5f70">Partition Analysis</span></strong></span></h4>'),
+                Clusters_UI("cluster")
+        ),
+        tabItem(tabName = "t_VGL",
+                HTML('<h4><span style="font-family:Trebuchet MS,Helvetica,sans-serif"><strong><span style="color:#4e5f70">Violin by Gene list </span></strong></span></h4>'),
+                VT_UI(id = "tools")
+        ),
+        tabItem(tabName = "t_MP",
+                HTML('<h4><span style="font-family:Trebuchet MS,Helvetica,sans-serif"><strong><span style="color:#4e5f70">MultiPlots</span></strong></span></h4>'),
+                MultiPlotsUI(id = "MP")
+        )
+      )
+    )
+  
+  ui <- dashboardPage(skin = "blue", 
+                  header,
+                  siderbar,
+                  body)
+  shinyApp(ui, server)  
+}
+
+launch_scXplorer(cseo = sce1,dataset_name = 'Pokemon')
+
+
+
