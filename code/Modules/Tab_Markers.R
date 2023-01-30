@@ -105,20 +105,21 @@ markersServer <- function(id = "markers",sce,ldf,point.size = 20) {
     
     output$box_DT <- renderUI({
       if(!is.null(cluster_selected())){
-      tagList(
-      box(width = NULL, status = "primary",solidHeader = F,collapsible = T,
-          DTOutput(NS(id,"DTMarkers"))
+        tagList(
+          box(width = NULL, status = "primary",solidHeader = F,collapsible = T,
+              DTOutput(NS(id,"DTMarkers"))
           ),
           fluidRow(column=12,align = "right",style='padding-left:12px; padding-right:12px;',
-          actionBttn(
-            inputId = NS(id,"resetButton"),
-            label = "Reset", 
-            style = "stretch",
-            color = "primary"
+            actionBttn(
+              inputId = NS(id,"resetButton"),
+              label = "Reset", 
+              style = "stretch",
+              color = "primary"
             )
           )
-      )} else{
-        
+        )
+      } 
+      else{
         HTML('<p style="text-align: center;"><strong>Click on a cluster to analyze its markers</strong></p>')
       }
     })
@@ -134,10 +135,17 @@ markersServer <- function(id = "markers",sce,ldf,point.size = 20) {
     output$DTMarkers <- renderDT(server = FALSE,datatable({
       req(!is.null(cluster_selected()))
       # ldf[[input$partitionType]][[cluster_selected()]][,c("robustness","boxcor","selectivity","meanX")]
-      ldf[[input$partitionType]][[cluster_selected()]]
+      df <- ldf[[input$partitionType]][[cluster_selected()]]
+      #Check if it is a cluster without any markers, if it is create a null data.frame
+      if(is.null(df)){
+        df <- data.frame(matrix(ncol = 2, nrow = 0))
+        colnames(df) <- c('boxcor','robustness')
+      }
+      df
+      
     }, selection = 'single',
     extensions = 'Buttons',
-    options = list(language = list(zeroRecords = "Click on a cluster to analyze its markers (double-click to clear)"),
+    options = list(language = list(zeroRecords = "No markers found for this cluster or criterion"),
                    dom = 'Bfrtip',
                    exportOptions = list(header = ""),
                    buttons = c('copy', 'csv', 'excel', 'pdf'),
