@@ -256,7 +256,7 @@ launch_scXplorer <- function(cseo,dataset_name='scXplorer', point.size =20){
   shinyApp(ui, server)  
 }
 
-launch_scXplorer(cseo = all,point.size = 10,dataset_name = 'Pokemon')
+launch_scXplorer(cseo = all,point.size = 20,dataset_name = 'scXplorer')
 
 
 

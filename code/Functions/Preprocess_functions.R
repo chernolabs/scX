@@ -86,9 +86,9 @@ createSCEobject <- function(xx,
   if(verbose) cat(' Finished','\n')
   
   #If there are not an assay called counts, get the first assay from the list and rename it as counts (to be consistent after on the code)
-  if(!('counts' %in% names(assays(xx.sce)))){
-    names(assays(xx.sce))[1] <- 'counts'
-  }
+  # if(!('counts' %in% names(assays(xx.sce)))){
+  #   names(assays(xx.sce))[1] <- 'counts'
+  # }
   
   # QC ----
   if(verbose) cat('Computing QC metrics...')
