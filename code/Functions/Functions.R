@@ -105,14 +105,14 @@ cajitasdeluz <- function(ssce, selected.cells, corr = 0.7){
 
 #### Markers Tab ----
 ####  Scientifict notation DT ----
-js <- c(
-  "function(row, data, displayNum, index){",
-  "  var x = data[3];",
-  "  $('td:eq(3)', row).html(x.toExponential(2));",
-  "  var y = data[4];",
-  "  $('td:eq(4)', row).html(y.toExponential(2));",
-  "}"
-)
+# js <- c(
+#   "function(row, data, displayNum, index){",
+#   "  var x = data[3];",
+#   "  $('td:eq(3)', row).html(x.toExponential(2));",
+#   "  var y = data[4];",
+#   "  $('td:eq(4)', row).html(y.toExponential(2));",
+#   "}"
+# )
 
 #### Diff Expression Tab ----
 ####  Scientifict notation DT ----

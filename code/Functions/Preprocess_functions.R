@@ -11,7 +11,7 @@
 #  calcRedDim: si tiene que computar las dimensiones reducidas (PCA, UMAP, TSNE, UMAP2D, TSNE2D)
 createSCEobject <- function(xx,
                             metadata=NULL,
-                            toFactors="scx.clust",
+                            toFactors=NULL,
                             chosen.hvg=NULL,
                             nHVGs=3000,
                             nPCs=50,
@@ -33,9 +33,14 @@ createSCEobject <- function(xx,
   #Check if the user put twice the same partition.
   toFactors <- unique(toFactors)
   
+  if(is.null(toFactors)){
+    warning('No toFactors specified, a quick clusterization will be computed.')
+    toFactors <- "scx.clust"
+  }
   #If isn't a Seurat or a SCE object, and the metadata is null (because the metadata could be inside de object)
   #The toFactors become the default.
-  if(is.null(metadata) & class(xx)[1]!="Seurat" & class(xx)[1]=="SingleCellExperiment"){
+  if(is.null(metadata) & class(xx)[1]!="Seurat" & class(xx)[1]!="SingleCellExperiment"){
+    warning('No metadata specified, a quick clusterization will be computed.')
     toFactors <- "scx.clust"
   }
   if(verbose) cat('Creating SCE object...')

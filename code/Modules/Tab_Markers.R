@@ -133,16 +133,17 @@ markersServer <- function(id = "markers",sce,ldf,point.size = 20) {
     #DT markers of cluster
     output$DTMarkers <- renderDT(server = FALSE,datatable({
       req(!is.null(cluster_selected()))
-      ldf[[input$partitionType]][[cluster_selected()]][,c("robustness","boxcor","selectivity","meanX")]
+      # ldf[[input$partitionType]][[cluster_selected()]][,c("robustness","boxcor","selectivity","meanX")]
+      ldf[[input$partitionType]][[cluster_selected()]]
     }, selection = 'single',
     extensions = 'Buttons',
     options = list(language = list(zeroRecords = "Click on a cluster to analyze its markers (double-click to clear)"),
                    dom = 'Bfrtip',
                    exportOptions = list(header = ""),
                    buttons = c('copy', 'csv', 'excel', 'pdf'),
-                   rowCallback = DT::JS(js),
+                   # rowCallback = DT::JS(js),
                    scrollX=T,
-                   autoWidth = TRUE),
+                   autoWidth = F),
     rownames= TRUE,
     caption = htmltools::tags$caption(
       style = paste0('caption-side: top; text-align: center; font-weight: bold;color:white;background-color:',OrderPartReact()$colPart[[cluster_selected()]]),

@@ -160,7 +160,7 @@ VolcanoServer <- function(id,sce,sce.markers) {
                       buttons = c('copy', 'csv', 'excel', 'pdf'),
                       rowCallback = DT::JS(js_volcano),
                       scrollX=T,
-                      autoWidth = TRUE),
+                      autoWidth = F),
                     rownames= TRUE,
                     selection = 'none',
                     caption = htmltools::tags$caption(

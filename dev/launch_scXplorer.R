@@ -50,7 +50,7 @@ library(shinydisconnect)
 library(ComplexHeatmap)
 library(bluster)
 ## Server -----
-launch_scXplorer <- function(cseo,dataset_name='scXplorer', point.size =20){
+launch_scXplorer <- function(cseo,dataset_name='scXplorer'){
   theme_set(theme_bw())
   source('code/Functions/Functions.R')
   source('code/Modules/Tab_Summary.R')
@@ -65,15 +65,17 @@ launch_scXplorer <- function(cseo,dataset_name='scXplorer', point.size =20){
   # source('code/SingleUI.R') #This allows to change the name
   # source('code/SingleServer.R')
   server <- function(input, output,session) {
+    observeEvent(input$button.config,{
       QC_Server("qc",sce = cseo$SCE)  
-      markersServer(id="markers",sce=cseo$SCE,ldf = cseo$ldf,point.size = point.size)
-      N_markersServer(id="n_markers",sce=cseo$SCE,point.size = point.size)
-      ExpressionServer(id="Exp",sce=cseo$SCE,point.size = point.size)
-      COExpServer(id="Co-exp",sce=cseo$SCE,point.size = point.size)
+      markersServer(id="markers",sce=cseo$SCE,ldf = cseo$ldf,point.size = input$point.size)
+      N_markersServer(id="n_markers",sce=cseo$SCE,point.size = input$point.size)
+      ExpressionServer(id="Exp",sce=cseo$SCE,point.size = input$point.size)
+      COExpServer(id="Co-exp",sce=cseo$SCE,point.size = input$point.size)
       VolcanoServer(id="volcano",sce=cseo$SCE,sce.markers = cseo$sce.markers)
       VT_Server(id = "tools",sce =cseo$SCE)
       MultiPlotsServer(id = "MP",sce =cseo$SCE)
       Clusters_Server("cluster",sce = cseo$SCE)                                                                                                                                                                                                     
+    })
   }
   
   #### ShinyDashboard ----
@@ -111,21 +113,21 @@ launch_scXplorer <- function(cseo,dataset_name='scXplorer', point.size =20){
           )
         ),
         tags$style("@import url(https://use.fontawesome.com/releases/v6.2.0/css/all.css);"),
-        # menuItem("Global Options", tabName = "globalTab", icon = icon("fa-regular fa-globe")),
-        # div( id = 'sidebar_global',
-        #      conditionalPanel("input.sidebar === 'globalTab'",
-        #                       sliderInput(inputId = "point.size",
-        #                                   label = "Point size ScatterPlots",
-        #                                   min = 5,max = 50,value = 20),
-        #                       fluidRow(column=12, align = "right",
-        #                                style='padding-left:12px; padding-right:12px;',
-        #                                actionBttn(inputId = "button.config",
-        #                                           label = "Apply", 
-        #                                           style = "stretch",
-        #                                           color = "primary")
-        #                       )
-        #      )
-        # ),
+        menuItem("Global Options", tabName = "globalTab", icon = icon("fa-regular fa-globe")),
+        div( id = 'sidebar_global',
+             conditionalPanel("input.sidebar === 'globalTab'",
+                              sliderInput(inputId = "point.size",
+                                          label = "Point size ScatterPlots",
+                                          min = 5,max = 50,value = 20),
+                              fluidRow(column=12, align = "right",
+                                       style='padding-left:12px; padding-right:12px;',
+                                       actionBttn(inputId = "button.config",
+                                                  label = "Apply", 
+                                                  style = "stretch",
+                                                  color = "primary")
+                              )
+             )
+        ),
         menuItem("Summary", tabName = "smryTab", icon = icon("fa-regular fa-bookmark"),selected = T),              
         menuItem("Markers", tabName = "markersTab",
                  icon = icon('fa-solid fa-location-dot'), startExpanded = F,
@@ -256,7 +258,7 @@ launch_scXplorer <- function(cseo,dataset_name='scXplorer', point.size =20){
   shinyApp(ui, server)  
 }
 
-launch_scXplorer(cseo = all,point.size = 10,dataset_name = 'Pokemon')
+launch_scXplorer(cseo = sce1,dataset_name = 'Pokemon')
 
 
 
