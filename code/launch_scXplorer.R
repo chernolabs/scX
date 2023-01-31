@@ -49,6 +49,7 @@ library(shinycustomloader)
 library(shinydisconnect)
 library(ComplexHeatmap)
 library(bluster)
+library(cowplot)
 ## Server -----
 launch_scXplorer <- function(cseo,dataset_name='scXplorer', point.size =20){
   theme_set(theme_bw())
@@ -79,7 +80,7 @@ launch_scXplorer <- function(cseo,dataset_name='scXplorer', point.size =20){
   #### ShinyDashboard ----
   #### Header ----
   path_git <- "https://www.leloir.org.ar/biologia-de-sistemas-integrativa?area=bioinformatica-y-biologia-computacional"
-  path_button <- "https://www.youtube.com/watch?v=OeVv7zc358E"
+  path_button <- "https://github.com/chernolab"
   
   header <- 
     dashboardHeader(title = HTML(dataset_name), 
@@ -105,7 +106,7 @@ launch_scXplorer <- function(cseo,dataset_name='scXplorer', point.size =20){
             paste0(
               "<p style = 'text-align: center;'><small><a href='",
               path_button,
-              "' target='_blank'>Click here to listen to a temaiken</a></small></p>"
+              "' target='_blank'>scXplorer</a></small></p>"
             ),
             "<br>"
           )
@@ -253,10 +254,13 @@ launch_scXplorer <- function(cseo,dataset_name='scXplorer', point.size =20){
                   header,
                   siderbar,
                   body)
+  
   shinyApp(ui, server)  
 }
 
-launch_scXplorer(cseo = all,point.size = 20,dataset_name = 'scXplorer')
-
-
+# load(file = 'data/Dataset1_paper.Rdata')
+# launch_scXplorer(cseo = all,
+#                  point.size = 20,
+#                  dataset_name = 'Dataset 1')
+# 
 
