@@ -124,33 +124,41 @@ N_markersServer <- function(id,sce,point.size = 20) {
     
     ### Cluster and Gen selected ----
     output$box_DT <- renderUI({
-      req(!is.null(MarkersDT()))
-      tagList(
-        box(title = htmltools::span(icon("fa-light fa-gears"), " Settings"), width = NULL, status = "primary",solidHeader = T,collapsible = T,
-            DTOutput(NS(id,"DTMarkers"))
-        ),
-        fluidRow(column=12,align = "right",style='padding-left:12px; padding-right:12px;',
-                 actionBttn(
-                   inputId = NS(id,"resetButton"),
-                   label = "Reset", 
-                   style = "stretch",
-                   color = "primary"
-                 )
+      if(!is.null(MarkersDT())){
+        tagList(
+          box(width = NULL, status = "primary",solidHeader = F,collapsible = T,
+              DTOutput(NS(id,"DTMarkers"))
+          ),
+          fluidRow(column=12,align = "right",style='padding-left:12px; padding-right:12px;',
+            actionBttn(
+              inputId = NS(id,"resetButton"),
+              label = "Reset", 
+              style = "stretch",
+              color = "primary"
+            )
+          )
         )
-      )
+      } else{
+        HTML('<p style="text-align: center;"><strong>Select custom clusters using the box and lasso select tools on the scatter plot.</strong></p>')
+      }
     })
     
     cells_selected <- reactive({
       req(input$partitionType)
       d <- event_data(source = "PlotMix","plotly_selected")
-      d <- d[,"customdata"]
-      if (is.null(d)) NULL else d
+      # d <- d[,"customdata"]
+      # if (is.null(d)) NULL else d
+      if(!is.null(d)  & length(d)>0){
+        d[,"customdata"]
+      } else{ NULL }
     })
     
     MarkersDT <- reactive({
-      req(!is.null(cells_selected()))
-      a<-cajitasdeluz(ssce = sce,selected.cells =cells_selected(),corr = 0.3)  
+      if(!is.null(cells_selected())){
+      a <- cajitasdeluz(ssce = sce,selected.cells =cells_selected(),corr = 0.3)  
       a
+      } 
+      else { NULL }
     })
     
     # #DT markers of cluster
