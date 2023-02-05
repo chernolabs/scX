@@ -38,6 +38,13 @@ N_markersUI <- function(id) {
               )
             )
           ),
+          conditionalPanel(ns = NS(id), "typeof output.DTMarkers !== 'undefined'", 
+                           fluidRow(
+                             column(12,align ="center",style='padding-left:12px; padding-right:12px;',
+                                    downloadButton(NS(id,'export'),label = "Download Selected Cells")
+                             )
+                           )
+          )
         ), 
         uiOutput(NS(id,"box_DT")) %>% withLoader(type='html',loader = 'loader6')
       ),
@@ -184,7 +191,17 @@ N_markersServer <- function(id,sce,point.size = 20) {
       rownames(MarkersDT()[input$DTMarkers_rows_selected,,drop=F])
     })
      
+    ### Download selected cells --
     
+    output$export = downloadHandler(
+      filename = function() {"Selected_Cells.csv"},
+      content = function(file) {
+        req(!is.null(MarkersDT()))
+        write.csv(data.frame(Selected_Cells = cells_selected()),
+                  file = file,
+                  row.names = F)
+      }
+    )
     
     ###Plots ----
     
