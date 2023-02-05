@@ -33,18 +33,14 @@ VT_UI <- function(id) {
                     buttonLabel = "Search",
                     placeholder = "Select Gene list"),
           htmlOutput(NS(id,"missingGenes")),
-          fluidRow(
-            column(12,
-                   align = "right",
-                   style='padding-left:12px; padding-right:12px;',
-              uiOutput(NS(id,"previewButton"))
-            )
-          )
+          uiOutput(NS(id,"previewButton"))
         )
       ),
       column(9,
-        box(title = "Preview", width = NULL, solidHeader = TRUE,
-            status = "primary",collapsible = T,
+        box(title = "Preview",
+            width = NULL,
+            solidHeader = T,
+            collapsible = F,
           plotOutput(NS(id,"plot")) %>% withSpinner()
         )
       )
@@ -106,7 +102,7 @@ VT_Server <- function(id,sce) {
       else {
         df <-data.frame(X=colData(sce)[,input$partitionType])
         g <- ggplot(df,aes(x=X)) + 
-          theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1),legend.position = "none") + ggtitle("Preview")
+          theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1),legend.position = "none")
         
       }
       g +
@@ -118,13 +114,27 @@ VT_Server <- function(id,sce) {
     ### Download ----
     output$previewButton <- renderUI({
       req(length(genes.GL()$genes)>0)
-      downloadButton(NS(id,'export'))
+      tagList(
+        hr(),
+        fluidRow(
+          column(3,style='padding-left:9px; padding-right:1px;',align="center",
+                 numericInput(NS(id,"pdf_widht"),"Widht",value = 7)),
+          column(3,style='padding-left:1px; padding-right:3px;',align="center",
+                 numericInput(NS(id,"pdf_heigth"),"Heigth",value = 7)),
+          column(6,style='padding-left:3px; padding-right:12px;padding-top:25px;',align="center",
+                 downloadButton(NS(id,'export'))
+          ) 
+        )
+      )
     })
 
     output$export = downloadHandler(
         filename = function() {"Violin_plots.pdf"},
         content = function(file) {
-          pdf(file)
+          pdf(file,
+              width = input$pdf_widht,
+              height = input$pdf_heigth
+              )
           for (i in 1:length(genes.GL()$genes)){
             if(input$partitionType_wrap != "None"){
               df <-data.frame(Y=assay(sce,"logcounts")[genes.GL()$genes[i],],
