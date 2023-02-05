@@ -25,14 +25,54 @@ VT_UI <- function(id) {
                           choices = NULL)
             )
           ),
-          fileInput(NS(id,'listGenes'),
-                    label = NULL,
-                    multiple = T, 
-                    accept = c("txt/csv", "text/comma-separated-values,
-                             text/plain", ".csv", ".xlsx"),
-                    buttonLabel = "Search",
-                    placeholder = "Select Gene list"),
-          htmlOutput(NS(id,"missingGenes")),
+          fluidRow(
+            column(12,style='padding-left:12px; padding-right:12px;',
+                   align="center",
+                   switchInput(NS(id,"GL_T"),
+                               label = "Upload GeneList",
+                               size = "small",
+                               width = NULL,
+                               labelWidth = "100px"),
+            )
+          ),
+          tabsetPanel(id = NS(id,"switcher"), type = "hidden", selected = "panel1",
+            tabPanelBody("panel1",
+              fluidRow(
+                column(11, style='padding-left:0px; padding-right:2px;',
+                  selectizeInput(NS(id,"gen_exp"),
+                                 label=NULL,
+                                 choices = NULL, 
+                                 options = list(maxItems = 10,
+                                 maxOptions = 20,
+                                 placeholder = 'Please select genes to plot'),
+                                 width = NULL,
+                                 multiple=T
+                  )
+                ),
+                column(1, style='padding-left:2px; padding-right:2px; padding-top:4px',
+                  actionBttn(NS(id,"action"),
+                             label = NULL,
+                             style = "unite",
+                             color = "primary",
+                             size = "xs",
+                             icon = icon("fa-solid fa-play")
+                  )
+                )
+              )
+            ),
+            tabPanelBody("panel2",
+              fluidRow(
+                column(12, style='padding-left:0px; padding-right:0px;',
+                  fileInput(NS(id,'listGenes'), label = NULL, multiple = T, 
+                            accept = c("txt/csv", "text/comma-separated-values,
+                                        text/plain", ".csv", ".xlsx"),
+                            buttonLabel = "Search", 
+                            placeholder = "Select Gene list"),
+                  htmlOutput(NS(id,"missingGenes"))
+                )
+              )
+            )
+          ),
           uiOutput(NS(id,"previewButton"))
         )
       ),
@@ -64,9 +104,27 @@ VT_Server <- function(id,sce) {
       )
     })
     
+    observeEvent(ignoreInit = T,input$GL_T,{
+      if(input$GL_T) {
+        updateTabsetPanel(inputId = "switcher", selected = "panel2")
+      } else{
+        updateTabsetPanel(inputId = "switcher", selected = "panel1")
+      }
+    })
+    
+    updateSelectizeInput(session, 'gen_exp', choices = rownames(sce), server = TRUE)
+    
     ### Gen selected & data preparation ----
+    #### Selected Gene -----
+    
+    genes.L <- eventReactive(input$action,{
+      req(input$GL_T == F)
+      req(input$gen_exp)
+      input$gen_exp
+    })
+    
     #### Gene List Uploaded  -----
-    genes.GL <- reactive({
+    genes.GL <- eventReactive(input$listGenes,{
       req(input$listGenes)
       GL <- genesList(dataPath = input$listGenes)
       no.genes <- GL[!(GL %in% rownames(sce))] #Keep the missing values
@@ -113,7 +171,11 @@ VT_Server <- function(id,sce) {
     
     ### Download ----
     output$previewButton <- renderUI({
-      req(length(genes.GL()$genes)>0)
+      if(input$GL_T){
+        req(length(genes.GL()$genes) > 0)
+      } else { 
+        req(!is.null(genes.L()))
+      }
       tagList(
         hr(),
         fluidRow(
@@ -131,13 +193,20 @@ VT_Server <- function(id,sce) {
     output$export = downloadHandler(
         filename = function() {"Violin_plots.pdf"},
         content = function(file) {
+          if(input$GL_T){
+            req(length(genes.GL()$genes) > 0)
+            feature <- genes.GL()$genes
+          } else { 
+            req(!is.null(genes.L()))
+            feature <- genes.L() 
+          }
           pdf(file,
               width = input$pdf_widht,
               height = input$pdf_heigth
               )
-          for (i in 1:length(genes.GL()$genes)){
+          for (i in 1:length(feature)){
             if(input$partitionType_wrap != "None"){
-              df <-data.frame(Y=assay(sce,"logcounts")[genes.GL()$genes[i],],
+              df <-data.frame(Y=assay(sce,"logcounts")[feature[i],],
                               X=colData(sce)[,input$partitionType],
                               Wrap=colData(sce)[,input$partitionType_wrap])
               
@@ -146,13 +215,13 @@ VT_Server <- function(id,sce) {
               g <-ggplot(df, aes(y=Y,x=X,fill=X)) + geom_violin(scale="width") + 
                 theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1),legend.position = "none") + 
                 facet_wrap(.~Wrap) + geom_text(aes(label = n,y=Ymax), data = summ) + 
-                ggtitle(paste0(genes.GL()$genes[i]," Expression")) +
+                ggtitle(paste0(feature[i]," Expression")) +
                 scale_fill_manual(values=OrderPartReact()$colPart) +
                 ylab("log(counts)") +
                 xlab(input$partitionType)
             }
             else {
-              df <-data.frame(Y=assay(sce,"logcounts")[genes.GL()$genes[i],],
+              df <-data.frame(Y=assay(sce,"logcounts")[feature[i],],
                               X=colData(sce)[,input$partitionType])
               summ <- df  %>% group_by(X) %>% summarise(n=n(),Ymax = (max(Y)+0.5))
               g <-ggplot(df,aes(y=Y,x=X,fill=X)) + 
@@ -160,7 +229,7 @@ VT_Server <- function(id,sce) {
                 theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1),legend.position = "none") + 
                 geom_text(aes(label = n, y=Ymax), data = summ) +
                 scale_fill_manual(values=OrderPartReact()$colPart) +
-                ggtitle(paste0(genes.GL()$genes[i]," Expression")) + 
+                ggtitle(paste0(feature[i]," Expression")) + 
                 ylab("log(counts)") +
                 xlab(input$partitionType)
               

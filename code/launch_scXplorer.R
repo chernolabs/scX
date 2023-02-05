@@ -153,7 +153,7 @@ launch_scXplorer <- function(cseo,dataset_name='scXplorer', point.size =20){
         ),
         menuItem("Tools", tabName = "toolsTab",
                  icon = icon("fa-solid fa-toolbox"), startExpanded = F,
-                 menuSubItem('Violin Gene List', tabName = "t_VGL",
+                 menuSubItem('Violin by Partition', tabName = "t_VGL",
                              icon = icon('fa-solid fa-wrench')
                  ),
                  menuSubItem('MultiPlots', tabName = "t_MP",
@@ -240,7 +240,7 @@ launch_scXplorer <- function(cseo,dataset_name='scXplorer', point.size =20){
                 Clusters_UI("cluster")
         ),
         tabItem(tabName = "t_VGL",
-                HTML('<h4><span style="font-family:Trebuchet MS,Helvetica,sans-serif"><strong><span style="color:#4e5f70">Violin by Gene list </span></strong></span></h4>'),
+                HTML('<h4><span style="font-family:Trebuchet MS,Helvetica,sans-serif"><strong><span style="color:#4e5f70">Violin by Partition </span></strong></span></h4>'),
                 VT_UI(id = "tools")
         ),
         tabItem(tabName = "t_MP",
