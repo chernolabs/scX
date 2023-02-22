@@ -213,7 +213,7 @@ VolcanoServer <- function(id,sce,sce.markers) {
                                          value.name="Y")
         colnames(exp_vtor)[1:2] <- c("CellID","DiffExpression")
       } else {
-        exp_vtor <- logcounts(sce)[Genes(),,drop=F]
+        exp_vtor <- logcounts(sce)[Genes(),,drop=F] %>% as.matrix
         exp_vtor<- t(exp_vtor) %>% as.data.frame
         colnames(exp_vtor) <- "Y"
         exp_vtor$DiffExpression <- diff_Exp
