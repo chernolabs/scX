@@ -201,27 +201,27 @@ COexp_Vtor <- function(sce,genes){
 #### Heatmaps Functions -----
 # 
 # #Line in heatmaps
-# vline <- function(x = 0){
-#   list(type = "line", 
-#        y0 = -0.02, y1 = 1.02, yref = "paper",
-#        x0 = x, x1 = x, 
-#        line = list(color = 'gray',
-#                    width = 0.8,
-#                    opacity = 0.8,
-#                    dash = 'dot')
-#        )
-# }
-# 
-# hline <- function(y = 0){
-#   list(type = "line", 
-#        x0 = -0.02, x1 = 1.02, xref = "paper",
-#        y0 = y, y1 = y, 
-#        line = list(color = 'gray',
-#                    width = 0.8,
-#                    opacity = 0.8,
-#                    dash = 'dot')
-#        )
-# }
+vline <- function(x = 0){
+  list(type = "line",
+       y0 = -0.02, y1 = 1.02, yref = "paper",
+       x0 = x, x1 = x,
+       line = list(color = 'gray',
+                   width = 0.8,
+                   opacity = 0.8,
+                   dash = 'dot')
+       )
+}
+
+hline <- function(y = 0){
+  list(type = "line",
+       x0 = -0.02, x1 = 1.02, xref = "paper",
+       y0 = y, y1 = y,
+       line = list(color = 'gray',
+                   width = 0.8,
+                   opacity = 0.8,
+                   dash = 'dot')
+       )
+}
 # 
 # 
 # ParamHeatm <- function(partition,sce){
