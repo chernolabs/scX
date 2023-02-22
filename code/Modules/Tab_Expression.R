@@ -56,15 +56,20 @@ ExpressionUI <- function(id) {
                          value = F,
                          status = "primary",
                          fill = TRUE),
-            prettySwitch(NS(id,"ord_heat"),
-                         "Ord genes",
+            prettySwitch(NS(id,"cluster_row"),
+                         "Cluster Row",
+                         value = F,
+                         status = "primary",
+                         fill = TRUE),
+            prettySwitch(NS(id,"cluster_column"),
+                         "Cluster Column",
                          value = F,
                          status = "primary",
                          fill = TRUE)
           ),
           conditionalPanel("input.scatter_heatmap == 'dotplot'",ns=NS(id),
             prettySwitch(NS(id,"ord_dotplot"),
-                         "Ord genes",
+                         "Cluster Row",
                          value = F,
                          status = "primary",
                          fill = TRUE),
@@ -81,7 +86,7 @@ ExpressionUI <- function(id) {
           ),
           conditionalPanel("input.scatter_heatmap == 'stackVln'",ns=NS(id),
             prettySwitch(NS(id,"ord_stackVln"),
-                         "Ord genes",
+                         "Cluster Row",
                          value = F,
                          status = "primary",
                          fill = TRUE)
@@ -158,7 +163,7 @@ ExpressionUI <- function(id) {
             box(title = tagList(shiny::icon("gear"), "Scatter plots"),
                 width = NULL, solidHeader = T, collapsible = T,
                 footer = tagList(shiny::icon("cat"), "Cat"),
-              plotlyOutput(NS(id,"plot_heatmap"),height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
+              plotOutput(NS(id,"plot_heatmap"),height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
             )
           ),
           tabPanel("DotPlot", value= "dotplot",
@@ -422,17 +427,12 @@ ExpressionServer <- function(id,sce,point.size=20) {
     
     
     ### Heatmaps ----
-    ParamHeatmap <- eventReactive(input$partitionType,{
-      ParamHeatm(partition = input$partitionType,sce = sce)
-    })
-    
     #Here I made everything in the same reactive object to manipulated all the reactive order at the same time
-    Heatmap_Plot <- eventReactive(c(HeatmapF(),input$partitionType,input$mean_heat,input$ord_heat),{
+    Heatmap_Plot <- eventReactive(c(HeatmapF(),input$partitionType,input$mean_heat,input$cluster_row,input$cluster_column),{
       req(input$scatter_heatmap == "heatmap")
       req(input$partitionType)
       req(!is.null(HeatmapF()))
       req(!is.null(OrderPartReact()))
-      req(!is.null(ParamHeatmap()))
       
       if(input$mean_heat) {
         dta <- apply(HeatmapF(),1,FUN =  function(x){
@@ -440,33 +440,73 @@ ExpressionServer <- function(id,sce,point.size=20) {
               }
         ) %>% t
         
-        if(input$ord_heat){ #Define the order if the input is selected and the is not a heatmap of 1 row, received the order vector
-          genes.clust <- if(nrow(dta)>1) {hclust(dist(dta))$order} else {1}  
-        } else {genes.clust <- 1:nrow(dta)}
+        ht <-   HeatmapAnnotation(Type = levels(colData(sce)[,input$partitionType]),
+                                  col=list(Type=OrderPartReact()$colPart),
+                                  annotation_legend_param = list(Type = list(title = input$partitionType)
+                                  ),
+                                  annotation_label = c(input$partitionType),
+                                  show_legend = c(Type =FALSE),
+                                  show_annotation_name = T)
         
-        plot_ly(z = dta[genes.clust,,drop=F], y = rownames(dta)[genes.clust], x = colnames(dta),
-                type = "heatmap", colors = "YlGnBu", hoverinfo='y', colorbar = list(x = 1.1)) %>% 
-          layout(yaxis = list(side = "left", autorange = "reversed"),
-                 margin = list(l = 80, r = 150))
+        h1 <- Heatmap(dta,
+                      col = viridis(100),
+                      border =F,
+                      name = "Gene expression",
+                      cluster_rows = input$cluster_row,
+                      cluster_columns = input$cluster_column,
+                      row_names_side = "left",
+                      column_names_rot = 45,
+                      # column_title_rot = 45,
+                      # column_title_gp = gpar(fontsize = 10),
+                      column_title_side = "bottom",
+                      # column_title = "Partition",
+                      row_title = "Genes",
+                      row_gap = unit(1, "mm"),
+                      column_gap = unit(1, "mm"),
+                      show_row_names = T,
+                      # show_column_names = T,
+                      top_annotation = ht,
+                      # column_split = colData(sce)[,input$partitionType],
+                      cluster_column_slices = F
+                      # use_raster = TRUE,
+                      # raster_by_magick = TRUE
+        )
       } else{
-        if(input$ord_heat){
-          genes.clust <- if (nrow(HeatmapF())>1) {hclust(dist(HeatmapF()))$order} else {1}  
-        } else {genes.clust <- 1:nrow(HeatmapF())}
+        ht <-   HeatmapAnnotation(Type = colData(sce)[,input$partitionType],
+                                  col=list(Type=OrderPartReact()$colPart),
+                                  show_legend = c(Type =FALSE),
+                                  annotation_label = c(input$partitionType),
+                                  show_annotation_name = T)
         
-        plot_ly(z = as.matrix(HeatmapF())[genes.clust,OrderPartReact()$ordPart,drop=F], y = rownames(HeatmapF())[genes.clust],
-                type = "heatmap", colors = "YlGnBu", hoverinfo='y', colorbar = list(x = 1.1)) %>% 
-          layout(xaxis = list(ticktext = ParamHeatmap()$lev, 
-                              tickvals = ParamHeatmap()$tickVals,
-                              tickmode = "array",
-                              tickangle = -30), 
-                 yaxis = list(side = "left", autorange = "reversed"),
-                 margin = list(l = 80, r = 150), 
-                 shapes = lapply(unname(ParamHeatmap()$lineVals), vline))
+        # colnames(HeatmapF()) <- NULL
+        h1 <- Heatmap(as.matrix(HeatmapF()),
+                      col = viridis(100),
+                      border =F,
+                      name = "Gene expression",
+                      cluster_rows = input$cluster_row,
+                      cluster_columns = input$cluster_column,
+                      row_names_side = "left",
+                      # column_names_rot = 45,
+                      column_title_rot = 45,
+                      # column_title_gp = gpar(fontsize = 10),
+                      column_title_side = "bottom",
+                      # column_title = "Partition",
+                      row_title = "Genes",
+                      row_gap = unit(1, "mm"),
+                      column_gap = unit(1, "mm"),
+                      show_row_names = T,
+                      show_column_names = F,
+                      top_annotation = ht,
+                      column_split = colData(sce)[,input$partitionType],
+                      cluster_column_slices = F,
+                      use_raster = TRUE,
+                      raster_by_magick = TRUE
+        )
       }
-      
-      })
+      h1
+    })
 
-    output$plot_heatmap <- renderPlotly({
+    output$plot_heatmap <- renderPlot({
       req(input$scatter_heatmap == "heatmap")
       req(!is.null(Heatmap_Plot()))
       Heatmap_Plot()

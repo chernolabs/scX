@@ -259,8 +259,8 @@ launch_scXplorer <- function(cseo,dataset_name='scXplorer', point.size =20){
 }
 
 # load(file = 'data/Dataset1_paper.Rdata')
-# launch_scXplorer(cseo = all,
-#                  point.size = 20,
-#                  dataset_name = 'Dataset 1')
+launch_scXplorer(cseo = cseo,
+                 point.size = 20,
+                 dataset_name = 'Dataset 1')
 # 
 
