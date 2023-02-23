@@ -227,6 +227,7 @@ createSCEobject <- function(xx,
   # Attaching ldf to output ----
   csceo[["ldf"]] <- ldf
   
+  gc() # free memory
   return(csceo)
 }
 
