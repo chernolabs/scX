@@ -19,13 +19,13 @@ MultiPlotsUI <- function(id) {
             column(6,style='padding-left:3px; padding-right:12px;',
               conditionalPanel("input.gene_cluster == 'gene'",ns=NS(id),
                 pickerInput(NS(id,"colPal"),
-                            "  Col Pallette",
+                            "  Col Palette",
                             choices = c("viridis","red","blue"),
                             width = NULL)
               ),
               conditionalPanel("input.gene_cluster == 'cluster'",ns=NS(id),
                 pickerInput(NS(id,"colPal_cluster"),
-                            "  Col Pallette",
+                            "  Col Palette",
                             choices = c("red","blue"),
                             width = NULL)
               )

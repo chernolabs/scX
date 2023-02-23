@@ -19,7 +19,7 @@ VolcanoUI <- function(id) {
                selectizeInput(NS(id,"clusterType"), "Clusters",
                               choices = NULL, 
                               options = list(maxItems = 2,
-                                             placeholder = 'Please select an option below'),
+                                             placeholder = 'Please select two options below'),
                               multiple=T),
                hr(),
                fluidRow(

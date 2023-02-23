@@ -40,7 +40,7 @@ COExpUI <- function(id) {
                          choices = NULL, 
                          options = list(maxItems = 2,
                                         maxOptions = 20,
-                                        placeholder = 'Please two genes to co-expresion'),
+                                        placeholder = 'Select two genes for co-expression'),
                          multiple=T)
         ),
         conditionalPanel("typeof output.plot !== 'undefined'", ns = NS(id), 
@@ -182,7 +182,7 @@ COExpServer <- function(id,sce,point.size=20) {
                               yaxis = list(title = 'Dim2',showgrid=F,visible=F),
                               zaxis = list(title = 'Dim3',showgrid=F,visible=F)),
                  showlegend = FALSE,
-                 title = paste(paste(input$gen_coexp,collapse = "-"), 'Co - Localization'),
+                 title = paste(paste(input$gen_coexp,collapse = " - "), 'Co-expression'),
                  margin = list(l = 0,
                                r = 10,
                                b = 0,
