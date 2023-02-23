@@ -77,7 +77,7 @@ VT_UI <- function(id) {
         )
       ),
       column(9,
-        box(title = "Preview",
+        box(title = "Preview - Downloaded plots will have the following layout",
             width = NULL,
             solidHeader = T,
             collapsible = F,
