@@ -147,35 +147,32 @@ ExpressionUI <- function(id) {
                selected = "scatter",
                width = NULL,
           tabPanel("Scatter",value = "scatter",
-            box(title = tagList(shiny::icon("gear"), "Scatter plots"),
+            box(title = "Scatter plots",
                 width = NULL, solidHeader = T, collapsible = T,
                 footer = tagList(shiny::icon("cat"), "Cat"),
               plotlyOutput(NS(id,"plot"),height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
             ),
-            box(title = tagList(shiny::icon("gear"), "Expression plots"),
-                width = NULL,solidHeader = T,collapsible = T,
+            box(title = "Expression plots",
+                width = NULL, solidHeader = T,collapsible = T,
                 footer = tagList(shiny::icon("cat"), "Cat"),
               uiOutput(NS(id,"Violin.Bar_Input")),
               plotOutput(NS(id,"Violin.Bar_Plot")) %>% withSpinner()
             )
           ),
           tabPanel("Heatmap", value= "heatmap",
-            box(title = tagList(shiny::icon("gear"), "Scatter plots"),
-                width = NULL, solidHeader = T, collapsible = T,
+            box(width = NULL, solidHeader = T, collapsible = F,
                 footer = tagList(shiny::icon("cat"), "Cat"),
               plotOutput(NS(id,"plot_heatmap"),height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
             )
           ),
           tabPanel("DotPlot", value= "dotplot",
-            box(title = tagList(shiny::icon("gear"), "Scatter plots"),
-                width = NULL,solidHeader = T,collapsible = T,
+            box(width = NULL,solidHeader = T,collapsible = F,
                 footer = tagList(shiny::icon("cat"), "Cat"),
               plotlyOutput(NS(id,"plot_DotPlot"),height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
             )
           ),
           tabPanel("StackedViolin", value= "stackVln",
-            box(title = tagList(shiny::icon("gear"), "Scatter plots"),
-                width = NULL,solidHeader = T,collapsible = T,
+            box(width = NULL,solidHeader = T,collapsible = F,
                 footer = tagList(shiny::icon("cat"), "Cat"),
               plotOutput(NS(id,"plot_stackVln"),height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
             )
