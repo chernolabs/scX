@@ -94,11 +94,12 @@ markersServer <- function(id = "markers",sce,ldf,point.size = 20) {
     observeEvent(c(input$DimType,dimVector()), {
       req(!is.null(dimVector()))
       req(input$DimType)
-      if(input$DimType == "3"){
-        updatePickerInput(session,inputId = "plotType", choices = rev(names(which(dimVector() == as.numeric(input$DimType)  | dimVector() > 3))))
-      } else if(input$DimType == "2") { 
-        updatePickerInput(session,inputId = "plotType", choices = rev(names(which(dimVector() == as.numeric(input$DimType)  | dimVector() > 3))))
-      }
+	  updatePickerInput(session,inputId = "plotType", choices = rev(names(which(dimVector() == as.numeric(input$DimType)  | dimVector() > 3))))
+      # if(input$DimType == "3"){
+        # updatePickerInput(session,inputId = "plotType", choices = rev(names(which(dimVector() == as.numeric(input$DimType)  | dimVector() > 3))))
+      # } else if(input$DimType == "2") { 
+        # updatePickerInput(session,inputId = "plotType", choices = rev(names(which(dimVector() == as.numeric(input$DimType)  | dimVector() > 3))))
+      # }
     })
     
     ### Cluster and Gen selected ----
