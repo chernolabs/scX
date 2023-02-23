@@ -11,11 +11,11 @@ markersUI <- function(id = "markers") {
         box(title = htmltools::span(icon("fa-light fa-gears"), " Settings"),
             width = NULL, status = "primary",solidHeader = T,collapsible = T,
           fluidRow(
-            column(4,style='padding-left:12px; padding-right:3px;',align="center",
-              pickerInput(NS(id,"plotType"), "  Plot Type", choices = NULL,width = NULL)
+            column(3,style='padding-left:12px; padding-right:3px;',align="center",
+              pickerInput(NS(id,"DimType"), "  # dims", choices = NULL,width = NULL)
             ),
-            column(3,style='padding-left:3px; padding-right:3px;',align="center",
-              pickerInput(NS(id,"DimType"), "  Dim Type", choices = NULL,width = NULL)
+			column(4,style='padding-left:3px; padding-right:3px;',align="center",
+              pickerInput(NS(id,"plotType"), "  Plot Type", choices = NULL,width = NULL)
             ),
             column(5,style='padding-left:3px; padding-right:12px;',align="center",
               pickerInput(NS(id,"partitionType"), "Partition", choices = NULL)

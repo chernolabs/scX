@@ -11,15 +11,15 @@ ExpressionUI <- function(id) {
             width = NULL, status = "primary",solidHeader = T,collapsible = F,
           conditionalPanel("input.scatter_heatmap == 'scatter'",ns=NS(id),
             fluidRow(
-              column(6,style='padding-left:12px; padding-right:3px;',
-                pickerInput(NS(id,"plotType"),
-                            "  Plot Type",
+              column(6,style='padding-left:12px; padding-right:3px;', align="center",
+                pickerInput(NS(id,"DimType"),
+                            "  # dims",
                             choices = NULL,
                             width = NULL)
               ),
-              column(6,style='padding-left:3px; padding-right:12px;',
-                pickerInput(NS(id,"DimType"),
-                            "  Dim Type",
+              column(6,style='padding-left:3px; padding-right:12px;', align="center",
+                pickerInput(NS(id,"plotType"),
+                            "  Plot Type",
                             choices = NULL,
                             width = NULL)
               )
