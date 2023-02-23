@@ -44,16 +44,15 @@ COExpUI <- function(id) {
                          multiple=T)
         ),
         conditionalPanel("typeof output.plot !== 'undefined'", ns = NS(id), 
-          box(title = htmltools::span(icon("fa-light fa-gears"), " Settings"),
-              width = NULL, status = "primary",solidHeader = T,collapsible = F,
+          box(title = " Co-expression Summary",
+              width = NULL,solidHeader = T, collapsible = F,
             tableOutput(NS(id,"DTCoExp")) %>% withLoader(type='html',loader = 'loader6')
           )
         )
       ),
       column(9,
-        box(title = tagList(shiny::icon("gear"), "Scatter plots"),
-            width = NULL, solidHeader = TRUE,
-            status = "primary",collapsible = T,
+        box(title = "Scatter",
+            width = NULL, solidHeader = T, collapsible = T,
           conditionalPanel("!input.button && typeof output.plot !== 'undefined'", ns = NS(id),
             fluidRow(column=12,align = "right",style='padding-left:12px; padding-right:12px;',
               dropdownButton(
@@ -68,7 +67,7 @@ COExpUI <- function(id) {
           plotlyOutput(NS(id,"plot"),height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
         ),
         conditionalPanel("typeof output.plot !== 'undefined'", ns = NS(id),
-          box(title="Expression Plots",width = NULL,
+          box(title="Co-expression Matrix",width = NULL,
               solidHeader = FALSE, collapsible=T,
             plotOutput(NS(id,"CorrPlot")) %>% withSpinner()
           )
@@ -99,11 +98,6 @@ COExpServer <- function(id,sce,point.size=20) {
       req(!is.null(dimVector()))
       req(input$DimType)
 	  updatePickerInput(session,inputId = "plotType", choices = rev(names(which(dimVector() == as.numeric(input$DimType)  | dimVector() > 3))))
-      # if(input$DimType == "3"){
-        # updatePickerInput(session,inputId = "plotType", choices = rev(names(which(dimVector() == as.numeric(input$DimType)  | dimVector() > 3))))
-      # } else if(input$DimType == "2") { 
-        # updatePickerInput(session,inputId = "plotType", choices = rev(names(which(dimVector() == as.numeric(input$DimType)  | dimVector() > 3))))
-      # }
     })
     
     ### Table and Gen selected ----
