@@ -133,7 +133,7 @@ N_markersServer <- function(id,sce,point.size = 20) {
     output$box_DT <- renderUI({
       if(!is.null(MarkersDT())){
         tagList(
-          box(width = NULL, status = "primary",solidHeader = F,collapsible = T,
+          box(title = "Selection marker list", width = NULL,solidHeader = T,collapsible = T,
               DTOutput(NS(id,"DTMarkers"))
           ),
           fluidRow(column=12,align = "right",style='padding-left:12px; padding-right:12px;',
