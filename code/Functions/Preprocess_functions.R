@@ -25,6 +25,7 @@ createSCEobject <- function(xx,
   library(Matrix)
   library(SingleCellExperiment)
   library(doParallel)
+  library(tidyverse)
   
   ##Check if there are colnames and rownames in the objects 
   if(is.null(rownames(xx)) | is.null(colnames(xx))){
