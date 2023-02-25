@@ -23,16 +23,18 @@ N_markersUI <- function(id) {
             )
           ),
           conditionalPanel(ns = NS(id), "typeof output.plot2 !== 'undefined' && input.switcher == 'panel2'",
-            fluidRow(
+			hr(),
+            fluidRow(style='padding-left:12px; padding-right:12px;', h4("Gene expression plot settings")),
+			fluidRow(
               column(6,style='padding-left:12px; padding-right:3px;',
-                pickerInput(NS(id,"plotType"), 
-                            "  Plot Type", 
+                pickerInput(NS(id,"DimType"),
+                            "  # dims",
                             choices = NULL,
                             width = NULL)
               ),
               column(6,style='padding-left:3px; padding-right:12px;',
-                pickerInput(NS(id,"DimType"),
-                            "  Dim Type",
+                pickerInput(NS(id,"plotType"), 
+                            "  Plot Type", 
                             choices = NULL,
                             width = NULL)
               )
