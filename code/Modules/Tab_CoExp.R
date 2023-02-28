@@ -45,13 +45,13 @@ COExpUI <- function(id) {
         ),
         conditionalPanel("typeof output.plot !== 'undefined'", ns = NS(id), 
           box(title = " Co-expression Summary",
-              width = NULL,solidHeader = T, collapsible = F,
+              width = NULL,solidHeader = F, collapsible = F,
             tableOutput(NS(id,"DTCoExp")) %>% withLoader(type='html',loader = 'loader6')
           )
         )
       ),
       column(9,
-        box(title = "Scatter",
+        box(title = "Scatter Plot",
             width = NULL, solidHeader = T, collapsible = T,
           conditionalPanel("!input.button && typeof output.plot !== 'undefined'", ns = NS(id),
             fluidRow(column=12,align = "right",style='padding-left:12px; padding-right:12px;',
@@ -68,7 +68,7 @@ COExpUI <- function(id) {
         ),
         conditionalPanel("typeof output.plot !== 'undefined'", ns = NS(id),
           box(title="Co-expression Matrix",width = NULL,
-              solidHeader = FALSE, collapsible=T,
+              solidHeader = T, collapsible=T,
             plotOutput(NS(id,"CorrPlot")) %>% withSpinner()
           )
         )

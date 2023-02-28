@@ -14,13 +14,13 @@ Clusters_UI <- function(id) {
                    style='padding-left:12px; padding-right:3px;',
                    align="center",
               pickerInput(NS(id,"partitionType1"),
-                          "Partition 1",
+                          "Partition #1",
                           choices = NULL)),
             column(6,
                    style='padding-left:3px; padding-right:12px;',
                    align="center",
               pickerInput(NS(id,"partitionType2"),
-                          "Partition 2",
+                          "Partition #2",
                           choices = NULL)
             )
           ),
@@ -257,7 +257,7 @@ Clusters_Server <- function(id,sce) {
       rand <- pairwiseRand(colData(sce)[,input$partitionType1],
                    colData(sce)[,input$partitionType2],
                    mode="index")
-      paste('<b style="color:black;">Rand index:',round(rand,2),'<b><br>')
+      paste('<b style="color:black;">Rand Index:',round(rand,2),'<b><br>')
     })
     output$plot_matrix <- renderPlot({
       req(input$partitionType1)  

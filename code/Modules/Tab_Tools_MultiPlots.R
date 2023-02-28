@@ -10,13 +10,13 @@ MultiPlotsUI <- function(id) {
         box(title = htmltools::span(icon("fa-light fa-gears"), " Settings"),
             width = NULL, status = "primary",solidHeader = T,collapsible = F,
           fluidRow(
-            column(6,style='padding-left:12px; padding-right:3px;',
+            column(6,style='padding-left:12px; padding-right:3px;', align="center",
               pickerInput(NS(id,"plotType"),
                           "  Plot Type",
                           choices = NULL,
                           width = NULL)
             ),
-            column(6,style='padding-left:3px; padding-right:12px;',
+            column(6,style='padding-left:3px; padding-right:12px;', align="center",
               conditionalPanel("input.gene_cluster == 'gene'",ns=NS(id),
                 pickerInput(NS(id,"colPal"),
                             "  Col Palette",

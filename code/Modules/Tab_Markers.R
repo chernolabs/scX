@@ -30,14 +30,14 @@ markersUI <- function(id = "markers") {
           type = "hidden",
           selected = "panel1",
           tabPanelBody("panel1",
-            box(title = "Scatter",
+            box(title = "Scatter Plot",
                 width = NULL,solidHeader = T,collapsible = F,
                 footer = tagList(shiny::icon("cat"), "Nya"),
               plotlyOutput(NS(id,"plot"),height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
             )
           ),
           tabPanelBody("panel2",
-            box(title = "Scatter",
+            box(title = "Scatter Plot",
                 width = NULL,solidHeader = T,collapsible = T,
                 footer = tagList(shiny::icon("cat"), "Nya"),
               dropdownButton(
@@ -49,7 +49,7 @@ markersUI <- function(id = "markers") {
               ),
               plotlyOutput(NS(id,"plot2"),height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
             ),
-            box(title = "Expression",
+            box(title = "Expression Plots",
                 width = NULL,solidHeader = T,collapsible = T,
                 footer = tagList(shiny::icon("cat"), "Nya"),
               uiOutput(NS(id,"Violin.Bar_Input")),
@@ -107,7 +107,9 @@ markersServer <- function(id = "markers",sce,ldf,point.size = 20) {
     output$box_DT <- renderUI({
       if(!is.null(cluster_selected())){
         tagList(
-          box(title="Cluster marker list", width = NULL, solidHeader = T,collapsible = T,
+          box(title="Cluster marker list", width = NULL, solidHeader = F,collapsible = T,
+			fluidRow(column=12, align="center", style='padding-left:12px; padding-right:12px;', "Click on a gene to see its expression plots"),
+			br(),
               DTOutput(NS(id,"DTMarkers"))
           ),
           fluidRow(column=12,align = "right",style='padding-left:12px; padding-right:12px;',

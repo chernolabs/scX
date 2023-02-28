@@ -11,28 +11,28 @@ N_markersUI <- function(id) {
         box(title = htmltools::span(icon("fa-light fa-gears"), " Settings"), 
             width = NULL, status = "primary",solidHeader = T,collapsible = T,
           fluidRow(
-            column(6,style='padding-left:12px; padding-right:3px;',
+            column(6,style='padding-left:12px; padding-right:3px;', align="center",
               pickerInput(NS(id,"partitionType"),
                           "Partition",
                           choices = NULL)
             ),
-            column(6,style='padding-left:3px; padding-right:12px;',
+            column(6,style='padding-left:3px; padding-right:12px;', align="center",
               pickerInput(NS(id,"plotType2D"), 
                           "Plot Type 2D", 
                           choices = NULL)
             )
           ),
           conditionalPanel(ns = NS(id), "typeof output.plot2 !== 'undefined' && input.switcher == 'panel2'",
-			hr(),
-            fluidRow(style='padding-left:12px; padding-right:12px;', h4("Gene expression plot settings")),
+			hr(style = "border-top: 1px solid #0073b7;"),
+            fluidRow(style='padding-left:12px; padding-right:12px;', h4("Gene expression scatter plot")),
 			fluidRow(
-              column(6,style='padding-left:12px; padding-right:3px;',
+              column(6,style='padding-left:12px; padding-right:3px;', align="center",
                 pickerInput(NS(id,"DimType"),
                             "  # dims",
                             choices = NULL,
                             width = NULL)
               ),
-              column(6,style='padding-left:3px; padding-right:12px;',
+              column(6,style='padding-left:3px; padding-right:12px;', align="center",
                 pickerInput(NS(id,"plotType"), 
                             "  Plot Type", 
                             choices = NULL,
@@ -56,14 +56,14 @@ N_markersUI <- function(id) {
           type = "hidden",
           selected = "panel1",
           tabPanelBody("panel1",
-            box(title = "Scatter",
+            box(title = "Scatter Plot",
               width = NULL,solidHeader = T,collapsible = F,
               footer = tagList(shiny::icon("cat"), "Nya"),
               plotlyOutput(NS(id,"plot"),height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
             )
           ),
           tabPanelBody("panel2",
-            box(title = "Scatter",
+            box(title = "Scatter Plot",
               width = NULL,solidHeader = T,collapsible = T,
               footer = tagList(shiny::icon("cat"), "Nya"),
               dropdownButton(
@@ -75,7 +75,7 @@ N_markersUI <- function(id) {
               ),
               plotlyOutput(NS(id,"plot2"),height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
             ),
-            box(title = "Expression plots",
+            box(title = "Expression Plots",
                 width = NULL,solidHeader = T,collapsible = T,
                 footer = tagList(shiny::icon("cat"), "Nya"),
               uiOutput(NS(id,"Violin.Bar_Input")),
@@ -135,7 +135,9 @@ N_markersServer <- function(id,sce,point.size = 20) {
     output$box_DT <- renderUI({
       if(!is.null(MarkersDT())){
         tagList(
-          box(title = "Selection marker list", width = NULL,solidHeader = T,collapsible = T,
+          box(title = "Selection marker list", width = NULL,solidHeader = F,collapsible = T,
+			fluidRow(column=12, align="center", style='padding-left:12px; padding-right:12px;', "Click on a gene to see its expression plots"),
+			br(),
               DTOutput(NS(id,"DTMarkers"))
           ),
           fluidRow(column=12,align = "right",style='padding-left:12px; padding-right:12px;',

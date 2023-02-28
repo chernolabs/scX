@@ -21,12 +21,12 @@ VolcanoUI <- function(id) {
                               options = list(maxItems = 2,
                                              placeholder = 'Please select two options below'),
                               multiple=T),
-               hr(),
+               hr(style = "border-top: 1px solid #0073b7;"),
                fluidRow(
                  column(4,style='padding-left:12px; padding-right:5px;',align="center",
                         numericInput(NS(id,"fdr_thr"),"FDR",value = 0.05)),
                  column(4,style='padding-left:5px; padding-right:5px;',align="center",
-                        numericInput(NS(id,"fc_thr"),"FoldChange",value = 2)),
+                        numericInput(NS(id,"fc_thr"),"Fold Change",value = 2)),
                  column(4,style='padding-left:5px; padding-right:12px;padding-top:25px;',align="center",
                         actionBttn((NS(id,"button")),label = "Calculate", style = "unite",color = "primary",size = "sm"))
                )
@@ -48,12 +48,11 @@ VolcanoUI <- function(id) {
       ),
       ## Main Panel -----
       column(width = 8,
-             box(title = "Volcano Plot", width = NULL, solidHeader = TRUE,
-                 status = "primary",collapsible = T,
+             box(title = "Volcano Plot", width = NULL, solidHeader = TRUE, collapsible = T,
                  plotlyOutput(NS(id,"VolcanoPlot"),height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
              ),
              conditionalPanel("typeof output.VolcanoPlot !== 'undefined'", ns = NS(id),
-                              box(title="Expression Plots",width = NULL, solidHeader = FALSE, collapsible=T,
+                              box(title="Expression Plots",width = NULL, solidHeader = T, collapsible=T,
                                   uiOutput(NS(id,"Violin.Bar_Input")),
                                   conditionalPanel("input.Cell_Exp == 'Heatmap'", ns = NS(id),
                                                    dropdownButton(
