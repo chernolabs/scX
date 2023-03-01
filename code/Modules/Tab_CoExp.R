@@ -45,7 +45,7 @@ COExpUI <- function(id) {
         ),
         conditionalPanel("typeof output.plot !== 'undefined'", ns = NS(id), 
           box(title = " Co-expression Summary",
-              width = NULL,solidHeader = F, collapsible = F,
+              width = NULL,solidHeader = F, collapsible = F, align="center",
             tableOutput(NS(id,"DTCoExp")) %>% withLoader(type='html',loader = 'loader6')
           )
         )
@@ -116,7 +116,7 @@ COExpServer <- function(id,sce,point.size=20) {
     
     output$DTCoExp <- renderTable({
       req(!is.null(CoExpressionVtor()))
-      data.frame(Co= CoExpressionVtor()) %>% group_by(Co) %>% summarise(N = n(),Perc = (n()/nrow(.))*100)
+      data.frame(Genes = CoExpressionVtor()) %>% group_by(Genes) %>% summarise("#" = n(), "%" = (n()/nrow(.))*100)
     })
     
     

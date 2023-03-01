@@ -163,6 +163,7 @@ VolcanoServer <- function(id,sce,sce.markers) {
                                                 scrollX=T,
                                                 autoWidth = F),
                                  rownames= TRUE,
+								 colnames = c('Expressed', 'log(FC)', 'log(FDR)'),
                                  selection = 'none',
                                  caption = htmltools::tags$caption(
                                    style = paste0('caption-side: top; text-align: center; font-weight: bold;color:black;background-image: linear-gradient(to right,',
