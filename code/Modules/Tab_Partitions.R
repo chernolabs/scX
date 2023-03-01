@@ -24,32 +24,36 @@ Clusters_UI <- function(id) {
                           choices = NULL)
             )
           ),
-          conditionalPanel("(input.barplot_matrix == 'barplot' && (input.wrap || input.partitionType2 == 'None')) || input.barplot_matrix == 'matrix'", ns=NS(id),  
-            prettySwitch(NS(id,"showFreq"),
+		  fluidRow(
+			column(6, 
+				conditionalPanel("(input.barplot_matrix == 'barplot' && (input.wrap || input.partitionType2 == 'None')) || input.barplot_matrix == 'matrix'", ns=NS(id),  
+					prettySwitch(NS(id,"showFreq"),
                        label="Hide Labels",
                        value = F,
                        status = "primary",
                        fill = TRUE
-            )
-          ),
-          conditionalPanel("input.barplot_matrix == 'barplot'", ns=NS(id),  
-            conditionalPanel("input.wrap || input.partitionType2 == 'None'",ns=NS(id),
-              prettySwitch(NS(id,"freq"),
+					)
+				),
+				conditionalPanel("input.barplot_matrix == 'barplot' && (input.wrap || input.partitionType2 == 'None')",ns=NS(id),
+					prettySwitch(NS(id,"freq"),
                            label= "Proportions",
                            value = F,
                            status = "primary",
                            fill = TRUE
-              )
-            ),
-            conditionalPanel("input.partitionType2 != 'None'",ns=NS(id),
-              prettySwitch(NS(id,"wrap"),
+					)
+				)
+			),
+			column(6, 
+				conditionalPanel("input.barplot_matrix == 'barplot' && input.partitionType2 != 'None'",ns=NS(id),
+					prettySwitch(NS(id,"wrap"),
                            label="Wrap",
                            value = F,
                            status = "primary",
                            fill = TRUE
-              )
-            )
-          ),
+					)
+				)
+			)
+		  ),
           conditionalPanel("input.barplot_matrix == 'matrix' && input.partitionType2 != 'None'",ns=NS(id),
              htmlOutput(NS(id,"randValue")),
              radioGroupButtons(inputId = NS(id,"Metric"), 
