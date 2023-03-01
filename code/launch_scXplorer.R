@@ -225,7 +225,7 @@ launch_scXplorer <- function(cseo,dataset_name='scXplorer', point.size =20){
                 ExpressionUI(id="Exp")
         ),
         tabItem(tabName = "g_coexp",
-                HTML('<h4><span style="font-family:Trebuchet MS,Helvetica,sans-serif"><strong><span style="color:#4e5f70">Co-Expression</span></strong></span></h4>'),
+                HTML('<h4><span style="font-family:Trebuchet MS,Helvetica,sans-serif"><strong><span style="color:#4e5f70">Co-expression</span></strong></span></h4>'),
                 COExpUI(id="Co-exp")
         ),
         tabItem(tabName = "volcanoTab",

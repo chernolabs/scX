@@ -46,16 +46,6 @@ ExpressionUI <- function(id) {
             )
           ),
           conditionalPanel("input.scatter_heatmap == 'heatmap'",ns=NS(id),
-            prettySwitch(NS(id,"norm_heat"),
-                         "Norm per gene",
-                         value = F,
-                         status = "primary",
-                         fill = TRUE),
-            prettySwitch(NS(id,"mean_heat"),
-                         "Mean per group",
-                         value = F,
-                         status = "primary",
-                         fill = TRUE),
             prettySwitch(NS(id,"cluster_row"),
                          "Cluster Row",
                          value = F,
@@ -65,7 +55,18 @@ ExpressionUI <- function(id) {
                          "Cluster Column",
                          value = F,
                          status = "primary",
+                         fill = TRUE),
+			prettySwitch(NS(id,"norm_heat"),
+                         "Norm per gene",
+                         value = F,
+                         status = "primary",
+                         fill = TRUE),
+            prettySwitch(NS(id,"mean_heat"),
+                         "Mean per group",
+                         value = F,
+                         status = "primary",
                          fill = TRUE)
+            
           ),
           conditionalPanel("input.scatter_heatmap == 'dotplot'",ns=NS(id),
             prettySwitch(NS(id,"ord_dotplot"),
@@ -149,31 +150,31 @@ ExpressionUI <- function(id) {
           tabPanel("Scatter",value = "scatter",
             box(title = "Scatter Plot",
                 width = NULL, solidHeader = T, collapsible = T,
-                footer = tagList(shiny::icon("cat"), "Cat"),
+                footer = tagList(shiny::icon("cat"), "Nya"),
               plotlyOutput(NS(id,"plot"),height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
             ),
             box(title = "Expression Plots",
                 width = NULL, solidHeader = T,collapsible = T,
-                footer = tagList(shiny::icon("cat"), "Cat"),
+                footer = tagList(shiny::icon("cat"), "Nya"),
               uiOutput(NS(id,"Violin.Bar_Input")),
               plotOutput(NS(id,"Violin.Bar_Plot")) %>% withSpinner()
             )
           ),
           tabPanel("Heatmap", value= "heatmap",
             box(width = NULL, solidHeader = T, collapsible = F,
-                footer = tagList(shiny::icon("cat"), "Cat"),
+                footer = tagList(shiny::icon("cat"), "Nya"),
               plotOutput(NS(id,"plot_heatmap"),height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
             )
           ),
           tabPanel("DotPlot", value= "dotplot",
             box(width = NULL,solidHeader = T,collapsible = F,
-                footer = tagList(shiny::icon("cat"), "Cat"),
+                footer = tagList(shiny::icon("cat"), "Nya"),
               plotlyOutput(NS(id,"plot_DotPlot"),height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
             )
           ),
           tabPanel("StackedViolin", value= "stackVln",
             box(width = NULL,solidHeader = T,collapsible = F,
-                footer = tagList(shiny::icon("cat"), "Cat"),
+                footer = tagList(shiny::icon("cat"), "Nya"),
               plotOutput(NS(id,"plot_stackVln"),height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
             )
           )
