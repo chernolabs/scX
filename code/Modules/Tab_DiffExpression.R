@@ -208,9 +208,16 @@ VolcanoServer <- function(id,sce,sce.markers) {
         exp_vtor <- apply(logcounts(sce)[Genes(),,drop=F],2,function(x){
           tapply(x,diff_Exp,mean)
         })
-        exp_vtor <- t(exp_vtor) %>% melt(measure.vars=rownames(exp_vtor),
-                                         value.name="Y")
-        colnames(exp_vtor)[1:2] <- c("CellID","DiffExpression")
+        if(length(levels(diff_Exp)) >1){
+          exp_vtor <- t(exp_vtor) %>% melt(measure.vars=rownames(exp_vtor),
+                                           value.name="Y")
+          colnames(exp_vtor)[1:2] <- c("CellID","DiffExpression")
+        }
+        else{
+          exp_vtor <- exp_vtor %>% as.matrix %>%  as.data.frame()
+          colnames(exp_vtor) <- "Y"
+          exp_vtor$DiffExpression <- levels(diff_Exp)
+        }
       } else {
         exp_vtor <- logcounts(sce)[Genes(),,drop=F] %>% as.matrix
         exp_vtor<- t(exp_vtor) %>% as.data.frame
