@@ -114,7 +114,7 @@ QC_Server <- function(id,sce) {
           labs(color = input$partitionType) + 
           scale_colour_manual(values=OrderPartReact()$colPart)
         
-        g <- ggplotly(g)
+        g <- ggplotly(g) %>% config(modeBarButtonsToRemove = c("select2d", "lasso2d"))
       }
       
       else{
@@ -148,7 +148,8 @@ QC_Server <- function(id,sce) {
         g_feat <- g_feat %>% ggplotly()
         
         
-        g <- subplot(g_ratio,g_counts,g_feat,nrows = 3,shareX = T,shareY = F,titleY = T,heights = c(0.4,0.3,0.3))
+        g <- subplot(g_ratio,g_counts,g_feat,nrows = 3,shareX = T,shareY = F,titleY = T,heights = c(0.4,0.3,0.3)) %>% 
+			config(modeBarButtonsToRemove = c("select2d", "lasso2d"))
         
         
       }

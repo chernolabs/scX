@@ -65,7 +65,7 @@ VolcanoUI <- function(id) {
                                                      prettySwitch(NS(id,"cluster_column"),"Cluster Column",value = F,status = "success",
                                                                   fill = TRUE),
                                                      circle = FALSE, status = "primary", icon = icon("cog"), width = "300px", size= "sm",
-                                                     tooltip = tooltipOptions(title = "Press to see Heatmaps setting")
+                                                     tooltip = tooltipOptions(title = "Press to see Heatmap settings")
                                                    )
                                   ),
                                   conditionalPanel("input.Cell_Exp == 'Dotplot'", ns = NS(id),
@@ -78,7 +78,7 @@ VolcanoUI <- function(id) {
                                                                   fill = TRUE),
                                                      circle = FALSE, status = "primary", icon = icon("cog"), width = "300px",
                                                      size= "sm",
-                                                     tooltip = tooltipOptions(title = "Press to see DotPlot setting")
+                                                     tooltip = tooltipOptions(title = "Press to see DotPlot settings")
                                                    )
                                   ), 
                                   uiOutput(NS(id,"Cell_Plots")) %>% withSpinner()
@@ -426,7 +426,7 @@ VolcanoServer <- function(id,sce,sce.markers) {
       diff_Exp <- droplevels(diff_Exp)
       g$data$Diff <- diff_Exp
       g <- g + facet_wrap(.~Diff,scales="free_y",ncol=1)
-      ggplotly(g)
+      ggplotly(g) %>% config(modeBarButtonsToRemove = c("select2d", "lasso2d", "hoverCompareCartesian"))
     })
     
     ####  Final output ---- 

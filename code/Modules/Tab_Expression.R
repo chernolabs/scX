@@ -596,7 +596,7 @@ ExpressionServer <- function(id,sce,point.size=20) {
         
          g$data$Feature <- factor(g$data$Feature,levels = vtor)
          
-         ggplotly(g)
+         ggplotly(g) %>% config(modeBarButtonsToRemove = c("select2d", "lasso2d", "hoverCompareCartesian"))
          
 
      })
