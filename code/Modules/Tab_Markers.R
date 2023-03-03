@@ -8,7 +8,7 @@ markersUI <- function(id = "markers") {
     useShinyjs(),
     fluidRow(
       column(4,
-        box(title = htmltools::span(icon("fa-light fa-gears"), " Settings"),
+        box(title = htmltools::span(icon("gears"), " Settings"),
             width = NULL, status = "primary",solidHeader = T,collapsible = T,
           fluidRow(
             column(3,style='padding-left:12px; padding-right:3px;',align="center",
@@ -42,7 +42,7 @@ markersUI <- function(id = "markers") {
                 footer = tagList(shiny::icon("cat"), "Nya"),
               dropdownButton(
                 plotlyOutput(NS(id,"plot1")) %>% withLoader(type='html',loader = 'dnaspin'),
-                  circle = TRUE, status = "danger", icon = icon("fa-solid fa-magnifying-glass"), width = "300px",
+                  circle = TRUE, status = "danger", icon = icon("magnifying-glass"), width = "300px",
                   tooltip = tooltipOptions(title = "Click to choose another cluster",
                                            placement= "right"),
                   right = F

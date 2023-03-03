@@ -7,7 +7,7 @@ COExpUI <- function(id) {
   tagList(
     fluidRow(
       column(3,
-        box(title = htmltools::span(icon("fa-light fa-gears"), " Settings"),
+        box(title = htmltools::span(icon("gears"), " Settings"),
             width = NULL, status = "primary",solidHeader = T,collapsible = F,
           fluidRow(
             column(6,style='padding-left:12px; padding-right:3px;', align="center",
@@ -54,13 +54,13 @@ COExpUI <- function(id) {
         box(title = "Scatter Plot",
             width = NULL, solidHeader = T, collapsible = T,
           conditionalPanel("!input.button && typeof output.plot !== 'undefined'", ns = NS(id),
-            fluidRow(column=12,align = "right",style='padding-left:12px; padding-right:12px;',
+            fluidRow(column=12,align = "left",style='padding-left:12px; padding-right:12px;',
               dropdownButton(
                 plotOutput(NS(id,"plot_gradient"),width = "400px",height =  "400px") %>% withSpinner(),
-                            circle = TRUE, status = "danger", icon = icon("cog"), width = "300px",
+                            circle = TRUE, status = "danger", icon = icon("palette"), width = "300px",
                             tooltip = tooltipOptions(title = "Click to see legend plot",
                                                      placement= "left"),
-                            right = T
+                            right = F
               )
             )
           ),

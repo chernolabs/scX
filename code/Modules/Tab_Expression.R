@@ -7,7 +7,7 @@ ExpressionUI <- function(id) {
   tagList(
     fluidRow(
       column(3,
-        box(title = htmltools::span(icon("fa-light fa-gears"), " Settings"),
+        box(title = htmltools::span(icon("gears"), " Settings"),
             width = NULL, status = "primary",solidHeader = T,collapsible = F,
           conditionalPanel("input.scatter_heatmap == 'scatter'",ns=NS(id),
             fluidRow(
@@ -122,7 +122,7 @@ ExpressionUI <- function(id) {
                              style = "unite",
                              color = "primary",
                              size = "xs",
-                             icon = icon("fa-solid fa-play"))
+                             icon = icon("play"))
                 )
               )
             ),

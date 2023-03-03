@@ -9,7 +9,7 @@ VolcanoUI <- function(id) {
       #### Side panel -----
       column(width = 4,
              box(
-               title = htmltools::span(icon("fa-light fa-gears"), " Settings"), width = NULL,
+               title = htmltools::span(icon("gears"), " Settings"), width = NULL,
                status = "primary",solidHeader = T,collapsible = T,
                pickerInput(
                  inputId = NS(id,"partitionType"),
@@ -24,11 +24,12 @@ VolcanoUI <- function(id) {
                hr(style = "border-top: 1px solid #0073b7;"),
                fluidRow(
                  column(4,style='padding-left:12px; padding-right:5px;',align="center",
-                        numericInput(NS(id,"fdr_thr"),"FDR",value = 0.05)),
+                        numericInput(NS(id,"fdr_thr"),"FDR",value = 0.05, step = 0.01)),
                  column(4,style='padding-left:5px; padding-right:5px;',align="center",
-                        numericInput(NS(id,"fc_thr"),"Fold Change",value = 2)),
+                        numericInput(NS(id,"fc_thr"),"Fold Change",value = 2, step = 0.01)),
                  column(4,style='padding-left:5px; padding-right:12px;padding-top:25px;',align="center",
-                        actionBttn((NS(id,"button")),label = "Calculate", style = "unite",color = "primary",size = "sm"))
+						actionBttn((NS(id,"button")),label = NULL,style = "unite",color = "primary",size = "sm",icon = icon("play")))
+                        #actionBttn((NS(id,"button")),label = "Calculate", style = "unite",color = "primary",size = "sm"))
                )
              ),
              conditionalPanel("typeof output.VolcanoPlot !== 'undefined'", ns = NS(id),

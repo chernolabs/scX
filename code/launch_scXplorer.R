@@ -124,37 +124,37 @@ launch_scXplorer <- function(cseo,dataset_name='scXplorer', point.size =20){
         #                       )
         #      )
         # ),
-        menuItem("Summary", tabName = "smryTab", icon = icon("fa-regular fa-bookmark"),selected = T),              
+        menuItem("Summary", tabName = "smryTab", icon = icon('bookmark', class = 'fa-solid'),selected = T),              
         menuItem("Markers", tabName = "markersTab",
-                 icon = icon('fa-solid fa-location-dot'), startExpanded = F,
+                 icon = icon('location-dot'), startExpanded = F,
                  menuSubItem('Cluster markers', tabName = "markers_cluster",
-                             icon = icon('fa-solid fa-map-location-dot')
+                             icon = icon('map-location-dot')
                  ),
                  menuSubItem('Find new markers', tabName = "markers_new",
-                             icon = icon('fa-solid fa-magnifying-glass-location')
+                             icon = icon('magnifying-glass-location')
                  )
         ),
         menuItem("Gene Expression", tabName = "g_expTab",
-                 icon = icon('fa-solid fa-chart-simple'), startExpanded = F,
+                 icon = icon('chart-simple'), startExpanded = F,
                  menuSubItem('Expression', tabName = "g_exp",
-                             icon = icon('fa-solid fa-signal')
+                             icon = icon('signal')
                  ),
                  menuSubItem('Co-expression', tabName = "g_coexp",
-                             icon = icon('fa-regular fa-clone'))
+                             icon = icon('clone', class = 'fa-regular'))
         ),
         menuItem("Differential Expression", tabName = "volcanoTab",
-                 icon = icon("fa-solid fa-chart-column")
+                 icon = icon("chart-column")
         ),
         menuItem("Partitions", tabName = "clustersTab",
-                 icon = icon("fa-solid fa-circle-nodes")
+                 icon = icon("circle-nodes")
         ),
         menuItem("Visual Tools", tabName = "toolsTab",
-                 icon = icon("fa-solid fa-toolbox"), startExpanded = F,
+                 icon = icon("toolbox"), startExpanded = F,
                  menuSubItem('Violin by Partition', tabName = "t_VGL",
-                             icon = icon('fa-solid fa-wrench')
+                             icon = icon('wrench')
                  ),
                  menuSubItem('MultiPlots', tabName = "t_MP",
-                             icon = icon('fa-solid fa-hammer')
+                             icon = icon('hammer')
                  )
         )
       )
@@ -185,6 +185,7 @@ launch_scXplorer <- function(cseo,dataset_name='scXplorer', point.size =20){
                }'
           )
         ),
+		tags$style(HTML('.sidebar .sidebar-menu .treeview-menu>li {margin-left: 10px}')),
         tags$style(
           HTML("hr {border-top: 1px solid #000000;}")
         ),

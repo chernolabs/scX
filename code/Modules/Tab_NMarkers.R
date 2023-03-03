@@ -8,7 +8,7 @@ N_markersUI <- function(id) {
     useShinyjs(),
     fluidRow(
       column(3,
-        box(title = htmltools::span(icon("fa-light fa-gears"), " Settings"), 
+        box(title = htmltools::span(icon("gears"), " Settings"), 
             width = NULL, status = "primary",solidHeader = T,collapsible = T,
           fluidRow(
             column(6,style='padding-left:12px; padding-right:3px;', align="center",
@@ -68,7 +68,7 @@ N_markersUI <- function(id) {
               footer = tagList(shiny::icon("cat"), "Nya"),
               dropdownButton(
                 plotlyOutput(NS(id,"plot1")) %>% withLoader(type='html',loader = 'dnaspin'),
-                circle = TRUE, status = "danger", icon = icon("fa-solid fa-magnifying-glass"), width = "300px",
+                circle = TRUE, status = "danger", icon = icon("magnifying-glass"), width = "300px",
                 tooltip = tooltipOptions(title = "Click to select other group of cells",
                                          placement= "right"),
                 right = F

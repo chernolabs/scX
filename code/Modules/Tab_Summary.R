@@ -19,7 +19,7 @@ QC_UI <- function(id) {
     ),
     fluidRow(
       column(2,
-        box(title = htmltools::span(icon("fa-light fa-gears"), " Settings"),
+        box(title = htmltools::span(icon("gears"), " Settings"),
             width = NULL, status = "primary",solidHeader = T,collapsible = T,
           pickerInput(
             inputId = NS(id,"partitionType"),
@@ -56,42 +56,42 @@ QC_Server <- function(id,sce) {
     #### Summary Box ----
     output$CellBox <- renderInfoBox({
       infoBox("Cells", value = ncol(sce),
-              icon = icon('fa-solid fa-vial'), #icon("sign-in"),
+              icon = icon('vial'), #icon("sign-in"),
               color = "light-blue", fill = F
       )
     })
     
     output$GenesBox <- renderInfoBox({
       infoBox(title = "Genes", value = nrow(sce),
-              icon = icon('fa-solid fa-dna'), #icon("sign-in"),
+              icon = icon('dna'), #icon("sign-in"),
               color = "light-blue", fill = F
       )
     })
     
     output$PartitionBox <- renderInfoBox({
       infoBox(title = "Partitions", value = ncol(colData(sce)[sapply(colData(sce), is.factor)]),
-              icon = icon('fa-solid fa-filter'), #icon("sign-in"),
+              icon = icon('filter'), #icon("sign-in"),
               color = "light-blue", fill = F
       )
     })
     
     output$ExpBox <- renderInfoBox({
       infoBox(title="Experiments",value= length(sce@metadata),subtitle = "Integrated experiments",
-              icon = icon('fa-solid fa-coins'), #icon("sign-in"),
+              icon = icon('coins'), #icon("sign-in"),
               color = "light-blue", fill = F
       )
     })
     
     output$nFeatureBox <- renderInfoBox({
       infoBox(title="Gene Detected",value= round(mean(sce$nFeatures),2),subtitle = "Mean gene detected per cell",
-              icon = icon('fa-solid fa-magnifying-glass-chart'),
+              icon = icon('magnifying-glass-chart'),
               color = "light-blue", fill = F
       )
     })
     
     output$nGeneBox <- renderInfoBox({
       infoBox(title="Lib size",value= round(mean(sce$nCounts),2),subtitle = "Mean lib size per cell",
-              icon = icon('fa-solid fa-book'), #icon("sign-in"),
+              icon = icon('book'), #icon("sign-in"),
               color = "light-blue", fill = F
       )
     })

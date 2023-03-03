@@ -7,7 +7,7 @@ MultiPlotsUI <- function(id) {
   tagList(
     fluidRow(
       column(3,
-        box(title = htmltools::span(icon("fa-light fa-gears"), " Settings"),
+        box(title = htmltools::span(icon("gears"), " Settings"),
             width = NULL, status = "primary",solidHeader = T,collapsible = F,
           fluidRow(
             column(6,style='padding-left:12px; padding-right:3px;', align="center",
@@ -61,7 +61,7 @@ MultiPlotsUI <- function(id) {
                                style = "unite",
                                color = "primary",
                                size = "xs",
-                               icon = icon("fa-solid fa-play"))
+                               icon = icon("play"))
                   )
                 )
               ),
@@ -102,7 +102,7 @@ MultiPlotsUI <- function(id) {
                                 style = "unite",
                                 color = "primary",
                                 size = "xs",
-                                icon = icon("fa-solid fa-play"))
+                                icon = icon("play"))
               )
             )
           )
