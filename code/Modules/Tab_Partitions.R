@@ -55,7 +55,8 @@ Clusters_UI <- function(id) {
 			)
 		  ),
           conditionalPanel("input.barplot_matrix == 'matrix' && input.partitionType2 != 'None'",ns=NS(id),
-             htmlOutput(NS(id,"randValue")),
+				htmlOutput(NS(id,"randValue"), style = "text-align:center;"),
+				bsTooltip(NS(id, "randValue"), title = "A measure of similarity between two partitions", placement = "bottom", trigger = "hover", options = list(container = "body")),
              radioGroupButtons(inputId = NS(id,"Metric"), 
                                label="",
                                choices = c("Count", "Jaccard"),

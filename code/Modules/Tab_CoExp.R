@@ -59,7 +59,7 @@ COExpUI <- function(id) {
                 plotOutput(NS(id,"plot_gradient"),width = "400px",height =  "400px") %>% withSpinner(),
                             circle = TRUE, status = "danger", icon = icon("palette"), width = "300px",
                             tooltip = tooltipOptions(title = "Click to see legend plot",
-                                                     placement= "left"),
+                                                     placement= "right"),
                             right = F
               )
             )
