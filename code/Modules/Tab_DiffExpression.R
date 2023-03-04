@@ -23,11 +23,11 @@ VolcanoUI <- function(id) {
                               multiple=T),
                hr(style = "border-top: 1px solid #0073b7;"),
                fluidRow(
-                 column(4,style='padding-left:12px; padding-right:5px;',align="center",
-                        numericInput(NS(id,"fdr_thr"),"FDR",value = 0.05, step = 0.01)),
-                 column(4,style='padding-left:5px; padding-right:5px;',align="center",
+                 column(5,style='padding-left:12px; padding-right:5px;',align="center",
                         numericInput(NS(id,"fc_thr"),"Fold Change",value = 2, step = 0.01)),
-                 column(4,style='padding-left:5px; padding-right:12px;padding-top:25px;',align="center",
+                 column(5,style='padding-left:5px; padding-right:5px;',align="center",
+                        numericInput(NS(id,"fdr_thr"),"False Discovery Rate",value = 0.05, step = 0.01)),
+                 column(2,style='padding-left:5px; padding-right:12px;padding-top:25px;',align="center",
 						actionBttn((NS(id,"button")),label = NULL,style = "unite",color = "primary",size = "sm",icon = icon("play")))
                         #actionBttn((NS(id,"button")),label = "Calculate", style = "unite",color = "primary",size = "sm"))
                )
@@ -164,7 +164,7 @@ VolcanoServer <- function(id,sce,sce.markers) {
                                                 scrollX=T,
                                                 autoWidth = F),
                                  rownames= TRUE,
-								 colnames = c('Expressed', 'log(FC)', 'log(FDR)'),
+								 colnames = c('Expressed', 'log2(FC)', 'log(FDR)'),
                                  selection = 'none',
                                  caption = htmltools::tags$caption(
                                    style = paste0('caption-side: top; text-align: center; font-weight: bold;color:black;background-image: linear-gradient(to right,',
