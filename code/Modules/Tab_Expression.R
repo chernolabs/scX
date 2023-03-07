@@ -634,7 +634,7 @@ ExpressionServer <- function(id,sce,point.size=20) {
        g <- ggplot(df_plot, aes(x = factor(Idents),y =  Expr, fill = Idents)) +
          geom_violin(scale = "width", adjust = 1, trim = TRUE) +
          scale_y_continuous(expand = c(0, 0), position="right", labels = function(x)
-           c(rep(x = "", times = length(x)-2), x[length(x) - 1], "")) +
+           c(rep(x = "", times = max(length(x)-2, 0) ), x[length(x) - 1], "")) +
          facet_grid(rows = vars(Feat), scales = "free", switch = "y") +
          theme_cowplot(font_size = 12) +
          theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1),
