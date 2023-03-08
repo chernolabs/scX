@@ -448,7 +448,7 @@ ExpressionServer <- function(id,sce,point.size=20) {
                                   show_annotation_name = T)
         
         h1 <- Heatmap(dta,
-                      col = viridis(100),
+                      col = if(max(dta)==min(dta)) {viridis(1)} else {viridis(100)},
                       border =F,
                       name = "Gene expression",
                       cluster_rows = input$cluster_row,
@@ -479,7 +479,7 @@ ExpressionServer <- function(id,sce,point.size=20) {
         
         # colnames(HeatmapF()) <- NULL
         h1 <- Heatmap(as.matrix(HeatmapF()),
-                      col = viridis(100),
+                      col = if(max(HeatmapF())==min(HeatmapF())) {viridis(1)} else {viridis(100)},
                       border =F,
                       name = "Gene expression",
                       cluster_rows = input$cluster_row,
