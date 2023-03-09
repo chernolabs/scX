@@ -69,7 +69,8 @@ markersServer <- function(id = "markers",sce,ldf,point.size = 20) {
     ### Observe Events ----
     
     updatePickerInput(session, 'partitionType', 
-                      choices = names(colData(sce))[sapply(colData(sce), is.factor)])
+                      choices = names(ldf)
+    )
     
     observeEvent(input$DTMarkers_rows_selected,{
       updateTabsetPanel(inputId = "switcher", selected = "panel2")

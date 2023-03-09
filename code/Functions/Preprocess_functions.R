@@ -199,13 +199,14 @@ createSCEobject <- function(xx,
     ttoFactors <- "scx.clust"
   }
   
-  #Delete the columns won't be used in the shiny. 
-  colData(xx.sce) <- colData(xx.sce)[,c(ttoFactors,'nCounts','nFeatures'),drop=F]
-  
-  for(icol in ttoFactors){
-    colData(xx.sce)[,icol] <- as.factor(colData(xx.sce)[,icol])
-    colData(xx.sce)[,icol] <- droplevels(colData(xx.sce)[,icol])
-  }
+  #Transform all the character columns to factor to be able to be selected in the shinyApp. 
+  cols <- sapply(colData(xx.sce), function(x){(is.character(x) | is.factor(x)) & length(unique(x)) < 30})
+  if(any(cols)){
+    colData(xx.sce)[,cols] <- lapply(colData(xx.sce)[,cols,drop=F], function(x){
+        x <- as.factor(x)
+        x <- droplevels(x)
+        x
+      })
   if(verbose) cat(' Finished\n')
   
   
@@ -223,8 +224,7 @@ createSCEobject <- function(xx,
                                     direction="any",pval.type="all",log.p=T,full.stats=T)
   }
   if(verbose) cat(' Finished\n')
-  
-  
+
   # Attaching sce.markers to output
   csceo[["sce.markers"]] <- sce.markers
   
