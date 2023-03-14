@@ -222,12 +222,151 @@ Clusters_Server <- function(id,sce) {
       input$numeric_columns
     })
     
+    ### Heatmap ----
+    Heatmap_DF <- eventReactive(c(feature(),input$norm_heat),{
+      req(input$scatter_heatmap == "heatmap")
+      req(length(feature()) > 0)
+      
+      # value <- ifelse(input$norm_heat,yes = "logcounts.norm",no = "logcounts") #To swtich between norm ot not normalize expression gene.
+      exp_mtx <- df()[,feature(),drop=F] %>% as.matrix %>% t()
+      
+      if(input$norm_heat){
+        exp_mtx <- apply(exp_mtx,1,function(x){x/max(x)}) %>% t()
+      }
+      
+      exp_mtx
+    })
     
+    ### Heatmaps ----
+    #Here I made everything in the same reactive object to manipulated all the reactive order at the same time
+    Heatmap_Plot <- eventReactive(c(Heatmap_DF(),input$partitionColor,input$mean_heat,input$cluster_row,input$cluster_column),{
+      req(input$scatter_heatmap == "heatmap")
+      req(input$partitionColor)
+      req(!is.null(Heatmap_DF()))
+      
+      if(input$mean_heat) {
+        byPartition <- if(input$partitionColor != 'None'){df()[,input$partitionColor,drop=T]}else{rep('All',ncol(Heatmap_DF()))}
+        dta <- apply(Heatmap_DF(),1,FUN =  function(x){
+          tapply(x,byPartition,FUN=mean)
+        }
+        )
+        
+        if(input$partitionColor != 'None'){
+        dta <- dta %>% t
+        ht <-   HeatmapAnnotation(Type = levels(df()[,input$partitionColor]),
+                                  col=list(Type=OrderPartReact()$colPart),
+                                  annotation_legend_param = list(Type = list(title = input$partitionColor)
+                                  ),
+                                  annotation_label = c(input$partitionColor),
+                                  show_legend = c(Type =FALSE),
+                                  show_annotation_name = T)
+        } else{
+          ht <- NULL
+        }
+        
+        h1 <- Heatmap(dta,
+                      col = if(max(dta)==min(dta)) {viridis(1)} else {viridis(100)},
+                      border =F,
+                      name = "Gene expression",
+                      cluster_rows = input$cluster_row,
+                      cluster_columns = input$cluster_column,
+                      row_names_side = "left",
+                      column_names_rot = 45,
+                      # column_title_rot = 45,
+                      # column_title_gp = gpar(fontsize = 10),
+                      column_title_side = "bottom",
+                      # column_title = "Partition",
+                      row_title = "Genes",
+                      row_gap = unit(1, "mm"),
+                      column_gap = unit(1, "mm"),
+                      show_row_names = T,
+                      # show_column_names = T,
+                      top_annotation = ht,
+                      # column_split = colData(sce)[,input$partitionType],
+                      cluster_column_slices = F
+                      # use_raster = TRUE,
+                      # raster_by_magick = TRUE
+        )
+      } else{
+        if(input$partitionColor != 'None'){
+        ht <-   HeatmapAnnotation(Type = df()[,input$partitionColor],
+                                  col=list(Type=OrderPartReact()$colPart),
+                                  show_legend = c(Type =FALSE),
+                                  annotation_label = c(input$partitionColor),
+                                  show_annotation_name = T)
+        col_split <- df()[,input$partitionColor]
+        } else{
+          ht <- NULL
+          col_split <- NULL
+        }
+        # colnames(HeatmapF()) <- NULL
+        h1 <- Heatmap(as.matrix(Heatmap_DF()),
+                      col = if(max(Heatmap_DF())==min(Heatmap_DF())) {viridis(1)} else {viridis(100)},
+                      border =F,
+                      name = "Gene expression",
+                      cluster_rows = input$cluster_row,
+                      cluster_columns = input$cluster_column,
+                      row_names_side = "left",
+                      # column_names_rot = 45,
+                      column_title_rot = 45,
+                      # column_title_gp = gpar(fontsize = 10),
+                      column_title_side = "bottom",
+                      # column_title = "Partition",
+                      row_title = "Genes",
+                      row_gap = unit(1, "mm"),
+                      column_gap = unit(1, "mm"),
+                      show_row_names = T,
+                      show_column_names = F,
+                      top_annotation = ht,
+                      column_split = col_split,
+                      cluster_column_slices = F,
+                      use_raster = TRUE,
+                      raster_by_magick = TRUE
+        )
+      }
+      h1
+    })
+    
+    output$plot_heatmap <- renderPlot({
+      req(input$scatter_heatmap == "heatmap")
+      req(!is.null(Heatmap_Plot()))
+      Heatmap_Plot()
+    })
+    
+    #### Dotplots ----
+    output$plot_DotPlot <- renderPlotly({
+      req(input$scatter_heatmap == "dotplot")
+      req(input$partitionColor)
+      req(length(feature()) > 0)
+      
+      byPartition <- if(input$partitionColor != 'None'){ input$partitionColor}else{NULL}
+      g  <- plotDots(object = sce,features = feature(),group = ,
+                     scale = input$scale_dotplot,center = input$center_dotplot) + 
+        theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1,size=15)) +
+        xlab(input$partitionType) + ylab("Genes")
+      if(input$ord_dotplot){ #Define the order if the input is selected and the is not a heatmap of 1 row, received the order vector
+        vtor <- if(length(feature())>1) {
+          ord <- matrix(g$data$Average,byrow = F,nrow=length(unique(g$data$Feature))) %>% dist %>% hclust %>% .$order
+          rev(feature()[ord])
+        } else {feature()[1]}  
+      } else {
+        vtor <- rev(feature())
+      }
+      
+      g$data$Feature <- factor(g$data$Feature,levels = vtor)
+      
+      ggplotly(g) %>% config(modeBarButtonsToRemove = c("select2d", "lasso2d", "hoverCompareCartesian"))
+      
+      
+    })
+    
+    
+    ### Stck Violin
     output$plot_stackVln <- renderPlot({
       req(input$scatter_heatmap == "stackVln")
       req(length(feature()) > 0)
       #Adaptated from https://github.com/ycl6/StackedVlnPlot
-      df_plot <- colData(sce)[,feature(),drop=F] %>% as.data.frame
+      df_plot <- df()[,feature(),drop=F] %>% as.data.frame
       # Add cell ID and identity classes
       df_plot$Cell <- rownames(df_plot)
       
