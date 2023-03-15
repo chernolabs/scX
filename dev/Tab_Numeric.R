@@ -32,7 +32,7 @@ Clusters_UI <- function(id) {
                                     "Partition Color",
                                     choices = NULL)
                  ),
-                 conditionalPanel("input.scatter_heatmap == 'heatmap' || input.scatter_heatmap == 'dotplot' || input.scatter_heatmap == 'stackVln'", ns = NS(id),
+                 conditionalPanel("input.scatter_heatmap == 'heatmap' || input.scatter_heatmap == 'dotplot' || input.scatter_heatmap == 'stackVln' || input.scatter_heatmap == 'matrix' ", ns = NS(id),
                                   fluidRow(
                                     column(11,style='padding-left:0px; padding-right:2px;',
                                            selectizeInput(NS(id,"numeric_columns"),
@@ -101,6 +101,24 @@ Clusters_UI <- function(id) {
                                                status = "primary",
                                                fill = TRUE)
                  ),
+                 conditionalPanel("input.scatter_heatmap == 'matrix'",ns=NS(id),
+                                  prettySwitch(NS(id,"matrix_cluster_row"),
+                                               "Cluster Row",
+                                               value = F,
+                                               status = "primary",
+                                               fill = TRUE),
+                                  prettySwitch(NS(id,"matrix_cluster_column"),
+                                               "Cluster Column",
+                                               value = F,
+                                               status = "primary",
+                                               fill = TRUE),
+                                  prettySwitch(NS(id,"showFreq"),
+                                               "Hide Labels",
+                                               value = F,
+                                               status = "primary",
+                                               fill = TRUE)
+                                  
+                 )
              )
       ),
       column(9,
@@ -130,6 +148,12 @@ Clusters_UI <- function(id) {
                              box(width = NULL,solidHeader = T,collapsible = F,
                                  footer = tagList(shiny::icon("cat"), "Nya"),
                                  plotOutput(NS(id,"plot_stackVln"),height = "100vh") %>% withSpinner()
+                             )
+                    ),
+                    tabPanel("Matrix", value= "matrix",
+                             box(width = NULL, solidHeader = T, collapsible = F,
+                                 footer = tagList(shiny::icon("cat"), "Nya"),
+                                 plotOutput(NS(id,"plot_Matrix"),height = "100vh") %>% withSpinner()
                              )
                     )
              )
@@ -335,9 +359,9 @@ Clusters_Server <- function(id,sce) {
     
     #### Dotplots ----
     output$plot_DotPlot <- renderPlotly({
+      req(length(feature()) > 0)
       req(input$scatter_heatmap == "dotplot")
       req(input$partitionColor)
-      req(length(feature()) > 0)
       
       byPartition <- if(input$partitionColor != 'None'){ input$partitionColor}else{NULL}
       g  <- plotDots(object = sce,features = feature(),group = ,
@@ -363,8 +387,8 @@ Clusters_Server <- function(id,sce) {
     
     ### Stck Violin
     output$plot_stackVln <- renderPlot({
-      req(input$scatter_heatmap == "stackVln")
       req(length(feature()) > 0)
+      req(input$scatter_heatmap == "stackVln")
       #Adaptated from https://github.com/ycl6/StackedVlnPlot
       df_plot <- df()[,feature(),drop=F] %>% as.data.frame
       # Add cell ID and identity classes
@@ -419,6 +443,57 @@ Clusters_Server <- function(id,sce) {
       g
     })
   
+    ### Matrix ----
+    
+    Matrix_DF <- eventReactive(c(input$partitionColor,feature()),{
+      req(input$scatter_heatmap == "matrix")
+      req(length(feature()) > 1)
+      byPartition <- if(input$partitionColor != 'None'){input$partitionColor}else{NULL}
+      df_corr <- df() %>% group_by(across(all_of(byPartition))) %>% summarise(Correlation = cor(cbind(across(all_of(feature())))))
+      df_corr
+    })
+    
+    output$plot_Matrix <- renderPlot({
+      req(input$scatter_heatmap == "matrix")
+      req(!is.null(Matrix_DF()))
+      if(input$partitionColor != 'None'){
+        # rownames(df_corr$Correlation)  <- paste0(mtx[,input$partitionColor,drop=T],"_",rownames(mtx$Correlation))
+        ht <-   HeatmapAnnotation(Type = Matrix_DF()[,input$partitionColor,drop=T],
+                                  col=list(Type=OrderPartReact()$colPart),
+                                  annotation_legend_param = list(Type = list(title = input$partitionColor)
+                                  ),
+                                  annotation_label = c(input$partitionColor),
+                                  show_legend = c(Type =FALSE),
+                                  show_annotation_name = T)
+        col_split <- Matrix_DF()[,input$partitionColor,drop=T]
+        mtx <- Matrix_DF()$Correlation %>% t()
+        rownames(mtx) <- feature()
+      } else{
+        mtx <- Matrix_DF()$Correlation
+        ht <- NULL
+        col_split <- NULL
+      }
+      Heatmap(mtx,
+              col = if(max(t(mtx))==min(t(mtx))) {viridis(1)} else {viridis(100)},
+              border =F,
+              name = "Gene expression",
+              cluster_rows = input$matrix_cluster_row,
+              cluster_columns = input$matrix_cluster_column,
+              row_names_side = "left",
+              column_title_rot = 45,
+              column_title_side = "bottom",
+              row_title = "Genes",
+              row_gap = unit(1, "mm"),
+              column_gap = unit(1, "mm"),
+              show_row_names = T,
+              show_column_names = T,
+              top_annotation = ht,
+              column_split = col_split,
+              cluster_column_slices = F,
+              cell_fun = if(!(input$showFreq)){set_val(tab = mtx)} else{NULL}
+      )
+    })
+    
     
   })
 }
@@ -430,3 +505,4 @@ server <- function(input, output, session) {
   Clusters_Server(sce = sce,id = 'lala')
 }
 shinyApp(ui = ui,server = server)
+
