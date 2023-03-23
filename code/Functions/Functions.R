@@ -261,7 +261,8 @@ reducedDimPlot_cluster <- function(sce,reducedDim,partition,cluster,alpha=0.5,pa
   levels(df$value) <- c(cluster,"Other")
   g <- ggplot(df %>% arrange(desc(value)),aes(x=x,y=y,col=value)) + geom_point(alpha=alpha)+ 
     theme_classic() +  
-    labs(color=partition) + xlab(reducedDim) + ylab(reducedDim) +
+    #labs(color=partition) + xlab(reducedDim) + ylab(reducedDim) +
+	xlab(reducedDim) + ylab(reducedDim) + ggtitle(paste("Colored:", cluster)) + theme(legend.position = "none", plot.title = element_text(hjust = 0.5)) +
     scale_color_manual(values=c(palette,"lightgrey"))
   return(g)
 }

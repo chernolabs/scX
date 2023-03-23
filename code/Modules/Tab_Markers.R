@@ -213,7 +213,8 @@ markersServer <- function(id = "markers",sce,ldf,point.size = 20) {
                       name = ~colData(sce)[,input$partitionType],
                       customdata= ~colData(sce)[,input$partitionType], 
                       size = I(point.size),span=I(0),text=~colData(sce)[,input$partitionType],hoverinfo='text') %>% 
-          event_register("plotly_selecting") %>% 
+          event_register("plotly_selecting") %>%
+		  config(modeBarButtonsToRemove = c("select2d", "lasso2d", "hoverCompareCartesian")) %>%
           toWebGL()
       }
       
@@ -257,7 +258,8 @@ markersServer <- function(id = "markers",sce,ldf,point.size = 20) {
                       customdata= ~colData(sce)[,input$partitionType],
                       color = ~logcounts(sce)[gene_marker_selected(),], 
                       size = I(point.size),span=I(0),text=~colData(sce)[,input$partitionType],hoverinfo='text') %>% 
-          colorbar(title = "log(counts)") %>% 
+          colorbar(title = "log(counts)") %>%
+		  config(modeBarButtonsToRemove = c("select2d", "lasso2d", "hoverCompareCartesian")) %>% 
           toWebGL()
       }
       
