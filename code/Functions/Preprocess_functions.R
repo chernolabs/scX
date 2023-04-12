@@ -1,16 +1,26 @@
 # (1) object to sce ----
-# Devuelve un objeto SCE listo para la funciones ldf y sce.markers 
-# Inputs:
-#  xx: puede ser un SCE, Seurat o una matriz de counts
-#  assay.name.raw: el nombre del assay con la matriz de raw counts
-#  assay.name.normalization: el nombre del assay con la matriz normalizada a usar en el shiny,
-#  metadata: un dataframe con la metadata de las celulas
-#  toFactors: el nombre de las columnas de la metadata o colData para pasar a factores
-#  chosen.hvg: lista de nombres de los genes mas variables
-#  nHVGs: si chosen.hvg=NULL calculo los nHVGs genes mas variables
-#  nPCs: número de componentes principales a calcular para PCA
-#  verbose: que la función de información de los pases que está haciendo
-#  calcRedDim: si tiene que computar las dimensiones reducidas (PCA, UMAP, TSNE, UMAP2D, TSNE2D)
+#' Returns a list with a SingleCellExperiment object
+#'
+#' `createSCEobject()` returns a list which includes a SingleCellExperiment object with counts, at
+#'		least one clusterization, gene markers for each clusterization, reduced dimensions for
+#'		visualization, and any additional data provided. This list is used as input when launching
+#'		the scXplorer app.
+#' 
+#' @param xx Either a matrix with counts, or a SCE or Seurat object.
+#' @param assay.name.raw Assay name for raw counts matrix if object is a SCE. Defaults to `counts`.
+#' @param assay.name.normalization Assay name for normalized matrix if present in SCE. If not present,
+#' 		it calculates `logcounts` (default).
+#' @param metadata Optional dataframe with cell metadata.
+#' @param toFactors Optional metadata column names (or colData) to use as factors. If `NULL` (default),
+#'		a quick clusterization will be computed.
+#' @param chosen.hvg Optional list of Highly Variable Genes.
+#' @param nHVGs Number of Highly Variable Genes to use if chosen.hvg=NULL. Defaults to 3000.
+#' @param nPCs Number of Principal Components to use in PCA. Defaults to 50.
+#' @param verbose Step by step status while function is running. Defaults to `TRUE`.
+#' @param calcRedDim Whether to compute reduced dimensions (PCA, UMAP, TSNE, UMAP2D, TSNE2D) or not.
+#'		Defaults to `TRUE`.
+#' @returns List with a SingleCellExperiment object and additional data ready for use in scXplorer.
+#' @export
 createSCEobject <- function(xx,
                             assay.name.raw="counts",
                             assay.name.normalization="logcounts",
@@ -24,9 +34,9 @@ createSCEobject <- function(xx,
   
   csceo <- list()
   
-  library(scater)
-  library(scran)
-  library(Matrix)
+  #library(scater)
+  #library(scran)
+  #library(Matrix)
   library(SingleCellExperiment)
   library(doParallel)
   
@@ -55,16 +65,16 @@ createSCEobject <- function(xx,
     assay.name.raw <- "counts"
     assay.name.normalization <- "logcounts"
     
-    library(Seurat)
-    xx.sce <- as.SingleCellExperiment(xx) 
+    #require(Seurat)
+    xx.sce <- Seurat::as.SingleCellExperiment(xx) 
     if((all(toFactors!="scx.clust")) & (!all(toFactors %in% names(colData(xx.sce))))){
       warning('at least one factor is not present in metadata')
     }
     if(nrow(xx@assays$RNA@meta.features)>0){
       rowData(xx.sce) <- xx@assays$RNA@meta.features
     }
-    if(length(VariableFeatures(xx))>0){
-      chosen.hvg <- VariableFeatures(xx)
+    if(length(Seurat::VariableFeatures(xx))>0){
+      chosen.hvg <- Seurat::VariableFeatures(xx)
     }
     # matrix + metadata to sce ----
   } else if (class(xx)[1] %in% c("dgCMatrix", "Matrix", "matrix")){
@@ -112,16 +122,16 @@ createSCEobject <- function(xx,
   
   
   # Normalization ----
-  clust <- quickCluster(xx.sce, assay.type = assay.name.raw)
+  clust <- scran::quickCluster(xx.sce, assay.type = assay.name.raw)
   xx.sce$scx.clust <- clust
   if(!assay.name.normalization %in% names(assays(xx.sce))){
     if(verbose) cat('Computing normalization...')
     set.seed(123457)
-    clust <- quickCluster(xx.sce, assay.type = assay.name.raw)
+    clust <- scran::quickCluster(xx.sce, assay.type = assay.name.raw)
     xx.sce$scx.clust <- clust
-    xx.sce <- computeSumFactors(xx.sce,cluster=clust,min.mean=0.1, assay.type = assay.name.raw)
+    xx.sce <- scran::computeSumFactors(xx.sce,cluster=clust,min.mean=0.1, assay.type = assay.name.raw)
     # xx.sce <- scuttle::pooledSizeFactors(xx.sce,cluster=clust,min.mean=0.1, assay.type = assay.name.raw)
-    xx.sce <- logNormCounts(xx.sce, assay.type = assay.name.raw, name="logcounts")
+    xx.sce <- scater::logNormCounts(xx.sce, assay.type = assay.name.raw, name="logcounts")
     if(verbose) cat(' Finished\n')
   }
   
@@ -129,7 +139,7 @@ createSCEobject <- function(xx,
   # HVGs ----
   if(is.null(chosen.hvg)){
     if(verbose) cat('Computing HVGs...')
-    mgv <- modelGeneVar(xx.sce,span=.8, assay.type = assay.name.normalization)
+    mgv <- scran::modelGeneVar(xx.sce,span=.8, assay.type = assay.name.normalization)
     rowData(xx.sce) <- cbind(rowData(xx.sce), hvg.mvBio=mgv$bio)
     chosen.hvg <- rank(-rowData(xx.sce)$hvg.mvBio) <= 3000 & rowData(xx.sce)$hvg.mvBio>0
     chosen.hvg <- rownames(xx.sce)[chosen.hvg]
@@ -151,7 +161,7 @@ createSCEobject <- function(xx,
   if(!calcRedDim){
     if(length(reducedDimNames(xx.sce))<1 | all(!(sapply(reducedDims(xx.sce),ncol) %in% c(2,3)))){
       calcRedDim <- TRUE
-      runDim <- c("PCA", "TSNE", "UMAP", "TSNE2D", "UMAP2D")
+      #runDim <- c("PCA", "TSNE", "UMAP", "TSNE2D", "UMAP2D")
     } else if(all(sapply(reducedDims(xx.sce),ncol) != 2)){
       calcRedDim <- TRUE
       runDim <- c("PCA","TSNE2D", "UMAP2D")
@@ -177,7 +187,7 @@ createSCEobject <- function(xx,
   #logcounts normalized ----
   if(!"logcounts.norm" %in% names(assays(xx.sce))){
     assays(xx.sce)$logcounts.norm <- t(apply(assay(xx.sce, "logcounts"), 1, function(x){x/max(x)}))
-    assays(xx.sce)$logcounts.norm <- Matrix(assays(xx.sce)$logcounts.norm, sparse = TRUE)
+    assays(xx.sce)$logcounts.norm <- Matrix::Matrix(assays(xx.sce)$logcounts.norm, sparse = TRUE)
   }
   if(verbose) cat(' Finished\n')
   
@@ -218,7 +228,7 @@ createSCEobject <- function(xx,
   # sce markers ----
   sce.markers <- list()
   for(i in ttoFactors){
-    sce.markers[[i]] <- findMarkers(xx.sce, 
+    sce.markers[[i]] <- scran::findMarkers(xx.sce, 
                                     assay.type = "logcounts",
                                     group = colData(xx.sce)[,i],
                                     direction="any",pval.type="all",log.p=T,full.stats=T)
@@ -251,31 +261,31 @@ applyReducedDim <- function(sce, reddimstocalculate, chosen.hvgs, nPCs, assaynam
   if("PCA"%in%reddimstocalculate){
     if(verbose) cat("\t Calculating PCA...")
     set.seed(12534)
-    sce <- runPCA(sce, subset_row=chosen.hvgs, ncomponents=nPCs, name=namepca, exprs_values=assayname)
+    sce <- scater::runPCA(sce, subset_row=chosen.hvgs, ncomponents=nPCs, name=namepca, exprs_values=assayname)
     if(verbose) cat(' Finished','\n')
   }
   if("TSNE"%in%reddimstocalculate){
     if(verbose) cat("\t Calculating TSNE...")
     set.seed(1111011)
-    sce <- runTSNE(sce,dimred=namepca,n_dimred=20,ncomponents=3,name=paste0(prefix.name,"TSNE"),exprs_values=assayname)
+    sce <- scater::runTSNE(sce,dimred=namepca,n_dimred=20,ncomponents=3,name=paste0(prefix.name,"TSNE"),exprs_values=assayname)
     if(verbose) cat(' Finished','\n')
   }
   if("UMAP"%in%reddimstocalculate){
     if(verbose) cat("\t Calculating UMAP...")
     set.seed(1111011)
-    sce <- runUMAP(sce,dimred=namepca,n_dimred=20,ncomponents=3,name=paste0(prefix.name,"UMAP"),exprs_values=assayname)
+    sce <- scater::runUMAP(sce,dimred=namepca,n_dimred=20,ncomponents=3,name=paste0(prefix.name,"UMAP"),exprs_values=assayname)
     if(verbose) cat(' Finished','\n')
   }
   if("TSNE2D"%in%reddimstocalculate){
     if(verbose) cat("\t Calculating TSNE2D...")
     set.seed(1111011)
-    sce <- runTSNE(sce,dimred=namepca,name=paste0(prefix.name,"TSNE2D"),exprs_values=assayname)
+    sce <- scater::runTSNE(sce,dimred=namepca,name=paste0(prefix.name,"TSNE2D"),exprs_values=assayname)
     if(verbose) cat(' Finished','\n')
   }
   if("UMAP2D"%in%reddimstocalculate){
     if(verbose) cat("\t Calculating UMAP2D...")
     set.seed(1111011)
-    sce <- runUMAP(sce,dimred=namepca,name=paste0(prefix.name,"UMAP2D"),exprs_values=assayname)
+    sce <- scater::runUMAP(sce,dimred=namepca,name=paste0(prefix.name,"UMAP2D"),exprs_values=assayname)
     if(verbose) cat(' Finished','\n')
   }
   
@@ -293,7 +303,7 @@ ldf_func <- function(sce, partition,minSize=50){
   type           <- c('all','any','some')
   lfmrk <- list()
   for(itype in seq_along(type)){
-    lfmrk[[type[itype]]]    <- findMarkers(sce,
+    lfmrk[[type[itype]]]    <- scran::findMarkers(sce,
                                            assay.type = "logcounts",
                                            groups=colData(sce)[,partition],
                                            full.stats=TRUE,

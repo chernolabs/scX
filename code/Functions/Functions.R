@@ -1,5 +1,8 @@
 #### General ----
+
 ###Cell order from a partition to make the SpikePlot ----
+#' @import RColorBrewer
+#' @noRd
 Col.and.Order <- function(partition,sce){
   #Color
   lvs <- levels(colData(sce)[,partition])
@@ -18,7 +21,7 @@ Col.and.Order <- function(partition,sce){
 }
 
 #### Upload a list of genes ----
-
+#' @noRd
 genesList <- function(dataPath){
   if(file_ext(dataPath$name) == "txt"){
     #lista de genes txt separado por comas o newline
@@ -38,11 +41,11 @@ genesList <- function(dataPath){
 
 ##### Correlation Boxs ----
 
-require(DropletUtils)
+#require(DropletUtils)
 require(SingleCellExperiment)
-require(scater)
-require(scran)
-require(Matrix)
+#require(scater)
+#require(scran)
+#require(Matrix)
 
 # Cajitas de Luz ----
 
@@ -67,7 +70,7 @@ make_box <- function(ssce, selected.cells){
   jotas <- unlist(mapply(function(x,y){rep(x, y)},
                          seq(length(lengths)), lengths)
            )
-  paraCorr <- sparseMatrix(i = ies,
+  paraCorr <- Matrix::sparseMatrix(i = ies,
                            j = jotas,
                            x = 1,
                            dims = c(ncol(ssce), length(levels(colData(ssce)[,clusterss])))
@@ -78,15 +81,16 @@ make_box <- function(ssce, selected.cells){
               ssce))
 }
 
+#' @noRd
 generar_correlacion <- function(mtx,mtx.cor,ssce, cluster){
-  require(qlcMatrix)
-  correlacion <- corSparse(t(mtx), mtx.cor[colnames(mtx),])
+  correlacion <- qlcMatrix::corSparse(t(mtx), mtx.cor[colnames(mtx),])
   colnames(correlacion) <- names(table(colData(ssce)[,cluster]))
   rownames(correlacion) <- rownames(mtx)
   correlacion[is.na(correlacion)] <- 0
   return(correlacion)
 }
 
+#' @noRd
 cajitasdeluz <- function(ssce, selected.cells, corr = 0.7){
   if(!("logcounts" %in% names(assays(ssce)))){
     stop("No 'logcounts' in the sce object")
@@ -243,7 +247,7 @@ hline <- function(y = 0){
 
 set_val <- function(tab){
   val_fun <- function(j, i, x, y, w, h, col) { # add text to each grid
-    grid.text(round(tab,digits = 2)[i, j], x, y,gp= gpar(col="white"))
+    grid::grid.text(round(tab,digits = 2)[i, j], x, y,gp= gpar(col="white"))
   }
   return(val_fun)
 }
