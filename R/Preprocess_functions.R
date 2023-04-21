@@ -14,7 +14,7 @@
 #' @param toFactors Optional metadata column names (or colData) to use as factors. If `NULL` (default),
 #'		a quick clusterization will be computed.
 #' @param chosen.hvg Optional list of Highly Variable Genes.
-#' @param nHVGs Number of Highly Variable Genes to use if chosen.hvg=NULL. Defaults to 3000.
+#' @param nHVGs Number of Highly Variable Genes to use if `chosen.hvg=NULL`. Defaults to 3000.
 #' @param nPCs Number of Principal Components to use in PCA. Defaults to 50.
 #' @param verbose Step by step status while function is running. Defaults to `TRUE`.
 #' @param calcRedDim Whether to compute reduced dimensions (PCA, UMAP, TSNE, UMAP2D, TSNE2D) or not.
@@ -34,24 +34,18 @@ createSCEobject <- function(xx,
   
   csceo <- list()
   
-  #library(scater)
-  #library(scran)
-  #library(Matrix)
-  library(SingleCellExperiment)
-  library(doParallel)
-  
   ##Check if there are colnames and rownames in the objects 
   if(is.null(rownames(xx)) | is.null(colnames(xx))){
     stop('Missing row names or column names.')
   }
-  #Check if the user put twice the same partition.
+  #Check for repeated partitions
   toFactors <- unique(toFactors)
   
   if(is.null(toFactors)){
     warning('No toFactors specified, a quick clusterization will be computed.')
     toFactors <- "scx.clust"
   }
-  #If isn't a Seurat or a SCE object, and the metadata is null (because the metadata could be inside the object)
+  #If it isn't a Seurat or SCE object, and metadata is null (metadata could be inside the object)
   #The toFactors become the default.
   if(is.null(metadata) & class(xx)[1]!="Seurat" & class(xx)[1]!="SingleCellExperiment"){
     warning('No metadata specified, a quick clusterization will be computed.')
@@ -65,7 +59,6 @@ createSCEobject <- function(xx,
     assay.name.raw <- "counts"
     assay.name.normalization <- "logcounts"
     
-    #require(Seurat)
     xx.sce <- Seurat::as.SingleCellExperiment(xx) 
     if((all(toFactors!="scx.clust")) & (!all(toFactors %in% names(colData(xx.sce))))){
       warning('at least one factor is not present in metadata')
@@ -150,12 +143,12 @@ createSCEobject <- function(xx,
   #                "Erh","Slc25a5","Pgk1","Eno1","Tubb2a","Emc4", "Scg5")]
   
   
-  # red dims ----
-  #If the user specify no calcRedDim but:
-  #there is no dimRed calculated, it calcules all
-  #there is no 2D or 3D redDim caclulated, it calcules all
-  #there is no 2D, it calculates only the 2D.
-  #there is no 3D, it calculates only the 3D.
+  # Reduced dimensions ----
+  #If user specifies no calcRedDim but:
+  #there is no dimRed calculated -> it calculates all
+  #there is no 2D or 3D redDim caclulated -> it calculates all
+  #there is no 2D -> it calculates only 2D
+  #there is no 3D -> it calculates only 3D
   
   runDim <- c("PCA", "TSNE", "UMAP", "TSNE2D", "UMAP2D")
   if(!calcRedDim){
@@ -177,7 +170,7 @@ createSCEobject <- function(xx,
     if(verbose) cat('Finished\n')
   }
   
-  # changing name for normalizated matrix to be inputed in shiny app
+  # changing name for normalized matrix to be input in shiny app
   if(assay.name.normalization!="logcounts" & "logcounts" %in% assayNames(xx.sce)){
     assay(xx.sce, "logcounts") <- NULL
   }
@@ -196,7 +189,7 @@ createSCEobject <- function(xx,
   if(verbose) cat('Changing factors from toFactors...')
   #Check the factors that are in the colData.
   tfs <- setNames(nm=toFactors,object = toFactors %in% names(colData(xx.sce)))
-  #Check if this columns have more than one level.
+  #Check if columns have more than one level.
   if(sum(tfs) > 0){
     vld <- sapply(colData(xx.sce)[,toFactors[tfs],drop=F],function(x){length(unique(x))>1})   
     tfs[names(vld)] <-  tfs[names(vld)] & vld
@@ -296,10 +289,10 @@ applyReducedDim <- function(sce, reddimstocalculate, chosen.hvgs, nPCs, assaynam
 ldf_func <- function(sce, partition,minSize=50){
   
   cat(partition, ":\n", sep = "")
-  # # le saco los factores vacios
+  # remove empty factors
   # colData(sce)[,partition] <- droplevels(colData(sce)[,partition])
   
-  # calculo lfmrk ----
+  # calculate lfmrk ----
   type           <- c('all','any','some')
   lfmrk <- list()
   for(itype in seq_along(type)){
@@ -312,7 +305,7 @@ ldf_func <- function(sce, partition,minSize=50){
   }
   
   
-  # calculo ldf ----
+  # calculate ldf ----
   ldf_t <-list()
   numCores <- detectCores() - 1
   registerDoParallel(numCores)
@@ -340,7 +333,7 @@ ldf_func <- function(sce, partition,minSize=50){
       mrkrs <- sort(a,decreasing=TRUE)
       a4    <- names(mrkrs)[mrkrs>=1]
       
-      # (6.1.1) Calculo de Boxcor ----
+      # (6.1.1) Boxcor ----
       
       cat("\t Calculating boxcor\n")
       
