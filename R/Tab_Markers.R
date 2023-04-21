@@ -62,6 +62,16 @@ markersUI <- function(id = "markers") {
   )
 }
 
+####  Scientific notation DT ----
+# js <- c(
+#   "function(row, data, displayNum, index){",
+#   "  var x = data[3];",
+#   "  $('td:eq(3)', row).html(x.toExponential(2));",
+#   "  var y = data[4];",
+#   "  $('td:eq(4)', row).html(y.toExponential(2));",
+#   "}"
+# )
+
 ##### Marker Server Module ----
 markersServer <- function(id = "markers",sce,ldf,point.size = 20) {
   moduleServer(id, function(input,output,session) {

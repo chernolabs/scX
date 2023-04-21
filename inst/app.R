@@ -1,96 +1,84 @@
-server <- function(input, output, session) {
-	QC_Server("qc", sce = cseo$SCE)
-	markersServer(id="markers", sce=cseo$SCE, ldf = cseo$ldf, point.size=point.size)
-	N_markersServer(id="n_markers", sce=cseo$SCE, point.size=point.size)
-	ExpressionServer(id="Exp", sce=cseo$SCE, point.size=point.size)
-	COExpServer(id="Co-exp", sce=cseo$SCE, point.size = point.size)
-	VolcanoServer(id="volcano", sce=cseo$SCE, sce.markers=cseo$sce.markers)
-	VT_Server(id = "tools", sce = cseo$SCE)
-	MultiPlotsServer(id = "MP", sce=cseo$SCE)
-	Clusters_Server("cluster", sce=cseo$SCE)
-}
+ui <- function(){
+	path_git <- "https://www.leloir.org.ar/biologia-de-sistemas-integrativa?area=bioinformatica-y-biologia-computacional"
+	path_button <- "https://github.com/chernolab"
 
-path_git <- "https://www.leloir.org.ar/biologia-de-sistemas-integrativa?area=bioinformatica-y-biologia-computacional"
-path_button <- "https://github.com/chernolab"
-
-# SideBar ----
-siderbar <- dashboardSidebar(
-	width = 250,
-	useShinyjs(),
-	sidebarMenu(
-        id = 'sidebar',
-        style = "position: relative; overflow: visible;",
-        HTML(
-          paste0(
-            "<br>","<a href='",
-            path_git,
-            "' target='_blank'><img style =
-                      'display: block; margin-left: auto; margin-right: auto;'
-                      src='scXplorer-03.png' width = '186'></a>",
-            "<br>",
-            paste0(
-              "<p style = 'text-align: center;'><small><a href='",
-              path_button,
-              "' target='_blank'>scXplorer</a></small></p>"
-            ),
-            "<br>"
-          )
-        ),
-        tags$style("@import url(https://use.fontawesome.com/releases/v6.2.0/css/all.css);"),
-        # menuItem("Global Options", tabName = "globalTab", icon = icon("fa-regular fa-globe")),
-        # div( id = 'sidebar_global',
-        #      conditionalPanel("input.sidebar === 'globalTab'",
-        #                       sliderInput(inputId = "point.size",
-        #                                   label = "Point size ScatterPlots",
-        #                                   min = 5,max = 50,value = 20),
-        #                       fluidRow(column=12, align = "right",
-        #                                style='padding-left:12px; padding-right:12px;',
-        #                                actionBttn(inputId = "button.config",
-        #                                           label = "Apply", 
-        #                                           style = "stretch",
-        #                                           color = "primary")
-        #                       )
-        #      )
-        # ),
-        menuItem("Summary", tabName = "smryTab", icon = icon('bookmark', class = 'fa-solid'),selected = T),
-        menuItem("Markers", tabName = "markersTab",
-                 icon = icon('location-dot'), startExpanded = F,
-                 menuSubItem('Cluster markers', tabName = "markers_cluster",
-                             icon = icon('map-location-dot')
-                 ),
-                 menuSubItem('Find new markers', tabName = "markers_new",
-                             icon = icon('magnifying-glass-location')
-                 )
-        ),
-        menuItem("Gene Expression", tabName = "g_expTab",
-                 icon = icon('chart-simple'), startExpanded = F,
-                 menuSubItem('Expression', tabName = "g_exp",
-                             icon = icon('signal')
-                 ),
-                 menuSubItem('Co-expression', tabName = "g_coexp",
-                             icon = icon('clone', class = 'fa-regular'))
-        ),
-        menuItem("Differential Expression", tabName = "volcanoTab",
-                 icon = icon("chart-column")
-        ),
-        menuItem("Partitions", tabName = "clustersTab",
-                 icon = icon("circle-nodes")
-        ),
-        menuItem("Visual Tools", tabName = "toolsTab",
-                 icon = icon("toolbox"), startExpanded = F,
-                 menuSubItem('Violin by Partition', tabName = "t_VGL",
-                             icon = icon('wrench')
-                 ),
-                 menuSubItem('MultiPlots', tabName = "t_MP",
-                             icon = icon('hammer')
-                 )
-        )
+	# SideBar ----
+	siderbar <- dashboardSidebar(
+		width = 250,
+		useShinyjs(),
+		sidebarMenu(
+			id = 'sidebar',
+			style = "position: relative; overflow: visible;",
+			HTML(
+			  paste0(
+				"<br>","<a href='",
+				path_git,
+				"' target='_blank'><img style =
+						  'display: block; margin-left: auto; margin-right: auto;'
+						  src='scXplorer-03.png' width = '186'></a>",
+				"<br>",
+				paste0(
+				  "<p style = 'text-align: center;'><small><a href='",
+				  path_button,
+				  "' target='_blank'>scXplorer</a></small></p>"
+				),
+				"<br>"
+			  )
+			),
+			tags$style("@import url(https://use.fontawesome.com/releases/v6.2.0/css/all.css);"),
+			# menuItem("Global Options", tabName = "globalTab", icon = icon("fa-regular fa-globe")),
+			# div( id = 'sidebar_global',
+			#      conditionalPanel("input.sidebar === 'globalTab'",
+			#                       sliderInput(inputId = "point.size",
+			#                                   label = "Point size ScatterPlots",
+			#                                   min = 5,max = 50,value = 20),
+			#                       fluidRow(column=12, align = "right",
+			#                                style='padding-left:12px; padding-right:12px;',
+			#                                actionBttn(inputId = "button.config",
+			#                                           label = "Apply", 
+			#                                           style = "stretch",
+			#                                           color = "primary")
+			#                       )
+			#      )
+			# ),
+			menuItem("Summary", tabName = "smryTab", icon = icon('bookmark', class = 'fa-solid'),selected = T),
+			menuItem("Markers", tabName = "markersTab",
+					 icon = icon('location-dot'), startExpanded = F,
+					 menuSubItem('Cluster markers', tabName = "markers_cluster",
+								 icon = icon('map-location-dot')
+					 ),
+					 menuSubItem('Find new markers', tabName = "markers_new",
+								 icon = icon('magnifying-glass-location')
+					 )
+			),
+			menuItem("Gene Expression", tabName = "g_expTab",
+					 icon = icon('chart-simple'), startExpanded = F,
+					 menuSubItem('Expression', tabName = "g_exp",
+								 icon = icon('signal')
+					 ),
+					 menuSubItem('Co-expression', tabName = "g_coexp",
+								 icon = icon('clone', class = 'fa-regular'))
+			),
+			menuItem("Differential Expression", tabName = "volcanoTab",
+					 icon = icon("chart-column")
+			),
+			menuItem("Partitions", tabName = "clustersTab",
+					 icon = icon("circle-nodes")
+			),
+			menuItem("Visual Tools", tabName = "toolsTab",
+					 icon = icon("toolbox"), startExpanded = F,
+					 menuSubItem('Violin by Partition', tabName = "t_VGL",
+								 icon = icon('wrench')
+					 ),
+					 menuSubItem('MultiPlots', tabName = "t_MP",
+								 icon = icon('hammer')
+					 )
+			)
+		)
 	)
-)
-
-# Body ----
-body <- function(dataset_name){
-    dashboardBody( 
+	
+	# Body ----
+	body <- dashboardBody(
       useSweetAlert(),
       
       ### Styling ----
@@ -176,11 +164,22 @@ body <- function(dataset_name){
         )
       )
     )
+
+	# Dashboard UI
+	dashboardPage(skin = "blue", 
+		header = dashboardHeader(title = HTML(dataset_name), disable = FALSE, titleWidth  = 250),
+		sidebar = siderbar,
+		body = body)
 }
 
-ui <- function(){
-	dashboardPage(skin = "blue", 
-	header = dashboardHeader(title = HTML(dataset_name), disable = FALSE, titleWidth  = 250),
-	sidebar = siderbar,
-	body = body(dataset_name))
+server <- function(input, output, session) {
+	QC_Server("qc", sce = cseo$SCE)
+	markersServer(id="markers", sce=cseo$SCE, ldf = cseo$ldf, point.size=point.size)
+	N_markersServer(id="n_markers", sce=cseo$SCE, point.size=point.size)
+	ExpressionServer(id="Exp", sce=cseo$SCE, point.size=point.size)
+	COExpServer(id="Co-exp", sce=cseo$SCE, point.size = point.size)
+	VolcanoServer(id="volcano", sce=cseo$SCE, sce.markers=cseo$sce.markers)
+	VT_Server(id = "tools", sce = cseo$SCE)
+	MultiPlotsServer(id = "MP", sce=cseo$SCE)
+	Clusters_Server("cluster", sce=cseo$SCE)
 }

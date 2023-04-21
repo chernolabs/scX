@@ -94,6 +94,14 @@ VolcanoUI <- function(id) {
 
 ### Volcano Server Module -----
 VolcanoServer <- function(id,sce,sce.markers) {
+	js_volcano <- c(
+	  "function(row, data, displayNum, index){",
+	  "  var x = data[2];",
+	  "  $('td:eq(2)', row).html(x.toExponential(2));",
+	  "  var y = data[3];",
+	  "  $('td:eq(3)', row).html(y.toExponential(2));",
+	  "}"
+	)
   moduleServer(id, function(input,output,session) {
     
     ### Observe Events ----
