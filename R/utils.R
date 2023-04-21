@@ -1,6 +1,7 @@
 #### General ----
 
 #### Upload a list of genes ----
+#' @keywords internal
 #' @noRd
 genesList <- function(dataPath){
   if(file_ext(dataPath$name) == "txt"){
@@ -21,6 +22,7 @@ genesList <- function(dataPath){
 
 ##### Correlation Boxes ----
 # Cajitas de Luz ----
+#' @keywords internal
 #' @noRd
 make_box <- function(ssce, selected.cells){
   # Create a vector that have a selected if the cell were selected
@@ -54,6 +56,7 @@ make_box <- function(ssce, selected.cells){
               ssce))
 }
 
+#' @keywords internal
 #' @noRd
 generar_correlacion <- function(mtx,mtx.cor,ssce, cluster){
   correlacion <- qlcMatrix::corSparse(t(mtx), mtx.cor[colnames(mtx),])
@@ -63,6 +66,7 @@ generar_correlacion <- function(mtx,mtx.cor,ssce, cluster){
   return(correlacion)
 }
 
+#' @keywords internal
 #' @noRd
 cajitasdeluz <- function(ssce, selected.cells, corr = 0.7){
   if(!("logcounts" %in% names(assays(ssce)))){
@@ -81,6 +85,7 @@ cajitasdeluz <- function(ssce, selected.cells, corr = 0.7){
 }
 
 #CoExpression DF ----
+#' @keywords internal
 #' @noRd
 COexp_Vtor <- function(sce,genes){
   coexp <- assay(sce,"logcounts")[genes,] %>% apply(1,function(x){ifelse(x>0,"1","0")})

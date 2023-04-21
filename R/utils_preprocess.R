@@ -210,6 +210,7 @@ createSCEobject <- function(xx,
         x <- droplevels(x)
         x
       })
+	}
   if(verbose) cat(' Finished\n')
   
   
@@ -307,8 +308,8 @@ ldf_func <- function(sce, partition,minSize=50){
   
   # calculate ldf ----
   ldf_t <-list()
-  numCores <- detectCores() - 1
-  registerDoParallel(numCores)
+  numCores <- max(1, parallel::detectCores() - 2, na.rm = TRUE)
+  doParallel::registerDoParallel(numCores)
   # lfmrk <- lfmrk_t
   
   lab   <- colData(sce)[,partition]
@@ -359,3 +360,4 @@ ldf_func <- function(sce, partition,minSize=50){
   }
   return(ldf_t)
 }
+#' @import SingleCellExperiment

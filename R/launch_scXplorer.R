@@ -21,7 +21,7 @@ launch_scXplorer <- function(cseo, dataset_name='scXplorer', point.size=20, laun
   ui_env$dataset_name <- dataset_name
 
   theme_set(theme_bw())
-  shiny::shinyApp(ui, server, options = list(launch.browser = launch.browser)))
+  shiny::shinyApp(ui, server, options = list(launch.browser = launch.browser))
 }
 
 # load(file = 'data/Dataset1_paper.Rdata')

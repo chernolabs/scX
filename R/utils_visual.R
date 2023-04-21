@@ -2,6 +2,7 @@
 
 # Cell order from a partition to make the SpikePlot ----
 #' @import RColorBrewer
+#' @keywords internal
 #' @noRd
 Col.and.Order <- function(partition,sce){
   #Color
@@ -22,6 +23,7 @@ Col.and.Order <- function(partition,sce){
 
 # CoExpression Tab ----
 # CoExpression Palette ----
+#' @keywords internal
 #' @noRd
 CoExp_Col  <- function(genes,sce){
   foo <- assay(sce,"logcounts")[genes,] %>%  
@@ -45,6 +47,7 @@ CoExp_Col  <- function(genes,sce){
 }
 
 # GridPlot ----
+#' @keywords internal
 #' @noRd
 plot2dgradient <- function(res = 50, gen1 = "Gen1", gen2 = "Gen2"){
   par(mfrow=c(1,1),
@@ -84,6 +87,7 @@ plot2dgradient <- function(res = 50, gen1 = "Gen1", gen2 = "Gen2"){
 
 # Heatmaps Functions ----
 # vertical and horizontal Line in heatmaps
+#' @keywords internal
 #' @noRd
 vline <- function(x = 0){
   list(type = "line",
@@ -96,6 +100,7 @@ vline <- function(x = 0){
        )
 }
 
+#' @keywords internal
 #' @noRd
 hline <- function(y = 0){
   list(type = "line",
@@ -124,6 +129,7 @@ hline <- function(y = 0){
 
 
 # Partition Tab ----
+#' @keywords internal
 #' @noRd
 set_val <- function(tab){
   val_fun <- function(j, i, x, y, w, h, col) { # add text to each grid
@@ -135,6 +141,7 @@ set_val <- function(tab){
 
 # MultiPlots Tab ----
 # By clusters, plot the points with true values on the top
+#' @keywords internal
 #' @noRd
 reducedDimPlot_cluster <- function(sce,reducedDim,partition,cluster,alpha=0.5,palette="red"){
   df <- data.frame(x=reducedDim(sce,reducedDim)[,1],
