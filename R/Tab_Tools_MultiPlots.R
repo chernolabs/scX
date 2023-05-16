@@ -205,7 +205,7 @@ MultiPlotsServer <- function(id,sce) {
       
        list_plots <- list()
        for(i in 1:length(feature)){
-         list_plots[[feature[i]]] <- plotReducedDim(object = sce, dimred = input$plotType,ncomponents = 2, colour_by=feature[i]) + ggtitle(feature[i]) 
+         list_plots[[feature[i]]] <- scater::plotReducedDim(object = sce, dimred = input$plotType,ncomponents = 2, colour_by=feature[i]) + ggtitle(feature[i]) 
          
        }
       list_plots
@@ -219,7 +219,7 @@ MultiPlotsServer <- function(id,sce) {
       }
       }
       
-      plot_grid(plotlist = f_plot)
+      cowplot::plot_grid(plotlist = f_plot)
     })
     
     list_cluster_plot <- eventReactive(c(input$actionButton,input$plotType,input$colPal_cluster),{
@@ -234,7 +234,7 @@ MultiPlotsServer <- function(id,sce) {
     })
     
     output$plot_cluster <- renderPlot({
-      plot_grid(plotlist = list_cluster_plot())
+      cowplot::plot_grid(plotlist = list_cluster_plot())
     })
     
 

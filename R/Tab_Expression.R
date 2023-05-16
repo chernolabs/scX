@@ -448,7 +448,7 @@ ExpressionServer <- function(id,sce,point.size=20) {
                                   show_annotation_name = T)
         
         h1 <- Heatmap(dta,
-                      col = if(max(dta)==min(dta)) {viridis(1)} else {viridis(100)},
+                      col = if(max(dta)==min(dta)) {viridis::viridis(1)} else {viridis::viridis(100)},
                       border =F,
                       name = "Gene expression",
                       cluster_rows = input$cluster_row,
@@ -479,7 +479,7 @@ ExpressionServer <- function(id,sce,point.size=20) {
         
         # colnames(HeatmapF()) <- NULL
         h1 <- Heatmap(as.matrix(HeatmapF()),
-                      col = if(max(HeatmapF())==min(HeatmapF())) {viridis(1)} else {viridis(100)},
+                      col = if(max(HeatmapF())==min(HeatmapF())) {viridis::viridis(1)} else {viridis::viridis(100)},
                       border =F,
                       name = "Gene expression",
                       cluster_rows = input$cluster_row,
@@ -582,7 +582,7 @@ ExpressionServer <- function(id,sce,point.size=20) {
           feature <- genes.L() 
         }
         
-        g  <- plotDots(object = sce,features = feature,group = input$partitionType,
+        g  <- scater::plotDots(object = sce,features = feature,group = input$partitionType,
                        scale = input$scale_dotplot,center = input$center_dotplot) + 
           theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1,size=15)) +
           xlab(input$partitionType) + ylab("Genes")
@@ -636,7 +636,7 @@ ExpressionServer <- function(id,sce,point.size=20) {
          scale_y_continuous(expand = c(0, 0), position="right", labels = function(x)
            c(rep(x = "", times = max(length(x)-2, 0) ), x[length(x) - 1], "")) +
          facet_grid(rows = vars(Feat), scales = "free", switch = "y") +
-         theme_cowplot(font_size = 12) +
+         cowplot::theme_cowplot(font_size = 12) +
          theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1),
                legend.position = "none", panel.spacing = unit(0, "lines"),
                plot.title = element_text(hjust = 0.5),

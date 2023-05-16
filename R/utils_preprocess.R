@@ -1,16 +1,26 @@
-# (1) object to sce ----
-# Devuelve un objeto SCE listo para la funciones ldf y sce.markers 
-# Inputs:
-#  xx: puede ser un SCE, Seurat o una matriz de counts
-#  assay.name.raw: el nombre del assay con la matriz de raw counts
-#  assay.name.normalization: el nombre del assay con la matriz normalizada a usar en el shiny,
-#  metadata: un dataframe con la metadata de las celulas
-#  toFactors: el nombre de las columnas de la metadata o colData para pasar a factores
-#  chosen.hvg: lista de nombres de los genes mas variables
-#  nHVGs: si chosen.hvg=NULL calculo los nHVGs genes mas variables
-#  nPCs: número de componentes principales a calcular para PCA
-#  verbose: que la función de información de los pases que está haciendo
-#  calcRedDim: si tiene que computar las dimensiones reducidas (PCA, UMAP, TSNE, UMAP2D, TSNE2D)
+# Object to sce ----
+#' Returns a list with a SingleCellExperiment object
+#'
+#' `createSCEobject()` returns a list which includes a SingleCellExperiment object with counts, at
+#'		least one clusterization, gene markers for each clusterization, reduced dimensions for
+#'		visualization, and any additional data provided. This list is used as input when launching
+#'		the scXplorer app.
+#' 
+#' @param xx Either a matrix with counts, or a SCE or Seurat object.
+#' @param assay.name.raw Assay name for raw counts matrix if object is a SCE. Defaults to `counts`.
+#' @param assay.name.normalization Assay name for normalized matrix if present in SCE. If not present,
+#' 		it calculates `logcounts` (default).
+#' @param metadata Optional dataframe with cell metadata.
+#' @param toFactors Optional metadata column names (or colData) to use as factors. If `NULL` (default),
+#'		a quick clusterization will be computed.
+#' @param chosen.hvg Optional list of Highly Variable Genes.
+#' @param nHVGs Number of Highly Variable Genes to use if `chosen.hvg=NULL`. Defaults to 3000.
+#' @param nPCs Number of Principal Components to use in PCA. Defaults to 50.
+#' @param verbose Step by step status while function is running. Defaults to `TRUE`.
+#' @param calcRedDim Whether to compute reduced dimensions (PCA, UMAP, TSNE, UMAP2D, TSNE2D) or not.
+#'		Defaults to `TRUE`.
+#' @returns List with a SingleCellExperiment object and additional data ready for use in scXplorer.
+#' @export
 createSCEobject <- function(xx,
                             assay.name.raw="counts",
                             assay.name.normalization="logcounts",
@@ -24,24 +34,18 @@ createSCEobject <- function(xx,
   
   csceo <- list()
   
-  library(scater)
-  library(scran)
-  library(Matrix)
-  library(SingleCellExperiment)
-  library(doParallel)
-  
   ##Check if there are colnames and rownames in the objects 
   if(is.null(rownames(xx)) | is.null(colnames(xx))){
     stop('Missing row names or column names.')
   }
-  #Check if the user put twice the same partition.
+  #Check for repeated partitions
   toFactors <- unique(toFactors)
   
   if(is.null(toFactors)){
     warning('No toFactors specified, a quick clusterization will be computed.')
     toFactors <- "scx.clust"
   }
-  #If isn't a Seurat or a SCE object, and the metadata is null (because the metadata could be inside the object)
+  #If it isn't a Seurat or SCE object, and metadata is null (metadata could be inside the object)
   #The toFactors become the default.
   if(is.null(metadata) & class(xx)[1]!="Seurat" & class(xx)[1]!="SingleCellExperiment"){
     warning('No metadata specified, a quick clusterization will be computed.')
@@ -55,16 +59,15 @@ createSCEobject <- function(xx,
     assay.name.raw <- "counts"
     assay.name.normalization <- "logcounts"
     
-    library(Seurat)
-    xx.sce <- as.SingleCellExperiment(xx) 
+    xx.sce <- Seurat::as.SingleCellExperiment(xx) 
     if((all(toFactors!="scx.clust")) & (!all(toFactors %in% names(colData(xx.sce))))){
       warning('at least one factor is not present in metadata')
     }
     if(nrow(xx@assays$RNA@meta.features)>0){
       rowData(xx.sce) <- xx@assays$RNA@meta.features
     }
-    if(length(VariableFeatures(xx))>0){
-      chosen.hvg <- VariableFeatures(xx)
+    if(length(Seurat::VariableFeatures(xx))>0){
+      chosen.hvg <- Seurat::VariableFeatures(xx)
     }
     # matrix + metadata to sce ----
   } else if (class(xx)[1] %in% c("dgCMatrix", "Matrix", "matrix")){
@@ -112,16 +115,16 @@ createSCEobject <- function(xx,
   
   
   # Normalization ----
-  clust <- quickCluster(xx.sce, assay.type = assay.name.raw)
+  clust <- scran::quickCluster(xx.sce, assay.type = assay.name.raw)
   xx.sce$scx.clust <- clust
   if(!assay.name.normalization %in% names(assays(xx.sce))){
     if(verbose) cat('Computing normalization...')
     set.seed(123457)
-    clust <- quickCluster(xx.sce, assay.type = assay.name.raw)
+    clust <- scran::quickCluster(xx.sce, assay.type = assay.name.raw)
     xx.sce$scx.clust <- clust
-    xx.sce <- computeSumFactors(xx.sce,cluster=clust,min.mean=0.1, assay.type = assay.name.raw)
+    xx.sce <- scran::computeSumFactors(xx.sce,cluster=clust,min.mean=0.1, assay.type = assay.name.raw)
     # xx.sce <- scuttle::pooledSizeFactors(xx.sce,cluster=clust,min.mean=0.1, assay.type = assay.name.raw)
-    xx.sce <- logNormCounts(xx.sce, assay.type = assay.name.raw, name="logcounts")
+    xx.sce <- scater::logNormCounts(xx.sce, assay.type = assay.name.raw, name="logcounts")
     if(verbose) cat(' Finished\n')
   }
   
@@ -129,7 +132,7 @@ createSCEobject <- function(xx,
   # HVGs ----
   if(is.null(chosen.hvg)){
     if(verbose) cat('Computing HVGs...')
-    mgv <- modelGeneVar(xx.sce,span=.8, assay.type = assay.name.normalization)
+    mgv <- scran::modelGeneVar(xx.sce,span=.8, assay.type = assay.name.normalization)
     rowData(xx.sce) <- cbind(rowData(xx.sce), hvg.mvBio=mgv$bio)
     chosen.hvg <- rank(-rowData(xx.sce)$hvg.mvBio) <= 3000 & rowData(xx.sce)$hvg.mvBio>0
     chosen.hvg <- rownames(xx.sce)[chosen.hvg]
@@ -140,18 +143,18 @@ createSCEobject <- function(xx,
   #                "Erh","Slc25a5","Pgk1","Eno1","Tubb2a","Emc4", "Scg5")]
   
   
-  # red dims ----
-  #If the user specify no calcRedDim but:
-  #there is no dimRed calculated, it calcules all
-  #there is no 2D or 3D redDim caclulated, it calcules all
-  #there is no 2D, it calculates only the 2D.
-  #there is no 3D, it calculates only the 3D.
+  # Reduced dimensions ----
+  #If user specifies no calcRedDim but:
+  #there is no dimRed calculated -> it calculates all
+  #there is no 2D or 3D redDim caclulated -> it calculates all
+  #there is no 2D -> it calculates only 2D
+  #there is no 3D -> it calculates only 3D
   
   runDim <- c("PCA", "TSNE", "UMAP", "TSNE2D", "UMAP2D")
   if(!calcRedDim){
     if(length(reducedDimNames(xx.sce))<1 | all(!(sapply(reducedDims(xx.sce),ncol) %in% c(2,3)))){
       calcRedDim <- TRUE
-      runDim <- c("PCA", "TSNE", "UMAP", "TSNE2D", "UMAP2D")
+      #runDim <- c("PCA", "TSNE", "UMAP", "TSNE2D", "UMAP2D")
     } else if(all(sapply(reducedDims(xx.sce),ncol) != 2)){
       calcRedDim <- TRUE
       runDim <- c("PCA","TSNE2D", "UMAP2D")
@@ -162,12 +165,12 @@ createSCEobject <- function(xx,
   }
   
   if(calcRedDim){
-    if(verbose) cat('Computing following reduced dims:',paste(runDim, collapse = ' '),'\n')
+    if(verbose) cat('Computing the following reduced dims:',paste(runDim, collapse = ' '),'\n')
     xx.sce <- applyReducedDim(xx.sce, runDim, chosen.hvg, nPCs, assay.name.normalization, prefix.name="SCX_", verbose)
     if(verbose) cat('Finished\n')
   }
   
-  # changing name for normalizated matrix to be inputed in shiny app
+  # changing name for normalized matrix to be input in shiny app
   if(assay.name.normalization!="logcounts" & "logcounts" %in% assayNames(xx.sce)){
     assay(xx.sce, "logcounts") <- NULL
   }
@@ -177,7 +180,7 @@ createSCEobject <- function(xx,
   #logcounts normalized ----
   if(!"logcounts.norm" %in% names(assays(xx.sce))){
     assays(xx.sce)$logcounts.norm <- t(apply(assay(xx.sce, "logcounts"), 1, function(x){x/max(x)}))
-    assays(xx.sce)$logcounts.norm <- Matrix(assays(xx.sce)$logcounts.norm, sparse = TRUE)
+    assays(xx.sce)$logcounts.norm <- Matrix::Matrix(assays(xx.sce)$logcounts.norm, sparse = TRUE)
   }
   if(verbose) cat(' Finished\n')
   
@@ -186,7 +189,7 @@ createSCEobject <- function(xx,
   if(verbose) cat('Changing factors from toFactors...')
   #Check the factors that are in the colData.
   tfs <- setNames(nm=toFactors,object = toFactors %in% names(colData(xx.sce)))
-  #Check if this columns have more than one level.
+  #Check if columns have more than one level.
   if(sum(tfs) > 0){
     vld <- sapply(colData(xx.sce)[,toFactors[tfs],drop=F],function(x){length(unique(x))>1})   
     tfs[names(vld)] <-  tfs[names(vld)] & vld
@@ -207,6 +210,7 @@ createSCEobject <- function(xx,
         x <- droplevels(x)
         x
       })
+	}
   if(verbose) cat(' Finished\n')
   
   
@@ -214,11 +218,11 @@ createSCEobject <- function(xx,
   csceo[["SCE"]] <- xx.sce
   
   
-  if(verbose) cat('Computing sce.markers...')
+  if(verbose) cat('Computing differential expression markers...')
   # sce markers ----
   sce.markers <- list()
   for(i in ttoFactors){
-    sce.markers[[i]] <- findMarkers(xx.sce, 
+    sce.markers[[i]] <- scran::findMarkers(xx.sce, 
                                     assay.type = "logcounts",
                                     group = colData(xx.sce)[,i],
                                     direction="any",pval.type="all",log.p=T,full.stats=T)
@@ -229,7 +233,7 @@ createSCEobject <- function(xx,
   csceo[["sce.markers"]] <- sce.markers
   
   
-  if(verbose) cat('Computing ldf function\n')
+  if(verbose) cat('Computing cluster markers:\n')
   # ldf functions ----
   ldf <- list()
   for(i in ttoFactors){
@@ -245,55 +249,62 @@ createSCEobject <- function(xx,
   return(csceo)
 }
 
-# (2) Red Dim ----
+#' @import SingleCellExperiment
+
+# Reduced Dimensions ----
+#' @keywords internal
+#' @noRd
 applyReducedDim <- function(sce, reddimstocalculate, chosen.hvgs, nPCs, assayname, prefix.name="SCX_",verbose=TRUE){
   namepca <- paste0(prefix.name,"PCA")
   if("PCA"%in%reddimstocalculate){
-    if(verbose) cat("\t Calculating PCA...")
+    if(verbose) cat("\t PCA...")
     set.seed(12534)
-    sce <- runPCA(sce, subset_row=chosen.hvgs, ncomponents=nPCs, name=namepca, exprs_values=assayname)
+    sce <- scater::runPCA(sce, subset_row=chosen.hvgs, ncomponents=nPCs, name=namepca, exprs_values=assayname)
     if(verbose) cat(' Finished','\n')
   }
   if("TSNE"%in%reddimstocalculate){
-    if(verbose) cat("\t Calculating TSNE...")
+    if(verbose) cat("\t TSNE...")
     set.seed(1111011)
-    sce <- runTSNE(sce,dimred=namepca,n_dimred=20,ncomponents=3,name=paste0(prefix.name,"TSNE"),exprs_values=assayname)
+    sce <- scater::runTSNE(sce,dimred=namepca,n_dimred=20,ncomponents=3,name=paste0(prefix.name,"TSNE"),exprs_values=assayname)
     if(verbose) cat(' Finished','\n')
   }
   if("UMAP"%in%reddimstocalculate){
-    if(verbose) cat("\t Calculating UMAP...")
+    if(verbose) cat("\t UMAP...")
     set.seed(1111011)
-    sce <- runUMAP(sce,dimred=namepca,n_dimred=20,ncomponents=3,name=paste0(prefix.name,"UMAP"),exprs_values=assayname)
+    sce <- scater::runUMAP(sce,dimred=namepca,n_dimred=20,ncomponents=3,name=paste0(prefix.name,"UMAP"),exprs_values=assayname)
     if(verbose) cat(' Finished','\n')
   }
   if("TSNE2D"%in%reddimstocalculate){
-    if(verbose) cat("\t Calculating TSNE2D...")
+    if(verbose) cat("\t TSNE2D...")
     set.seed(1111011)
-    sce <- runTSNE(sce,dimred=namepca,name=paste0(prefix.name,"TSNE2D"),exprs_values=assayname)
+    sce <- scater::runTSNE(sce,dimred=namepca,name=paste0(prefix.name,"TSNE2D"),exprs_values=assayname)
     if(verbose) cat(' Finished','\n')
   }
   if("UMAP2D"%in%reddimstocalculate){
-    if(verbose) cat("\t Calculating UMAP2D...")
+    if(verbose) cat("\t UMAP2D...")
     set.seed(1111011)
-    sce <- runUMAP(sce,dimred=namepca,name=paste0(prefix.name,"UMAP2D"),exprs_values=assayname)
+    sce <- scater::runUMAP(sce,dimred=namepca,name=paste0(prefix.name,"UMAP2D"),exprs_values=assayname)
     if(verbose) cat(' Finished','\n')
   }
   
   return(sce)
 }
 
-# (3) ldf func ----
+# ldf func for cluster markers ----
+# returns: markers, robustness, correlation with a binary vector "turned on" in that cluster
+#' @keywords internal
+#' @noRd
 ldf_func <- function(sce, partition,minSize=50){
   
   cat(partition, ":\n", sep = "")
-  # # le saco los factores vacios
+  # remove empty factors
   # colData(sce)[,partition] <- droplevels(colData(sce)[,partition])
   
-  # calculo lfmrk ----
+  # calculate lfmrk ----
   type           <- c('all','any','some')
   lfmrk <- list()
   for(itype in seq_along(type)){
-    lfmrk[[type[itype]]]    <- findMarkers(sce,
+    lfmrk[[type[itype]]]    <- scran::findMarkers(sce,
                                            assay.type = "logcounts",
                                            groups=colData(sce)[,partition],
                                            full.stats=TRUE,
@@ -302,10 +313,10 @@ ldf_func <- function(sce, partition,minSize=50){
   }
   
   
-  # calculo ldf ----
+  # calculate ldf ----
   ldf_t <-list()
-  numCores <- detectCores() - 1
-  registerDoParallel(numCores)
+  numCores <- max(1, parallel::detectCores() - 2, na.rm = TRUE)
+  if(require("doParallel", quietly = T)) doParallel::registerDoParallel(numCores)
   # lfmrk <- lfmrk_t
   
   lab   <- colData(sce)[,partition]
@@ -318,7 +329,7 @@ ldf_func <- function(sce, partition,minSize=50){
   if(length(lfmrk[[1]])>0){ #At least one group to calculate
     for(ic in seq_along(lfmrk[[1]])){
       coi <- names(lfmrk[[1]])[ic]
-      cat(coi,'\n')
+      cat('\t', coi,'- ')
       any  <- rownames(lfmrk[['any']][[coi]])[lfmrk[['any']][[coi]][,'FDR']<0.05 & 
                                                 lfmrk[['any']][[coi]][,'Top']<=10]
       all  <-rownames(lfmrk[['all']][[coi]])[lfmrk[['all']][[coi]][,'FDR']<0.05]
@@ -330,9 +341,8 @@ ldf_func <- function(sce, partition,minSize=50){
       mrkrs <- sort(a,decreasing=TRUE)
       a4    <- names(mrkrs)[mrkrs>=1]
       
-      # (6.1.1) Calculo de Boxcor ----
-      
-      cat("\t Calculating boxcor\n")
+      # (6.1.1) Boxcor ----
+      cat("Computing correlation\n")
       
       if(length(a4) > 0){
         Z   <- assay(sce, "logcounts")[a4,]  

@@ -94,6 +94,14 @@ VolcanoUI <- function(id) {
 
 ### Volcano Server Module -----
 VolcanoServer <- function(id,sce,sce.markers) {
+	js_volcano <- c(
+	  "function(row, data, displayNum, index){",
+	  "  var x = data[2];",
+	  "  $('td:eq(2)', row).html(x.toExponential(2));",
+	  "  var y = data[3];",
+	  "  $('td:eq(3)', row).html(y.toExponential(2));",
+	  "}"
+	)
   moduleServer(id, function(input,output,session) {
     
     ### Observe Events ----
@@ -339,8 +347,8 @@ VolcanoServer <- function(id,sce,sce.markers) {
                                   show_annotation_name = T)
         
         h1 <- Heatmap(dta,
-                      col = viridis(100),
-                      row_names_gp = gpar(col=HeatmapL()$color_genes),
+                      col = viridis::viridis(100),
+                      row_names_gp = grid::gpar(col=HeatmapL()$color_genes),
                       border =F,
                       name = "Gene expression",
                       cluster_rows = input$cluster_row,
@@ -348,7 +356,7 @@ VolcanoServer <- function(id,sce,sce.markers) {
                       row_names_side = "left",
                       column_names_rot = 45,
                       # column_title_rot = 45,
-                      # column_title_gp = gpar(fontsize = 10),
+                      # column_title_gp = grid::gpar(fontsize = 10),
                       column_title_side = "bottom",
                       # column_title = "Partition",
                       # row_title = if(nrow(HeatmapL()$Exp) < 50){ "Genes" }else{ F},
@@ -371,8 +379,8 @@ VolcanoServer <- function(id,sce,sce.markers) {
         
         # colnames(HeatmapF()) <- NULL
         h1 <- Heatmap(as.matrix(HeatmapL()$Exp),
-                      row_names_gp = gpar(col=HeatmapL()$color_genes),
-                      col = viridis(100),
+                      row_names_gp = grid::gpar(col=HeatmapL()$color_genes),
+                      col = viridis::viridis(100),
                       border =F,
                       name = "Gene expression",
                       cluster_rows = input$cluster_row,
@@ -380,7 +388,7 @@ VolcanoServer <- function(id,sce,sce.markers) {
                       row_names_side = "left",
                       # column_names_rot = 45,
                       column_title_rot = 45,
-                      # column_title_gp = gpar(fontsize = 10),
+                      # column_title_gp = grid::gpar(fontsize = 10),
                       column_title_side = "bottom",
                       # column_title = "Partition",
                       # row_title = if(nrow(HeatmapL()$Exp) < 50){ "Genes" }else{ F},
@@ -410,7 +418,7 @@ VolcanoServer <- function(id,sce,sce.markers) {
       req(input$partitionType)
       req(length(Genes()) > 0)
       feature <- Genes()
-      g  <- plotDots(object = sce,features = feature,group = input$partitionType,
+      g  <- scater::plotDots(object = sce,features = feature,group = input$partitionType,
                      scale = input$scale_dotplot,center = input$center_dotplot) + 
         theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1,size=15)) +
         xlab(input$partitionType) + ylab("Genes")

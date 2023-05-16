@@ -259,7 +259,7 @@ Clusters_Server <- function(id,sce) {
       req(input$partitionType1)  
       req(input$partitionType2 != "None")
       req(input$barplot_matrix == "matrix")
-      rand <- pairwiseRand(colData(sce)[,input$partitionType1],
+      rand <- bluster::pairwiseRand(colData(sce)[,input$partitionType1],
                    colData(sce)[,input$partitionType2],
                    mode="index")
       paste('<b style="color:black;">Rand Index:',round(rand,2),'<b><br>')
@@ -275,13 +275,13 @@ Clusters_Server <- function(id,sce) {
         # tab <- log10(tab+10)
         col <- viridis::viridis(100)
       } else if (input$Metric == "Jaccard"){
-        tab <- linkClustersMatrix(colData(sce)[,input$partitionType1],
+        tab <- bluster::linkClustersMatrix(colData(sce)[,input$partitionType1],
                                   colData(sce)[,input$partitionType2],
                                   denominator = "union")
         col <- viridis::viridis(100)
       } 
       # else if (input$Metric == "Rand"){
-      #   tab <- pairwiseRand(colData(sce)[,input$partitionType1],
+      #   tab <- bluster::pairwiseRand(colData(sce)[,input$partitionType1],
       #                       colData(sce)[,input$partitionType2],
       #                       mode="ratio")
       #   col <- viridis::magma(100) 
