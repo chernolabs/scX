@@ -10,3 +10,39 @@ License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
+Depends: 
+    SingleCellExperiment
+Imports: 
+    bluster,
+    ComplexHeatmap,
+    cowplot,
+    dplyr,
+    DT,
+    ggcorrplot,
+    ggplot2,
+    glue,
+    htmltools,
+    magick,
+    magrittr,
+    Matrix,
+    plotly,
+    qlcMatrix,
+    RColorBrewer,
+    reshape2,
+    scales,
+    scater,
+    scran,
+    shiny,
+    shinyBS,
+    shinycssloaders,
+    shinycustomloader,
+    shinydashboard,
+    shinydisconnect,
+    shinyFeedback,
+    shinyjs,
+    shinyWidgets,
+    tidyr,
+    viridis
+Suggests: 
+    doParallel,
+	Seurat

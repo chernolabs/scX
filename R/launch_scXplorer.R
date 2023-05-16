@@ -8,6 +8,8 @@
 #' @param launch.browser Launch Shiny app in browser or not. Defaults to `TRUE`.
 #' @export
 launch_scXplorer <- function(cseo, dataset_name='scXplorer', point.size=20, launch.browser = T) {
+	options(bitmapType='cairo')
+	options(spinner.color="#006272")
   file_path <- system.file("app.R", package = "scXplorer")
   if (!nzchar(file_path)) stop("Shiny app not found")
   ui <- server <- NULL # avoid NOTE about undefined globals

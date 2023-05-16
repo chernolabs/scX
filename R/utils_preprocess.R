@@ -1,4 +1,4 @@
-# (1) object to sce ----
+# Object to sce ----
 #' Returns a list with a SingleCellExperiment object
 #'
 #' `createSCEobject()` returns a list which includes a SingleCellExperiment object with counts, at
@@ -165,7 +165,7 @@ createSCEobject <- function(xx,
   }
   
   if(calcRedDim){
-    if(verbose) cat('Computing following reduced dims:',paste(runDim, collapse = ' '),'\n')
+    if(verbose) cat('Computing the following reduced dims:',paste(runDim, collapse = ' '),'\n')
     xx.sce <- applyReducedDim(xx.sce, runDim, chosen.hvg, nPCs, assay.name.normalization, prefix.name="SCX_", verbose)
     if(verbose) cat('Finished\n')
   }
@@ -218,7 +218,7 @@ createSCEobject <- function(xx,
   csceo[["SCE"]] <- xx.sce
   
   
-  if(verbose) cat('Computing sce.markers...')
+  if(verbose) cat('Computing differential expression markers...')
   # sce markers ----
   sce.markers <- list()
   for(i in ttoFactors){
@@ -233,7 +233,7 @@ createSCEobject <- function(xx,
   csceo[["sce.markers"]] <- sce.markers
   
   
-  if(verbose) cat('Computing ldf function\n')
+  if(verbose) cat('Computing cluster markers:\n')
   # ldf functions ----
   ldf <- list()
   for(i in ttoFactors){
@@ -249,35 +249,39 @@ createSCEobject <- function(xx,
   return(csceo)
 }
 
-# (2) Red Dim ----
+#' @import SingleCellExperiment
+
+# Reduced Dimensions ----
+#' @keywords internal
+#' @noRd
 applyReducedDim <- function(sce, reddimstocalculate, chosen.hvgs, nPCs, assayname, prefix.name="SCX_",verbose=TRUE){
   namepca <- paste0(prefix.name,"PCA")
   if("PCA"%in%reddimstocalculate){
-    if(verbose) cat("\t Calculating PCA...")
+    if(verbose) cat("\t PCA...")
     set.seed(12534)
     sce <- scater::runPCA(sce, subset_row=chosen.hvgs, ncomponents=nPCs, name=namepca, exprs_values=assayname)
     if(verbose) cat(' Finished','\n')
   }
   if("TSNE"%in%reddimstocalculate){
-    if(verbose) cat("\t Calculating TSNE...")
+    if(verbose) cat("\t TSNE...")
     set.seed(1111011)
     sce <- scater::runTSNE(sce,dimred=namepca,n_dimred=20,ncomponents=3,name=paste0(prefix.name,"TSNE"),exprs_values=assayname)
     if(verbose) cat(' Finished','\n')
   }
   if("UMAP"%in%reddimstocalculate){
-    if(verbose) cat("\t Calculating UMAP...")
+    if(verbose) cat("\t UMAP...")
     set.seed(1111011)
     sce <- scater::runUMAP(sce,dimred=namepca,n_dimred=20,ncomponents=3,name=paste0(prefix.name,"UMAP"),exprs_values=assayname)
     if(verbose) cat(' Finished','\n')
   }
   if("TSNE2D"%in%reddimstocalculate){
-    if(verbose) cat("\t Calculating TSNE2D...")
+    if(verbose) cat("\t TSNE2D...")
     set.seed(1111011)
     sce <- scater::runTSNE(sce,dimred=namepca,name=paste0(prefix.name,"TSNE2D"),exprs_values=assayname)
     if(verbose) cat(' Finished','\n')
   }
   if("UMAP2D"%in%reddimstocalculate){
-    if(verbose) cat("\t Calculating UMAP2D...")
+    if(verbose) cat("\t UMAP2D...")
     set.seed(1111011)
     sce <- scater::runUMAP(sce,dimred=namepca,name=paste0(prefix.name,"UMAP2D"),exprs_values=assayname)
     if(verbose) cat(' Finished','\n')
@@ -286,7 +290,10 @@ applyReducedDim <- function(sce, reddimstocalculate, chosen.hvgs, nPCs, assaynam
   return(sce)
 }
 
-# (3) ldf func ----
+# ldf func for cluster markers ----
+# returns: markers, robustness, correlation with a binary vector "turned on" in that cluster
+#' @keywords internal
+#' @noRd
 ldf_func <- function(sce, partition,minSize=50){
   
   cat(partition, ":\n", sep = "")
@@ -309,7 +316,7 @@ ldf_func <- function(sce, partition,minSize=50){
   # calculate ldf ----
   ldf_t <-list()
   numCores <- max(1, parallel::detectCores() - 2, na.rm = TRUE)
-  doParallel::registerDoParallel(numCores)
+  if(require("doParallel", quietly = T)) doParallel::registerDoParallel(numCores)
   # lfmrk <- lfmrk_t
   
   lab   <- colData(sce)[,partition]
@@ -322,7 +329,7 @@ ldf_func <- function(sce, partition,minSize=50){
   if(length(lfmrk[[1]])>0){ #At least one group to calculate
     for(ic in seq_along(lfmrk[[1]])){
       coi <- names(lfmrk[[1]])[ic]
-      cat(coi,'\n')
+      cat('\t', coi,'- ')
       any  <- rownames(lfmrk[['any']][[coi]])[lfmrk[['any']][[coi]][,'FDR']<0.05 & 
                                                 lfmrk[['any']][[coi]][,'Top']<=10]
       all  <-rownames(lfmrk[['all']][[coi]])[lfmrk[['all']][[coi]][,'FDR']<0.05]
@@ -335,8 +342,7 @@ ldf_func <- function(sce, partition,minSize=50){
       a4    <- names(mrkrs)[mrkrs>=1]
       
       # (6.1.1) Boxcor ----
-      
-      cat("\t Calculating boxcor\n")
+      cat("Computing correlation\n")
       
       if(length(a4) > 0){
         Z   <- assay(sce, "logcounts")[a4,]  
@@ -360,4 +366,3 @@ ldf_func <- function(sce, partition,minSize=50){
   }
   return(ldf_t)
 }
-#' @import SingleCellExperiment

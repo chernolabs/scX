@@ -1,7 +1,7 @@
 ui <- function(){
 	path_git <- "https://www.leloir.org.ar/biologia-de-sistemas-integrativa?area=bioinformatica-y-biologia-computacional"
 	path_button <- "https://github.com/chernolab"
-
+	
 	# SideBar ----
 	siderbar <- dashboardSidebar(
 		width = 250,
@@ -84,7 +84,7 @@ ui <- function(){
       ### Styling ----
       tags$head(
         tags$link(rel="shortcut icon", href="scXplorer-03.ico"),
-        tags$script(glue('document.title = {dataset_name}')),
+        tags$script(glue::glue('document.title = {dataset_name}')),
         tags$style(
           HTML(".tab-content { padding-left: 20px; padding-right: 30px; }")
         ),

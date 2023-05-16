@@ -22,7 +22,7 @@ Col.and.Order <- function(partition,sce){
 }
 
 # CoExpression Tab ----
-# CoExpression Palette ----
+# CoExpression Palette
 #' @keywords internal
 #' @noRd
 CoExp_Col  <- function(genes,sce){
@@ -46,7 +46,7 @@ CoExp_Col  <- function(genes,sce){
   return(col)
 }
 
-# GridPlot ----
+# GridPlot
 #' @keywords internal
 #' @noRd
 plot2dgradient <- function(res = 50, gen1 = "Gen1", gen2 = "Gen2"){
@@ -133,7 +133,7 @@ hline <- function(y = 0){
 #' @noRd
 set_val <- function(tab){
   val_fun <- function(j, i, x, y, w, h, col) { # add text to each grid
-    grid::grid.text(round(tab,digits = 2)[i, j], x, y,gp= gpar(col="white"))
+    grid::grid.text(round(tab,digits = 2)[i, j], x, y,gp= grid::gpar(col="white"))
   }
   return(val_fun)
 }

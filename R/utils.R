@@ -1,26 +1,49 @@
-#### General ----
+#' @import shiny
+#' @import shinydashboard
+#' @import shinyWidgets
+#' @import shinycssloaders
+#' @import shinycustomloader
+#' @import shinydisconnect
+#' @import shinyFeedback
+#' @import shinyjs
+#' @import shinyBS
+#' @import DT
+#' @import Matrix
+#' @import reshape2
+#' @import plotly
+#' @import ggplot2
+#' @import ComplexHeatmap
+#' @import magick
+#' @importFrom magrittr %>%
+#' @importFrom htmltools HTML
+#' @importFrom htmltools tags
+#' @importFrom scales rescale
+#' @import dplyr
+#' @import tidyr
 
-#### Upload a list of genes ----
+# General functions
+
+# Upload a list of genes ----
 #' @keywords internal
 #' @noRd
 genesList <- function(dataPath){
   if(file_ext(dataPath$name) == "txt"){
-    #lista de genes txt separado por comas o newline
+    # txt list of genes, separated by commas or newline
     genes <- readr::read_csv(file=dataPath$datapath, col_names = FALSE, col_types = readr::cols())
   }
   else{
-    #lista de genes xlsx
+    # xlsx list of genes
     genes <- readxl::read_excel(path = dataPath$datapath, col_names = FALSE)
   }
   genes <- as.vector(as.matrix(genes))
   
-  #saco los espacios, separo en "\\(" y saco "\\)"
+  # remove spaces, separate at "\\(" and remove "\\)"
   genes <- sub("\\)", "", unlist(strsplit(sub(" ", "", genes), split = "\\(")))
   
   return(unique(genes))
 }
 
-##### Correlation Boxes ----
+# Correlation Boxes ----
 # Cajitas de Luz ----
 #' @keywords internal
 #' @noRd
@@ -73,12 +96,12 @@ cajitasdeluz <- function(ssce, selected.cells, corr = 0.7){
     stop("No 'logcounts' in the sce object")
   }
   lista <- make_box(ssce, selected.cells)
-  correlacionMarker <- generar_correlacion(mtx = logcounts(lista[[2]]),
+  correlationMarker <- generar_correlacion(mtx = logcounts(lista[[2]]),
                                            mtx.cor = lista[[1]],
                                            ssce = lista[[2]],
                                            cluster = "cajitasdeluz")
-  correlacionMarker <- data.frame(correlacionMarker)
-  df <- correlacionMarker[correlacionMarker$selected > corr,1,drop=F]
+  correlationMarker <- data.frame(correlationMarker)
+  df <- correlationMarker[correlationMarker$selected > corr,1,drop=F]
   df <- df[order(df$selected, decreasing = TRUE),,drop=F]
   names(df)[1] <- "box.cor"
   return(df)
