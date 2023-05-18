@@ -118,3 +118,12 @@ COexp_Vtor <- function(sce,genes){
                   levels = c("None",genes[1],genes[2],"Both"))
   return(vt)
 }
+
+### Add imagenes to shiny
+#' @keywords internal
+#' @noRd
+.onAttach <- function(libname, pkgname) {
+  shiny::addResourcePath('www',
+                         system.file('www',
+                                     package = 'scXplorer'))
+}
