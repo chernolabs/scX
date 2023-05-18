@@ -112,23 +112,23 @@ MultiPlotsUI <- function(id) {
             )
           ),
           conditionalPanel("input.gene_cluster == 'field'",ns=NS(id),
-                           fluidRow(
-                             column(10, style='padding-left:12px; padding-right:2px;',
-                                    selectizeInput(NS(id,"fieldType"), "Fields",
-                                                   choices = NULL, 
-                                                   options = list(placeholder = 'Please select an option below'),
-                                                   multiple=T)
-                             ),
-                             column(2, style='padding-left:2px; padding-right:12px; padding-top:28px',
-                                    align="center",
-                                    actionBttn((NS(id,"field_actionButton")),
-                                               label = NULL,
-                                               style = "unite",
-                                               color = "primary",
-                                               size = "xs",
-                                               icon = icon("play"))
-                             )
-                           )
+            fluidRow(
+              column(10, style='padding-left:12px; padding-right:2px;',
+                selectizeInput(NS(id,"fieldType"), "Fields",
+                               choices = NULL, 
+                               options = list(placeholder = 'Please select an option below'),
+                               multiple=T)
+              ),
+              column(2, style='padding-left:2px; padding-right:12px; padding-top:28px',
+                     align="center",
+                actionBttn((NS(id,"field_actionButton")),
+                           label = NULL,
+                           style = "unite",
+                           color = "primary",
+                           size = "xs",
+                           icon = icon("play"))
+              )
+            )
           )
         )
       ),
@@ -147,6 +147,7 @@ MultiPlotsUI <- function(id) {
           tabPanel("by Field",value = "field",
                    plotOutput(NS(id,"plot_field"),
                               height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
+          )
         )
       )
     )
