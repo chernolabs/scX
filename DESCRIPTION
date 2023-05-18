@@ -14,6 +14,7 @@ Depends:
     SingleCellExperiment
 Imports: 
     bluster,
+    circlize,
     ComplexHeatmap,
     cowplot,
     dplyr,

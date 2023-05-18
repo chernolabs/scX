@@ -53,7 +53,10 @@ ui <- function(){
 			),
 			menuItem("Gene Expression", tabName = "g_expTab",
 					 icon = icon('chart-simple'), startExpanded = F,
-					 menuSubItem('Expression', tabName = "g_exp",
+					 menuSubItem('Categories', tabName = "g_exp",
+					             icon = icon('signal')
+					 ),
+					 menuSubItem('Fields', tabName = "g_numeric_exp",
 								 icon = icon('signal')
 					 ),
 					 menuSubItem('Co-expression', tabName = "g_coexp",
@@ -62,8 +65,14 @@ ui <- function(){
 			menuItem("Differential Expression", tabName = "volcanoTab",
 					 icon = icon("chart-column")
 			),
-			menuItem("Partitions", tabName = "clustersTab",
-					 icon = icon("circle-nodes")
+			menuItem("EDA", tabName = "EDATab",
+			         icon = icon("circle-nodes"), startExpanded = F,
+			         menuSubItem('Character', tabName = "clustersTab",
+			                     icon = icon('signal')
+			         ),
+			         menuSubItem('Field', tabName = "fieldsTab",
+			                     icon = icon('signal')
+			         )
 			),
 			menuItem("Visual Tools", tabName = "toolsTab",
 					 icon = icon("toolbox"), startExpanded = F,
@@ -139,8 +148,12 @@ ui <- function(){
                 N_markersUI(id="n_markers")
         ),
         tabItem(tabName = "g_exp",
-                HTML('<h4><span style="font-family:Trebuchet MS,Helvetica,sans-serif"><strong><span style="color:#4e5f70">Expression</span></strong></span></h4>'),
+                HTML('<h4><span style="font-family:Trebuchet MS,Helvetica,sans-serif"><strong><span style="color:#4e5f70">Expression by Partitions</span></strong></span></h4>'),
                 ExpressionUI(id="Exp")
+        ),
+        tabItem(tabName = "g_numeric_exp",
+                HTML('<h4><span style="font-family:Trebuchet MS,Helvetica,sans-serif"><strong><span style="color:#4e5f70">Expression by Fields</span></strong></span></h4>'),
+                Numeric_ExpressionUI(id="numeric_Exp")
         ),
         tabItem(tabName = "g_coexp",
                 HTML('<h4><span style="font-family:Trebuchet MS,Helvetica,sans-serif"><strong><span style="color:#4e5f70">Co-expression</span></strong></span></h4>'),
@@ -153,6 +166,10 @@ ui <- function(){
         tabItem(tabName = "clustersTab",
                 HTML('<h4><span style="font-family:Trebuchet MS,Helvetica,sans-serif"><strong><span style="color:#4e5f70">Partition Analysis</span></strong></span></h4>'),
                 Clusters_UI("cluster")
+        ),
+        tabItem(tabName = "fieldsTab",
+                HTML('<h4><span style="font-family:Trebuchet MS,Helvetica,sans-serif"><strong><span style="color:#4e5f70">Fields Analysis</span></strong></span></h4>'),
+                Fields_UI("fields")
         ),
         tabItem(tabName = "t_VGL",
                 HTML('<h4><span style="font-family:Trebuchet MS,Helvetica,sans-serif"><strong><span style="color:#4e5f70">Violin by Partition </span></strong></span></h4>'),
@@ -173,13 +190,15 @@ ui <- function(){
 }
 
 server <- function(input, output, session) {
-	QC_Server("qc", sce = cseo$SCE)
+  QC_Server(id ="qc",sce = cseo$SCE,descriptionText = cseo$text)
 	markersServer(id="markers", sce=cseo$SCE, ldf = cseo$ldf, point.size=point.size)
 	N_markersServer(id="n_markers", sce=cseo$SCE, point.size=point.size)
 	ExpressionServer(id="Exp", sce=cseo$SCE, point.size=point.size)
+	Numeric_ExpressionServer(id="numeric_Exp",sce=cseo$SCE,point.size = point.size)
 	COExpServer(id="Co-exp", sce=cseo$SCE, point.size = point.size)
 	VolcanoServer(id="volcano", sce=cseo$SCE, sce.markers=cseo$sce.markers)
 	VT_Server(id = "tools", sce = cseo$SCE)
 	MultiPlotsServer(id = "MP", sce=cseo$SCE)
-	Clusters_Server("cluster", sce=cseo$SCE)
+	Clusters_Server(id ="cluster", sce=cseo$SCE)
+  Fields_Server("fields",sce = cseo$SCE)                                                                                                                                                                                                     
 }

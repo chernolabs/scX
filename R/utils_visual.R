@@ -156,3 +156,115 @@ reducedDimPlot_cluster <- function(sce,reducedDim,partition,cluster,alpha=0.5,pa
     scale_color_manual(values=c(palette,"lightgrey"))
   return(g)
 }
+
+#### Fields Tab ----
+
+#Modified from https://rdrr.io/github/davismcc/scater/src/R/plotDots.R to allow column vectors
+plotDots_fields <- function(object, features, group = NULL, block=NULL,
+                            exprs_values = "logcounts", detection_limit = 0, zlim = NULL, 
+                            colour = color, color = NULL,
+                            max_detected = NULL, other_fields = list(),
+                            by_exprs_values = exprs_values,
+                            swap_rownames = NULL,
+                            center = FALSE,
+                            scale = FALSE,
+                            assay_name=exprs_values,
+                            by_assay_name=by_exprs_values)
+{
+  noAll <- F
+  if (is.null(group)) {
+    group <- rep("all", ncol(object))
+  } else {
+    group <- scater::retrieveCellInfo(object, group, search="colData")$value
+    noAll <- T
+  }
+  
+  # object <- .swap_rownames(object, swap_rownames)
+  # features <- .handle_features(features, object)
+  group <- factor(group)
+  
+  # Computing, possibly also batch correcting.
+  ids <- DataFrame(group=group)
+  if (!is.null(block)) {
+    ids$block <- scater::retrieveCellInfo(object, block, search="colData")$value
+  }
+  
+  summarized <- scuttle::summarizeAssayByGroup(
+    as.matrix(t(colData(object)[,as.character(features), drop = FALSE])),
+    ids=ids, statistics=c("mean", "prop.detected"),
+    threshold=detection_limit)
+  
+  ave <- assay(summarized, "mean")
+  num <- assay(summarized, "prop.detected")
+  group.names <- summarized$group
+  
+  if (!is.null(block)) {
+    ave <- scuttle::correctGroupSummary(ave, group=summarized$group, block=summarized$block)
+    num <- scuttle::correctGroupSummary(num, group=summarized$group, block=summarized$block, transform="logit")
+    group.names <- factor(colnames(ave), levels = levels(summarized$group))
+  }
+  #Function from https://rdrr.io/github/davismcc/scater/src/R/plotHeatmap.R#sym-.heatmap_scale
+  .heatmap_scale <- function(x, center, scale, colour=NULL, zlim=NULL, symmetric=NULL) {
+    
+    if (center & noAll) {
+      x <- x - rowMeans(x)
+    }
+    if (scale & noAll) {
+      if (!center & any(rowSums(x) == 0)) {
+        stop("Cannot include non-expressed genes when scale=TRUE.")
+      }
+      x <- x / sqrt(rowSums(x^2) / (ncol(x) - 1))
+    }
+    if (is.null(zlim)) {
+      if (center & noAll) {
+        extreme <- max(abs(x))
+        zlim <- c(-extreme, extreme)
+      } else {
+        zlim <- range(x)
+      }
+    }
+    if (is.null(colour)) {
+      if (center) {
+        colour <- rev(RColorBrewer::brewer.pal(9, "RdYlBu"))
+      } else {
+        colour <- viridis::viridis(9)
+      }
+    }
+    x[x < zlim[1]] <- zlim[1]
+    x[x > zlim[2]] <- zlim[2]
+    list(
+      x = x,
+      colour = colour,
+      colour_breaks = seq(zlim[1], zlim[2], length.out=length(colour) + 1L),
+      colour_scale = scale_colour_gradientn(colours = colour, limits = zlim),
+      zlim = zlim
+    )
+  }
+  heatmap_scale <- .heatmap_scale(ave, center=center, scale=scale, colour=colour, zlim=zlim)
+  
+  # Creating a long-form table.
+  evals_long <- data.frame(
+    Feature=rep(features, ncol(num)),
+    Group=rep(group.names, each=nrow(num)),
+    NumDetected=as.numeric(num),
+    Average=as.numeric(heatmap_scale$x)
+  )
+  if (!is.null(max_detected)) {
+    evals_long$NumDetected <- pmin(max_detected, evals_long$NumDetected)
+  }
+  
+  # Adding other fields, if requested.
+  # vis_out <- .incorporate_common_vis_row(evals_long, se = object,
+  #                                        colour_by = NULL, shape_by = NULL, size_by = NULL, 
+  #                                        by_assay_name = by_assay_name, other_fields = other_fields,
+  #                                        multiplier = rep(.subset2index(features, object), ncol(num)))
+  # evals_long <- vis_out$df
+  ggplot(evals_long) + 
+    geom_point(aes(x=.data$Group, y=.data$Feature, size=.data$NumDetected, col=.data$Average)) +
+    scale_size(limits=c(0, max(evals_long$NumDetected))) +
+    theme(
+      panel.background = element_rect(fill = "white"),
+      panel.grid.major = element_line(size=0.5,colour = "grey80"),
+      panel.grid.minor = element_line(size=0.25,colour = "grey80")) +
+    heatmap_scale$colour_scale 
+}

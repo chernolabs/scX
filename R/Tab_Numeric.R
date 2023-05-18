@@ -3,38 +3,40 @@
 #####                              ######## 
 
 ##### Cluster UI Module ----
-Clusters_UI <- function(id) {
+Fields_UI <- function(id) {
   tagList(
     fluidRow(
       column(3,
              box(title = htmltools::span(icon("gears"), " Settings"),
                  width = NULL, status = "primary",solidHeader = T,collapsible = F,
-                 conditionalPanel("input.scatter_heatmap == 'scatter'",ns=NS(id),
-                   column(4, 
-                          style='padding-left:12px; padding-right:3px;',
-                          align="center",
-                          pickerInput(NS(id,"partitionType1"),
-                          "Partition #1",
-                          choices = NULL)
-                   ),
-                   column(4,
-                          style='padding-left:3px; padding-right:12px;',
-                          align="center",
-                          pickerInput(NS(id,"partitionType2"),
-                          "Partition #2",
-                          choices = NULL)
-                   ),
-                 ),
-                 column(4,
-                        style='padding-left:3px; padding-right:12px;',
+                 column(12,
+                        style='padding-left:20px; padding-right:20px;',
                         align="center",
                         pickerInput(NS(id,"partitionColor"),
                                     "Partition Color",
                                     choices = NULL)
                  ),
+                 conditionalPanel("input.scatter_heatmap == 'scatter'",ns=NS(id),
+                   fluidRow(
+                     column(6, 
+                            style='padding-left:12px; padding-right:3px;',
+                            align="center",
+                            pickerInput(NS(id,"partitionType1"),
+                            "Field #1",
+                            choices = NULL)
+                     ),
+                     column(6,
+                            style='padding-left:3px; padding-right:12px;',
+                            align="center",
+                            pickerInput(NS(id,"partitionType2"),
+                            "Field #2",
+                            choices = NULL)
+                     )
+                   ),
+                 ),
                  conditionalPanel("input.scatter_heatmap == 'heatmap' || input.scatter_heatmap == 'dotplot' || input.scatter_heatmap == 'stackVln' || input.scatter_heatmap == 'matrix' ", ns = NS(id),
                                   fluidRow(
-                                    column(11,style='padding-left:0px; padding-right:2px;',
+                                    column(10,style='padding-left:12px; padding-right:2px;',align="center",
                                            selectizeInput(NS(id,"numeric_columns"),
                                                           label=NULL,
                                                           choices = NULL, 
@@ -44,7 +46,8 @@ Clusters_UI <- function(id) {
                                                           width = NULL,
                                                           multiple=T)
                                     ),
-                                    column(1,style='padding-left:2px; padding-right:2px; padding-top:4px',
+                                    column(2,style='padding-left:2px; padding-right:12px; padding-top:4px',
+                                           align="center",
                                            actionBttn((NS(id,"action")),
                                                       label = NULL,
                                                       style = "unite",
@@ -66,7 +69,7 @@ Clusters_UI <- function(id) {
                                                status = "primary",
                                                fill = TRUE),
                                   prettySwitch(NS(id,"norm_heat"),
-                                               "Norm per gene",
+                                               "Norm per field",
                                                value = F,
                                                status = "primary",
                                                fill = TRUE),
@@ -163,7 +166,7 @@ Clusters_UI <- function(id) {
 }
 
 ##### Cluster Server Module ----
-Clusters_Server <- function(id,sce) {
+Fields_Server <- function(id,sce) {
   moduleServer(id, function(input,output,session) {
     
     ### Observe Events ----
@@ -364,7 +367,9 @@ Clusters_Server <- function(id,sce) {
       req(input$partitionColor)
       
       byPartition <- if(input$partitionColor != 'None'){ input$partitionColor}else{NULL}
-      g  <- plotDots(object = sce,features = feature(),group = ,
+      g  <- plotDots_fields(object = sce,
+                            features = feature(),
+                            group = byPartition,
                      scale = input$scale_dotplot,center = input$center_dotplot) + 
         theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1,size=15)) +
         xlab(input$partitionType) + ylab("Genes")
@@ -497,12 +502,12 @@ Clusters_Server <- function(id,sce) {
     
   })
 }
-
-ui <- fluidPage(
-  Clusters_UI(id = 'lala')
-)
-server <- function(input, output, session) {
-  Clusters_Server(sce = sce,id = 'lala')
-}
-shinyApp(ui = ui,server = server)
+# 
+# ui <- fluidPage(
+#   Clusters_UI(id = 'lala')
+# )
+# server <- function(input, output, session) {
+#   Clusters_Server(sce = sce,id = 'lala')
+# }
+# shinyApp(ui = ui,server = server)
 

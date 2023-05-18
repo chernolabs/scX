@@ -295,11 +295,15 @@ VolcanoServer <- function(id,sce,sce.markers) {
       } else { 
         par(mfrow=c((length(SpikePlot())),1))
         for(i in 1:length(SpikePlot())){
-          barplot(SpikePlot()[[i]][OrderPartReact()$ordPart,"Y",drop=T],
+          m <-barplot(SpikePlot()[[i]][OrderPartReact()$ordPart,"Y",drop=T],
                                     col = OrderPartReact()$colPart[colData(sce)[,input$partitionType]][OrderPartReact()$ordPart],
                                     border = OrderPartReact()$colPart[colData(sce)[,input$partitionType]][OrderPartReact()$ordPart],
-                                    ylab = "log(counts)", main = names(SpikePlot())[i], names.arg = F) 
-          abline(h=mean(SpikePlot()[[i]][SpikePlot()[[i]]$Y>0,"Y",drop=T]),lty=2,col="grey")
+                                    ylab = "log(counts)", main = names(SpikePlot())[i], names.arg = F)
+          lines(x = m,
+                tapply(SpikePlot()[[i]],
+                       INDEX = colData(sce)[,input$partitionType],
+                       FUN = mean)[colData(sce)[,input$partitionType]][OrderPartReact()$ordPart],
+                lty=2,col="black")
         }
         legend("bottom", legend = names(OrderPartReact()$colPart), col = OrderPartReact()$colPart,
                pch=19, ncol=6, xpd=T, inset=c(0,-0.10))

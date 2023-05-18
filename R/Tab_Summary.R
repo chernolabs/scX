@@ -5,6 +5,7 @@
 ##### QC UI Module ----
 QC_UI <- function(id) {
   tagList(
+    uiOutput(outputId = NS(id,"DescriptionText")),
     box(width = 12,title = "Summary",solidHeader = F, status = "primary",collapsible = T,
       fluidRow(
         infoBoxOutput(NS(id,"CellBox")) %>% withSpinner(),
@@ -46,12 +47,20 @@ QC_UI <- function(id) {
 }
 
 ##### Expression Server Module ----
-QC_Server <- function(id,sce) {
+QC_Server <- function(id,sce,descriptionText) {
   moduleServer(id, function(input,output,session) {
     
     ### Observe Events ----
     updatePickerInput(session, 'partitionType', 
                       choices = c("None",names(colData(sce))[sapply(colData(sce), is.factor)]))
+    
+    ### Description Text -----
+    output$DescriptionText <- renderUI({
+      req(!is.null(descriptionText))
+      box(width = 12,title = "Description",solidHeader = T, status = "primary",collapsible = T,
+          p(descriptionText)
+      )
+    })
     
     #### Summary Box ----
     output$CellBox <- renderInfoBox({

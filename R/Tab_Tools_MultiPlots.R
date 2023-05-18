@@ -105,11 +105,30 @@ MultiPlotsUI <- function(id) {
                                 icon = icon("play"))
               )
             ),
-			hr(style = "border-top: 1px solid #0073b7;"),
-			fluidRow(align="center",
-					div(style = "display:inline-block;color:#0073b7", icon("circle-info"),
-					title = "To color all clusters simultaneously,\ngo to Cluster Markers tab. The plot toolbar\nincludes the option to download as a png.")
-			)
+            hr(style = "border-top: 1px solid #0073b7;"),
+            fluidRow(align="center",
+                     div(style = "display:inline-block;color:#0073b7", icon("circle-info"),
+                         title = "To color all clusters simultaneously,\ngo to Cluster Markers tab. The plot toolbar\nincludes the option to download as a png.")
+            )
+          ),
+          conditionalPanel("input.gene_cluster == 'field'",ns=NS(id),
+                           fluidRow(
+                             column(10, style='padding-left:12px; padding-right:2px;',
+                                    selectizeInput(NS(id,"fieldType"), "Fields",
+                                                   choices = NULL, 
+                                                   options = list(placeholder = 'Please select an option below'),
+                                                   multiple=T)
+                             ),
+                             column(2, style='padding-left:2px; padding-right:12px; padding-top:28px',
+                                    align="center",
+                                    actionBttn((NS(id,"field_actionButton")),
+                                               label = NULL,
+                                               style = "unite",
+                                               color = "primary",
+                                               size = "xs",
+                                               icon = icon("play"))
+                             )
+                           )
           )
         )
       ),
@@ -124,7 +143,10 @@ MultiPlotsUI <- function(id) {
           tabPanel("by Cluster",value = "cluster",
             plotOutput(NS(id,"plot_cluster"),
                       height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
-          )
+          ),
+          tabPanel("by Field",value = "field",
+                   plotOutput(NS(id,"plot_field"),
+                              height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
         )
       )
     )
@@ -163,6 +185,9 @@ MultiPlotsServer <- function(id,sce) {
                            server = TRUE)
     }) 
     
+    updateSelectizeInput(session, 'fieldType', 
+                         choices = names(colData(sce))[sapply(colData(sce), is.numeric)],
+                         server = TRUE)
     
     ### Gen selected & data preparation ----
     #### Selected Gene -----
@@ -235,6 +260,25 @@ MultiPlotsServer <- function(id,sce) {
     
     output$plot_cluster <- renderPlot({
       cowplot::plot_grid(plotlist = list_cluster_plot())
+    })
+    
+    ### Fields ---
+    
+    list_field_plot <- eventReactive(c(input$field_actionButton,input$plotType),{
+      req(length(input$fieldType) > 0)
+      req(!is.null(input$plotType))
+      list_plots <- list()
+      feature <- input$fieldType
+      for(i in 1:length(feature)){
+        list_plots[[feature[i]]] <- plotReducedDim(object = sce, dimred = input$plotType,ncomponents = 2, colour_by=feature[i]) + ggtitle(feature[i]) + 
+          scale_color_distiller(palette ='YlOrRd',direction = 1) + labs(color=feature[i])
+        
+      }
+      list_plots
+    })
+    
+    output$plot_field <- renderPlot({
+      plot_grid(plotlist = list_field_plot())
     })
     
 

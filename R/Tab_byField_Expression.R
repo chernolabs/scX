@@ -3,12 +3,20 @@
 #####                              ######## 
 
 ##### Expression UI Module ----
-ExpressionUI <- function(id) {
+Numeric_ExpressionUI <- function(id) {
   tagList(
     fluidRow(
       column(3,
         box(title = htmltools::span(icon("gears"), " Settings"),
             width = NULL, status = "primary",solidHeader = T,collapsible = F,
+            fluidRow(
+              column(12,style='padding-left:12px; padding-right:12px;',
+                    align="center",
+                     pickerInput(inputId = NS(id,"numericType"), 
+                                 label = "Numeric",
+                                 choices = NULL)
+              )
+          ),
           conditionalPanel("input.scatter_heatmap == 'scatter'",ns=NS(id),
             fluidRow(
               column(6,style='padding-left:12px; padding-right:3px;', align="center",
@@ -25,7 +33,7 @@ ExpressionUI <- function(id) {
               )
             )  
           ),
-          conditionalPanel("typeof output.plot !== 'undefined' || input.scatter_heatmap == 'heatmap' || input.scatter_heatmap == 'dotplot' || input.scatter_heatmap == 'stackVln'", ns = NS(id),
+          conditionalPanel("typeof output.plot !== 'undefined' || input.scatter_heatmap == 'heatmap'", ns = NS(id),
             fluidRow(
               column(8,style='padding-left:12px; padding-right:3px;',
                 pickerInput(inputId = NS(id,"partitionType"), 
@@ -51,47 +59,26 @@ ExpressionUI <- function(id) {
                          value = F,
                          status = "primary",
                          fill = TRUE),
-            prettySwitch(NS(id,"cluster_column"),
-                         "Cluster Column",
-                         value = F,
-                         status = "primary",
-                         fill = TRUE),
-			prettySwitch(NS(id,"norm_heat"),
+			      prettySwitch(NS(id,"norm_heat"),
                          "Norm per gene",
                          value = F,
                          status = "primary",
                          fill = TRUE),
-            prettySwitch(NS(id,"mean_heat"),
-                         "Mean per group",
-                         value = F,
-                         status = "primary",
-                         fill = TRUE)
-            
+			      conditionalPanel("input.partitionType != 'None'",ns=NS(id),
+			         prettySwitch(NS(id,"split_column"),
+			                      "Split by Column",
+			                      value = F,
+			                      status = "primary",
+			                      fill = TRUE)
+			      )
           ),
-          conditionalPanel("input.scatter_heatmap == 'dotplot'",ns=NS(id),
-            prettySwitch(NS(id,"ord_dotplot"),
-                         "Cluster Row",
-                         value = F,
-                         status = "primary",
-                         fill = TRUE),
-            prettySwitch(NS(id,"scale_dotplot"),
-                         "Scale",
-                         value = F,
-                         status = "primary",
-                         fill = TRUE),
-            prettySwitch(NS(id,"center_dotplot"),
-                         "Center",
-                         value = F,
-                         status = "primary",
-                         fill = TRUE)
-          ),
-          conditionalPanel("input.scatter_heatmap == 'stackVln'",ns=NS(id),
-            prettySwitch(NS(id,"ord_stackVln"),
-                         "Cluster Row",
-                         value = F,
-                         status = "primary",
-                         fill = TRUE)
-          ),
+          # conditionalPanel("input.scatter_heatmap == 'MultiLines'",ns=NS(id),
+          #   prettySwitch(NS(id,"ord_MultiLines"),
+          #                "Cluster Row",
+          #                value = F,
+          #                status = "primary",
+          #                fill = TRUE)
+          # ),
           fluidRow(
             column(12,style='padding-left:12px; padding-right:12px;',align="center",
               switchInput(NS(id,"GL_T"), 
@@ -156,8 +143,8 @@ ExpressionUI <- function(id) {
             box(title = "Expression Plots",
                 width = NULL, solidHeader = T,collapsible = T,
                 footer = tagList(shiny::icon("cat"), "Nya"),
-              uiOutput(NS(id,"Violin.Bar_Input")),
-              plotOutput(NS(id,"Violin.Bar_Plot")) %>% withSpinner()
+              uiOutput(NS(id,"Lines.Bar_Input")),
+              uiOutput(NS(id,"Cell_Plots")) %>% withSpinner()
             )
           ),
           tabPanel("Heatmap", value= "heatmap",
@@ -166,16 +153,10 @@ ExpressionUI <- function(id) {
               plotOutput(NS(id,"plot_heatmap"),height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
             )
           ),
-          tabPanel("DotPlot", value= "dotplot",
+          tabPanel("MultiLines", value= "MultiLines",
             box(width = NULL,solidHeader = T,collapsible = F,
                 footer = tagList(shiny::icon("cat"), "Nya"),
-              plotlyOutput(NS(id,"plot_DotPlot"),height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
-            )
-          ),
-          tabPanel("StackedViolin", value= "stackVln",
-            box(width = NULL,solidHeader = T,collapsible = F,
-                footer = tagList(shiny::icon("cat"), "Nya"),
-              plotOutput(NS(id,"plot_stackVln"),height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
+              plotlyOutput(NS(id,"plot_MultiLines"),height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
             )
           )
         )
@@ -186,19 +167,22 @@ ExpressionUI <- function(id) {
 
 
 ##### Expression Server Module ----
-ExpressionServer <- function(id,sce,point.size=20) {
+Numeric_ExpressionServer <- function(id,sce,point.size=20) {
   moduleServer(id, function(input,output,session) {
     ### Observe Events ----
     observeEvent(ignoreInit = T,input$GL_T,{
       if(input$GL_T) {
-      updateTabsetPanel(inputId = "switcher", selected = "panel2")
+        updateTabsetPanel(inputId = "switcher", selected = "panel2")
       } else{
         updateTabsetPanel(inputId = "switcher", selected = "panel1")
       }
     })
     
     updatePickerInput(session, 'partitionType', 
-                         choices = names(colData(sce))[sapply(colData(sce), is.factor)])
+                         choices = c('None',names(colData(sce))[sapply(colData(sce), is.factor)]))
+    
+    updatePickerInput(session, 'numericType', 
+                      choices = names(colData(sce))[sapply(colData(sce), is.numeric)])
     
     updateSelectizeInput(session, 'gen_exp', choices = rownames(sce), server = TRUE)
     
@@ -321,43 +305,54 @@ ExpressionServer <- function(id,sce,point.size=20) {
     #### Plots ----
     
     OrderPartReact <- eventReactive(input$partitionType,{
-      req(input$partitionType)
+      req(input$partitionType != 'None')
       Col.and.Order(partition = input$partitionType, sce=sce)
     })
     
     ### Scatter ----
-    ClusterPlot <- eventReactive(c(input$plotType,input$partitionType),{
+    ClusterPlot <- eventReactive(c(input$plotType,input$partitionType,input$numericType),{
       req(input$scatter_heatmap == "scatter")
       #3D
       if(input$DimType == "3"){
-        plot_ly(type = "scatter3d", mode = "markers",source = "PlotMix")  %>%
+        plot_ly(type = "scatter3d", mode = "markers",source = "PlotMix",colors = 'YlOrRd')  %>%
           layout(dragmode = "select",
                  scene = list(xaxis = list(title = 'Dim1',showgrid=F,visible=F),
                               yaxis = list(title = 'Dim2',showgrid=F,visible=F),
                               zaxis = list(title = 'Dim3',showgrid=F,visible=F)),
-                 title = paste(input$partitionType, 'Partition'),
+                 title = input$numeircType,
+                 legend= list(x=1,y=1),
+                 showlegend = T, #(input$partitionType != 'None'),
                  margin = list(l = 0,
                                r = 10,
                                b = 0,
                                t = 40,
                                pad = 0)) %>% 
-          add_markers(x = ~reducedDim(sce,input$plotType)[,1], y=~reducedDim(sce,input$plotType)[,2], z=~reducedDim(sce,input$plotType)[,3],
-                      color = ~I(as.character(OrderPartReact()$colPart[colData(sce)[,input$partitionType]])),
-                      name = ~colData(sce)[,input$partitionType],
-                      # customdata= ~colData(sce)[,input$partitionType],
-                      size = I(point.size),span=I(0),text=~colData(sce)[,input$partitionType],hoverinfo='text') %>% 
+          add_markers(x=~reducedDim(sce,input$plotType)[,1],
+                      y=~reducedDim(sce,input$plotType)[,2],
+                      z=~reducedDim(sce,input$plotType)[,3],
+                      text= if(input$partitionType == 'None') {NULL} else {~colData(sce)[,input$partitionType]},
+                      hoverinfo = 'text',
+                      color = ~colData(sce)[,input$numericType],
+                      name = if(input$partitionType == 'None') {NULL} else {~colData(sce)[,input$partitionType]},
+                      size = I(point.size),
+                      span=I(0)) %>% 
+          colorbar(title =input$numericType,x=0,y=1) %>% 
           toWebGL()
       } else { #2D
-        plot_ly(type = "scatter", mode = "markers",source="PlotMix")  %>%
+        plot_ly(type = "scatter", mode = "markers",source="PlotMix",colors = 'YlOrRd')  %>%
           layout(dragmode = "select",
                  xaxis = list(title = 'Dim1',zeroline=F),
                  yaxis = list(title = 'Dim2',zeroline=F),
-                 title = paste(input$partitionType, 'Partition')) %>%
-          add_markers(x = ~reducedDim(sce,input$plotType)[,1], y=~reducedDim(sce,input$plotType)[,2], 
-                      color = ~I(as.character(OrderPartReact()$colPart[colData(sce)[,input$partitionType]])),
-                      name = ~colData(sce)[,input$partitionType],
-                      # customdata= ~colData(sce)[,input$partitionType], 
-                      size = I(point.size),span=I(0),text=~colData(sce)[,input$partitionType],hoverinfo='text') %>% 
+                 showlegend = F,
+                 title = input$numericType) %>%
+          add_markers(x = ~reducedDim(sce,input$plotType)[,1],
+                      y=~reducedDim(sce,input$plotType)[,2], 
+                      color = ~colData(sce)[,input$numericType],
+                      text=  if(input$partitionType == 'None') {NULL} else {~colData(sce)[,input$partitionType]},
+                      hoverinfo = 'text',
+                      size = I(point.size),
+                      span=I(0)) %>% 
+          colorbar(title = input$numericType) %>% 
           toWebGL()
       }
       
@@ -374,7 +369,7 @@ ExpressionServer <- function(id,sce,point.size=20) {
                               yaxis = list(title = 'Dim2',showgrid=F,visible=F),
                               zaxis = list(title = 'Dim3',showgrid=F,visible=F)),
                  legend= list(x=1,y=1),
-                 showlegend = TRUE,
+                 showlegend = T, #(input$partitionType != 'None'),
                  title = ifelse(length(ExpressionF()$Genes)>1,'Mean Expression', 'Expression'),
                  margin = list(l = 0,
                                r = 10,
@@ -383,10 +378,10 @@ ExpressionServer <- function(id,sce,point.size=20) {
                                pad = 0)) %>% 
           add_markers(x = ~reducedDim(sce,input$plotType)[,1], y=~reducedDim(sce,input$plotType)[,2],
                       z=~reducedDim(sce,input$plotType)[,3],
-                      text= ~colData(sce)[,input$partitionType],
+                      text= if(input$partitionType == 'None') {NULL} else {~colData(sce)[,input$partitionType]},
                       hoverinfo = 'text',
                       color = ~ExpressionF()$Exp,
-                      name = ~colData(sce)[,input$partitionType],
+                      name = if(input$partitionType == 'None') {NULL} else {~colData(sce)[,input$partitionType]},
                       size = I(point.size),span=I(0)) %>% 
           colorbar(title = "log(counts)",x=0,y=1) %>% 
           toWebGL()
@@ -401,7 +396,7 @@ ExpressionServer <- function(id,sce,point.size=20) {
           add_markers(x = ~reducedDim(sce,input$plotType)[,1], y=~reducedDim(sce,input$plotType)[,2],
                       color = ~ExpressionF()$Exp, 
                       size = I(point.size),span=I(0),
-                      text=  ~colData(sce)[,input$partitionType],
+                      text=  if(input$partitionType == 'None') {NULL} else {~colData(sce)[,input$partitionType]},
                       #name = ~colData(sce)[,input$partitionType],
                       hoverinfo = 'text') %>% 
           colorbar(title = "log(counts)") %>% 
@@ -418,85 +413,48 @@ ExpressionServer <- function(id,sce,point.size=20) {
       }
     })
     
-    
-    
     ### Heatmaps ----
     #Here I made everything in the same reactive object to manipulated all the reactive order at the same time
-    Heatmap_Plot <- eventReactive(c(HeatmapF(),input$partitionType,input$mean_heat,input$cluster_row,input$cluster_column),{
+    Heatmap_Plot <- eventReactive(c(HeatmapF(),input$partitionType,input$numericType,input$cluster_row,input$split_column),{
       req(input$scatter_heatmap == "heatmap")
       req(input$partitionType)
+      req(input$numericType)
       req(!is.null(HeatmapF()))
-      req(!is.null(OrderPartReact()))
+      # req(!is.null(OrderPartReact()))
       
-      if(input$mean_heat) {
-        dta <- apply(HeatmapF(),1,FUN =  function(x){
-          tapply(x,colData(sce)[,input$partitionType],FUN=mean)
-              }
-        ) %>% t
-        
-        ht <-   HeatmapAnnotation(Type = levels(colData(sce)[,input$partitionType]),
-                                  col=list(Type=OrderPartReact()$colPart),
-                                  annotation_legend_param = list(Type = list(title = input$partitionType)
-                                  ),
-                                  annotation_label = c(input$partitionType),
-                                  show_legend = c(Type =FALSE),
-                                  show_annotation_name = T)
-        
-        h1 <- Heatmap(dta,
-                      col = if(max(dta)==min(dta)) {viridis::viridis(1)} else {viridis::viridis(100)},
-                      border =F,
-                      name = "Gene expression",
-                      cluster_rows = input$cluster_row,
-                      cluster_columns = input$cluster_column,
-                      row_names_side = "left",
-                      column_names_rot = 45,
-                      # column_title_rot = 45,
-                      # column_title_gp = gpar(fontsize = 10),
-                      column_title_side = "bottom",
-                      # column_title = "Partition",
-                      row_title = "Genes",
-                      row_gap = unit(1, "mm"),
-                      column_gap = unit(1, "mm"),
-                      show_row_names = T,
-                      # show_column_names = T,
-                      top_annotation = ht,
-                      # column_split = colData(sce)[,input$partitionType],
-                      cluster_column_slices = F
-                      # use_raster = TRUE,
-                      # raster_by_magick = TRUE
-        )
-      } else{
-        ht <-   HeatmapAnnotation(Type = colData(sce)[,input$partitionType],
-                                  col=list(Type=OrderPartReact()$colPart),
-                                  show_legend = c(Type =FALSE),
-                                  annotation_label = c(input$partitionType),
-                                  show_annotation_name = T)
-        
-        # colnames(HeatmapF()) <- NULL
+      col_fun = circlize::colorRamp2(c(0,max(sce$pt_pca,na.rm = T)), hcl_palette ='YlOrRd',reverse = T)
+      ht <-   HeatmapAnnotation(numeric = colData(sce)[,input$numericType],
+                                Type = if(input$partitionType == 'None') {NULL} else {colData(sce)[,input$partitionType]},
+                                col= if(input$partitionType == 'None') {list(numeric = col_fun)} else {list(numeric = col_fun,Type=OrderPartReact()$colPart)} ,
+                                show_legend = c(Type = FALSE),
+                                annotation_label = if(input$partitionType == 'None') {c(input$numericType)} else {c(input$numericType,input$partitionType)},
+                                show_annotation_name = T)
+      
+      split_col <- NULL
+      if(input$partitionType != 'None' & input$split_column){
+        split_col <- colData(sce)[,input$partitionType]
+        }
         h1 <- Heatmap(as.matrix(HeatmapF()),
-                      col = if(max(HeatmapF())==min(HeatmapF())) {viridis::viridis(1)} else {viridis::viridis(100)},
+                      col = if(max(HeatmapF())==min(HeatmapF())) {viridis(1)} else {viridis(100)},
                       border =F,
                       name = "Gene expression",
                       cluster_rows = input$cluster_row,
-                      cluster_columns = input$cluster_column,
+                      cluster_columns = F,
                       row_names_side = "left",
-                      # column_names_rot = 45,
                       column_title_rot = 45,
-                      # column_title_gp = gpar(fontsize = 10),
                       column_title_side = "bottom",
-                      # column_title = "Partition",
                       row_title = "Genes",
                       row_gap = unit(1, "mm"),
                       column_gap = unit(1, "mm"),
                       show_row_names = T,
                       show_column_names = F,
                       top_annotation = ht,
-                      column_split = colData(sce)[,input$partitionType],
+                      column_order = order(colData(sce)[,input$numericType]),
+                      column_split = split_col,
                       cluster_column_slices = F,
                       use_raster = TRUE,
                       raster_by_magick = TRUE
         )
-      }
       h1
     })
 
@@ -506,105 +464,61 @@ ExpressionServer <- function(id,sce,point.size=20) {
       Heatmap_Plot()
     })
     
-    ####  Violin&SpikePlots ----
-     output$Violin.Bar_Input <- renderUI({
+    ####  Lines&SpikePlots ----
+     output$Lines.Bar_Input <- renderUI({
        req(!is.null(ExpressionF()))
-       radioGroupButtons(inputId = NS(id,"Cell_Exp"), label=NULL,choices = c("Violin", "SpikePlot"),
+       radioGroupButtons(inputId = NS(id,"Cell_Exp"), label=NULL,choices = c("Lines", "SpikePlot"),
                          direction = "horizontal",justified = T,individual=T)
      })
      
-     ViolinReact <- reactive({
-       req(!is.null(ExpressionF()) & input$Cell_Exp == "Violin")
-       data.frame(Y =ExpressionF()$Exp,
-                  X=factor(colData(sce)[,input$partitionType]))
+     LinesReact <- reactive({
+       req(!is.null(ExpressionF()) & input$Cell_Exp == "Lines")
+       
+       p <- data.frame(Exp=ExpressionF()$Exp,Numeric = colData(sce)[,input$numericType])
+       if(input$partitionType != 'None') {
+         p$partitionType <- colData(sce)[,input$partitionType]
+       }
+       p
      })
      
-     ViolinReact_Cell <- reactive({
-       ViolinReact() %>% group_by(X) %>% summarise(n=n(),Ymax = (max(Y)+0.5))
-     })
-     
-     ViolinPlot <-reactive({
+     output$scatter_lines  <- renderPlotly({
        req(input$scatter_heatmap == "scatter")
-       req(!is.null(ExpressionF()) & input$Cell_Exp == "Violin")
-       ggplot(ViolinReact()) + 
-         geom_violin(aes(y = Y, 
-                         x = X, 
-                         fill = X),
-                     scale="width") + 
-         theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1),
-               legend.position = "none") + 
-         xlab("Clusters") + 
-         ylab("log(counts)") +
-         ggtitle(ifelse(length(ExpressionF()$Genes)>1,"mean expression","expression")) +
-         scale_fill_manual(values=OrderPartReact()$colPart) +
-         geom_text(aes(label = n,x=X, y=Ymax), data = ViolinReact_Cell()) 
+       req(!is.null(ExpressionF()) & input$Cell_Exp == "Lines")
+        p <- LinesReact() %>% ggplot(aes(y=Exp,x=Numeric)) + geom_point(aes(col = if(input$partitionType != 'None'){partitionType} else{NULL}),alpha=0.5) + geom_smooth(se = F) +
+         labs(color = input$partitionType) + 
+          xlab(input$numericType) + 
+          ylab("log(counts)") +
+          ggtitle(ifelse(length(ExpressionF()$Genes)>1,"mean expression","expression"))  + 
+          scale_color_manual(values=if(input$partitionType != 'None'){ OrderPartReact()$colPart} else{'grey'})
+        p %>% ggplotly() %>% toWebGL()
      })
      
-     
-     
-     SpikePlot <-reactive({
+     output$SpikePlot <- renderPlot({
        req(input$scatter_heatmap == "scatter")
        req(!is.null(ExpressionF()) & input$Cell_Exp == "SpikePlot")
-       m <- barplot(ExpressionF()$Exp[OrderPartReact()$ordPart],
+       barplot(ExpressionF()$Exp[OrderPartReact()$ordPart],
                col = OrderPartReact()$colPart[colData(sce)[,input$partitionType]][OrderPartReact()$ordPart],
                border = OrderPartReact()$colPart[colData(sce)[,input$partitionType]][OrderPartReact()$ordPart],
                ylab = "log(counts)", main = ifelse(length(ExpressionF()$Genes)>1,"mean expression","expression"), names.arg = F) 
        legend("bottom", legend = names(OrderPartReact()$colPart), col = OrderPartReact()$colPart,
               pch=19, ncol=6, xpd=T, inset=c(0,-0.25))
-       lines(x = m,
-             tapply(ExpressionF()$Exp,
-                    INDEX = colData(sce)[,input$partitionType],
-                    FUN = mean)[colData(sce)[,input$partitionType]][OrderPartReact()$ordPart],
-             lty=2,col="black")
+       abline(h=mean(ExpressionF()$Exp[ExpressionF()$Exp>0]),lty=2,col="grey")
      })
      
-     output$Violin.Bar_Plot <- renderPlot({
-       req(!is.null(ExpressionF()))
+     output$Cell_Plots <- renderUI({
        req(input$Cell_Exp)
-       if(input$Cell_Exp == "Violin"){
-         ViolinPlot()
-       } else { 
-         SpikePlot()
+       if(input$Cell_Exp == "SpikePlot"){
+         plotOutput(NS(id,"scatter_lines"),height = "100vh")
+       }
+       else if(input$Cell_Exp == "Lines"){
+         plotlyOutput(NS(id,"scatter_lines"),height = "100vh")
        }
      })
      
-     
-     #### Dotplots ----
-     output$plot_DotPlot <- renderPlotly({
-        req(input$scatter_heatmap == "dotplot")
-        req(input$partitionType)
-        if(input$GL_T){
-          req(length(genes.GL()$genes) > 0)
-          feature <- genes.GL()$genes
-        } else { 
-          req(!is.null(genes.L()))
-          feature <- genes.L() 
-        }
-        
-        g  <- scater::plotDots(object = sce,features = feature,group = input$partitionType,
-                       scale = input$scale_dotplot,center = input$center_dotplot) + 
-          theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1,size=15)) +
-          xlab(input$partitionType) + ylab("Genes")
-        if(input$ord_dotplot){ #Define the order if the input is selected and the is not a heatmap of 1 row, received the order vector
-          vtor <- if(length(feature)>1) {
-            ord <- matrix(g$data$Average,byrow = F,nrow=length(unique(g$data$Feature))) %>% dist %>% hclust %>% .$order
-            rev(feature[ord])
-            } else {feature[1]}  
-        } else {
-          vtor <- rev(feature)
-        }
-        
-         g$data$Feature <- factor(g$data$Feature,levels = vtor)
-         
-         ggplotly(g) %>% config(modeBarButtonsToRemove = c("select2d", "lasso2d", "hoverCompareCartesian"))
-         
-
-     })
-     
-     #### Stacked Violin ----
-     output$plot_stackVln <- renderPlot({
-       req(input$scatter_heatmap == "stackVln")
-       req(input$partitionType)
+     #### Line plot MultiGenes ----
+     output$plot_MultiLines <- renderPlotly({
+       req(input$scatter_heatmap == "MultiLines")
+       req(input$numericType)
        if(input$GL_T){
          req(length(genes.GL()$genes) > 0)
          feature <- genes.GL()$genes
@@ -612,41 +526,21 @@ ExpressionServer <- function(id,sce,point.size=20) {
          req(!is.null(genes.L()))
          feature <- genes.L() 
        }
-       #Adaptated from https://github.com/ycl6/StackedVlnPlot
+       
        df_plot <- assay(sce,"logcounts")[feature,,drop=F] %>% as.matrix %>% t %>% as.data.frame
        # Add cell ID and identity classes
        df_plot$Cell <- rownames(df_plot)
-       df_plot$Idents <- colData(sce)[,input$partitionType]
-       df_plot <- reshape2::melt(df_plot, id.vars = c("Cell","Idents"), measure.vars = feature,
-                                 variable.name = "Feat", value.name = "Expr")
+       df_plot$Numeric <- colData(sce)[,input$numericType]
+       df_plot <- reshape2::melt(df_plot, id.vars = c("Cell","Numeric"), measure.vars = feature,
+                                variable.name = "Feat", value.name = "Expr")
        
-       if(input$ord_stackVln & length(feature) >1){ #Define the order if the input is selected and the is not a heatmap of 1 row, received the order vector
-         dta <- apply(assay(sce,"logcounts")[feature,,drop=F],1,FUN =  function(x){
-           tapply(x,colData(sce)[,input$partitionType],FUN=mean)
-         }
-         ) %>% t
-         ord <- hclust(dist(dta))$order
-         df_plot$Feat <- factor(df_plot$Feat, levels = levels(df_plot$Feat)[ord])
-       } 
-       
-       
-       g <- ggplot(df_plot, aes(x = factor(Idents),y =  Expr, fill = Idents)) +
-         geom_violin(scale = "width", adjust = 1, trim = TRUE) +
-         scale_y_continuous(expand = c(0, 0), position="right", labels = function(x)
-           c(rep(x = "", times = max(length(x)-2, 0) ), x[length(x) - 1], "")) +
-         facet_grid(rows = vars(Feat), scales = "free", switch = "y") +
-         cowplot::theme_cowplot(font_size = 12) +
-         theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1),
-               legend.position = "none", panel.spacing = unit(0, "lines"),
-               plot.title = element_text(hjust = 0.5),
-               panel.background = element_rect(fill = NA, color = "black"),
-               strip.background = element_blank(),
-               strip.text = element_text(face = "bold"),
-               strip.text.y.left = element_text(angle = 0)) +
-           xlab(input$partitionType) + ylab("Expression Level") + 
-         scale_fill_manual(values=OrderPartReact()$colPart) 
-       
-       g
+       p <- df_plot %>% ggplot(aes(y=Expr,x=Numeric,col = Feat)) + geom_smooth(se = F) +
+         xlab(input$numericType) + 
+         ylab("log(counts)") +
+         ggtitle("Expression")   
+       p %>% ggplotly() %>% toWebGL()
      })
+     
   }) 
 }
+
