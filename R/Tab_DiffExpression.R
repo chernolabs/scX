@@ -300,7 +300,7 @@ VolcanoServer <- function(id,sce,sce.markers) {
                                     border = OrderPartReact()$colPart[colData(sce)[,input$partitionType]][OrderPartReact()$ordPart],
                                     ylab = "log(counts)", main = names(SpikePlot())[i], names.arg = F)
           lines(x = m,
-                tapply(SpikePlot()[[i]],
+                tapply(SpikePlot()[[i]][,"Y",drop=T],
                        INDEX = colData(sce)[,input$partitionType],
                        FUN = mean)[colData(sce)[,input$partitionType]][OrderPartReact()$ordPart],
                 lty=2,col="black")
