@@ -154,10 +154,7 @@ Fields_UI <- function(id) {
                              )
                     ),
                     tabPanel("Matrix", value= "matrix",
-                             box(width = NULL, solidHeader = T, collapsible = F,
-                                 footer = tagList(shiny::icon("cat"), "Nya"),
-                                 plotOutput(NS(id,"plot_Matrix"),height = "100vh") %>% withSpinner()
-                             )
+                                 uiOutput(NS(id,"CorheatMapOutput"))
                     )
              )
       )
@@ -456,7 +453,7 @@ Fields_Server <- function(id,sce) {
       req(input$scatter_heatmap == "matrix")
       req(length(feature()) > 1)
       byPartition <- if(input$partitionColor != 'None'){input$partitionColor}else{NULL}
-      df_corr <- df() %>% group_by(across(all_of(byPartition))) %>% summarise(Correlation = cor(cbind(across(all_of(feature())))))
+      df_corr <- df() %>% group_by(across(all_of(byPartition))) %>% summarise(Correlation = cor(cbind(across(all_of(feature())))),use = "complete.obs",method = "spearman")
       df_corr
     })
     
@@ -481,9 +478,10 @@ Fields_Server <- function(id,sce) {
         col_split <- NULL
       }
       Heatmap(mtx,
-              col = if(max(t(mtx))==min(t(mtx))) {viridis(1)} else {viridis(100)},
+              col = if(max(t(mtx),na.rm = T)==min(t(mtx),na.rm = T)) {viridis(1)} else {viridis(100)},
               border =F,
               name = "Gene expression",
+              na_col = "grey",
               cluster_rows = input$matrix_cluster_row,
               cluster_columns = input$matrix_cluster_column,
               row_names_side = "left",
@@ -501,7 +499,21 @@ Fields_Server <- function(id,sce) {
       )
     })
     
-    
+    output$CorheatMapOutput <- renderUI({
+      req(input$scatter_heatmap == "matrix")
+      req(!is.null(Matrix_DF()))
+      #If there are only 1 and NA values, it doens't show any plot.
+      if(all(unique(as.vector(Matrix_DF()$Correlation))%in% c(NA,1))){
+        HTML('<p style="text-align: center;"><strong>No correlation could be found with this conditions.</strong></p>')  
+      } else{
+        tagList(
+          box(width = NULL, solidHeader = T, collapsible = F,
+              footer = tagList(shiny::icon("cat"), "Nya"),
+        plotOutput(NS(id,"plot_Matrix"),height = "100vh") %>% withSpinner()
+          )
+        )
+      }
+    })
   })
 }
 # 
