@@ -258,7 +258,7 @@ Fields_Server <- function(id,sce) {
       exp_mtx <- df()[,feature(),drop=F] %>% as.matrix %>% t()
       
       if(input$norm_heat){
-        exp_mtx <- apply(exp_mtx,1,function(x){x/max(x)}) %>% t()
+        exp_mtx <- apply(exp_mtx,1,function(x){x/max(x,na.rm = T)}) %>% t()
       }
       
       exp_mtx
@@ -274,7 +274,7 @@ Fields_Server <- function(id,sce) {
       if(input$mean_heat) {
         byPartition <- if(input$partitionColor != 'None'){df()[,input$partitionColor,drop=T]}else{rep('All',ncol(Heatmap_DF()))}
         dta <- apply(Heatmap_DF(),1,FUN =  function(x){
-          tapply(x,byPartition,FUN=mean)
+          tapply(x,byPartition,FUN=function(y){mean(y,na.rm = T)})
         }
         )
         
@@ -292,8 +292,9 @@ Fields_Server <- function(id,sce) {
         }
         
         h1 <- Heatmap(dta,
-                      col = if(max(dta)==min(dta)) {viridis(1)} else {viridis(100)},
+                      col = if(max(dta,na.rm = T)==min(dta,na.rm = T)) {viridis(1)} else {viridis(100)},
                       border =F,
+                      na_col = "grey",
                       name = "Gene expression",
                       cluster_rows = input$cluster_row,
                       cluster_columns = input$cluster_column,
@@ -328,8 +329,9 @@ Fields_Server <- function(id,sce) {
         }
         # colnames(HeatmapF()) <- NULL
         h1 <- Heatmap(as.matrix(Heatmap_DF()),
-                      col = if(max(Heatmap_DF())==min(Heatmap_DF())) {viridis(1)} else {viridis(100)},
+                      col = if(max(Heatmap_DF(),na.rm = T)==min(Heatmap_DF(),na.rm = T)) {viridis(1)} else {viridis(100)},
                       border =F,
+                      na_col = "grey",
                       name = "Gene expression",
                       cluster_rows = input$cluster_row,
                       cluster_columns = input$cluster_column,
