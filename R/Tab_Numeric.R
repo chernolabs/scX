@@ -366,7 +366,7 @@ Fields_Server <- function(id,sce) {
       req(input$partitionColor)
       
       byPartition <- if(input$partitionColor != 'None'){ input$partitionColor}else{NULL}
-      g  <- plotDots_fields(object = sce,
+      g  <- plotDots_fields(df = df(),
                             features = feature(),
                             group = byPartition,
                      scale = input$scale_dotplot,center = input$center_dotplot) + 
