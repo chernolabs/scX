@@ -67,10 +67,10 @@ ui <- function(){
 			),
 			menuItem("EDA", tabName = "EDATab",
 			         icon = icon("circle-nodes"), startExpanded = F,
-			         menuSubItem('Character', tabName = "clustersTab",
+			         menuSubItem('Categories', tabName = "clustersTab",
 			                     icon = icon('bars-progress')
 			         ),
-			         menuSubItem('Field', tabName = "fieldsTab",
+			         menuSubItem('Fields', tabName = "fieldsTab",
 			                     icon = icon('clone')
 			         )
 			),
