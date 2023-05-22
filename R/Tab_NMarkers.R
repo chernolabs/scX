@@ -12,13 +12,13 @@ N_markersUI <- function(id) {
             width = NULL, status = "primary",solidHeader = T,collapsible = T,
           fluidRow(
             column(6,style='padding-left:12px; padding-right:3px;', align="center",
-              pickerInput(NS(id,"partitionType"),
-                          "Partition",
+              pickerInput(NS(id,"plotType2D"), 
+                          "Plot Type 2D", 
                           choices = NULL)
             ),
             column(6,style='padding-left:3px; padding-right:12px;', align="center",
-              pickerInput(NS(id,"plotType2D"), 
-                          "Plot Type 2D", 
+              pickerInput(NS(id,"partitionType"),
+                          "Partition",
                           choices = NULL)
             )
           ),
