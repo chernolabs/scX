@@ -154,10 +154,7 @@ Fields_UI <- function(id) {
                              )
                     ),
                     tabPanel("Matrix", value= "matrix",
-                             box(width = NULL, solidHeader = T, collapsible = F,
-                                 footer = tagList(shiny::icon("cat"), "Nya"),
-                                 plotOutput(NS(id,"plot_Matrix"),height = "100vh") %>% withSpinner()
-                             )
+                                 uiOutput(NS(id,"CorheatMapOutput"))
                     )
              )
       )
@@ -258,7 +255,7 @@ Fields_Server <- function(id,sce) {
       exp_mtx <- df()[,feature(),drop=F] %>% as.matrix %>% t()
       
       if(input$norm_heat){
-        exp_mtx <- apply(exp_mtx,1,function(x){x/max(x)}) %>% t()
+        exp_mtx <- apply(exp_mtx,1,function(x){x/max(x,na.rm = T)}) %>% t()
       }
       
       exp_mtx
@@ -274,7 +271,7 @@ Fields_Server <- function(id,sce) {
       if(input$mean_heat) {
         byPartition <- if(input$partitionColor != 'None'){df()[,input$partitionColor,drop=T]}else{rep('All',ncol(Heatmap_DF()))}
         dta <- apply(Heatmap_DF(),1,FUN =  function(x){
-          tapply(x,byPartition,FUN=mean)
+          tapply(x,byPartition,FUN=function(y){mean(y,na.rm = T)})
         }
         )
         
@@ -292,8 +289,9 @@ Fields_Server <- function(id,sce) {
         }
         
         h1 <- Heatmap(dta,
-                      col = if(max(dta)==min(dta)) {viridis(1)} else {viridis(100)},
+                      col = if(max(dta,na.rm = T)==min(dta,na.rm = T)) {viridis(1)} else {viridis(100)},
                       border =F,
+                      na_col = "grey",
                       name = "Gene expression",
                       cluster_rows = input$cluster_row,
                       cluster_columns = input$cluster_column,
@@ -328,8 +326,9 @@ Fields_Server <- function(id,sce) {
         }
         # colnames(HeatmapF()) <- NULL
         h1 <- Heatmap(as.matrix(Heatmap_DF()),
-                      col = if(max(Heatmap_DF())==min(Heatmap_DF())) {viridis(1)} else {viridis(100)},
+                      col = if(max(Heatmap_DF(),na.rm = T)==min(Heatmap_DF(),na.rm = T)) {viridis(1)} else {viridis(100)},
                       border =F,
+                      na_col = "grey",
                       name = "Gene expression",
                       cluster_rows = input$cluster_row,
                       cluster_columns = input$cluster_column,
@@ -367,7 +366,7 @@ Fields_Server <- function(id,sce) {
       req(input$partitionColor)
       
       byPartition <- if(input$partitionColor != 'None'){ input$partitionColor}else{NULL}
-      g  <- plotDots_fields(object = sce,
+      g  <- plotDots_fields(df = df(),
                             features = feature(),
                             group = byPartition,
                      scale = input$scale_dotplot,center = input$center_dotplot) + 
@@ -454,7 +453,7 @@ Fields_Server <- function(id,sce) {
       req(input$scatter_heatmap == "matrix")
       req(length(feature()) > 1)
       byPartition <- if(input$partitionColor != 'None'){input$partitionColor}else{NULL}
-      df_corr <- df() %>% group_by(across(all_of(byPartition))) %>% summarise(Correlation = cor(cbind(across(all_of(feature())))))
+      df_corr <- df() %>% group_by(across(all_of(byPartition))) %>% summarise(Correlation = cor(cbind(across(all_of(feature())))),use = "complete.obs",method = "spearman")
       df_corr
     })
     
@@ -479,9 +478,10 @@ Fields_Server <- function(id,sce) {
         col_split <- NULL
       }
       Heatmap(mtx,
-              col = if(max(t(mtx))==min(t(mtx))) {viridis(1)} else {viridis(100)},
+              col = if(max(t(mtx),na.rm = T)==min(t(mtx),na.rm = T)) {viridis(1)} else {viridis(100)},
               border =F,
               name = "Gene expression",
+              na_col = "grey",
               cluster_rows = input$matrix_cluster_row,
               cluster_columns = input$matrix_cluster_column,
               row_names_side = "left",
@@ -499,7 +499,21 @@ Fields_Server <- function(id,sce) {
       )
     })
     
-    
+    output$CorheatMapOutput <- renderUI({
+      req(input$scatter_heatmap == "matrix")
+      req(!is.null(Matrix_DF()))
+      #If there are only 1 and NA values, it doens't show any plot.
+      if(all(unique(as.vector(Matrix_DF()$Correlation))%in% c(NA,1))){
+        HTML('<p style="text-align: center;"><strong>No correlation could be found with this conditions.</strong></p>')  
+      } else{
+        tagList(
+          box(width = NULL, solidHeader = T, collapsible = F,
+              footer = tagList(shiny::icon("cat"), "Nya"),
+        plotOutput(NS(id,"plot_Matrix"),height = "100vh") %>% withSpinner()
+          )
+        )
+      }
+    })
   })
 }
 # 

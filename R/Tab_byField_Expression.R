@@ -33,7 +33,7 @@ Numeric_ExpressionUI <- function(id) {
               )
             )  
           ),
-          conditionalPanel("typeof output.plot !== 'undefined' || input.scatter_heatmap == 'heatmap'", ns = NS(id),
+          conditionalPanel("(typeof output.plot !== 'undefined' || input.scatter_heatmap == 'heatmap') && input.scatter_heatmap !== 'MultiLines'", ns = NS(id),
             fluidRow(
               column(8,style='padding-left:12px; padding-right:3px;',
                 pickerInput(inputId = NS(id,"partitionType"), 

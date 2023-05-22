@@ -160,7 +160,7 @@ reducedDimPlot_cluster <- function(sce,reducedDim,partition,cluster,alpha=0.5,pa
 #### Fields Tab ----
 
 #Modified from https://rdrr.io/github/davismcc/scater/src/R/plotDots.R to allow column vectors
-plotDots_fields <- function(object, features, group = NULL, block=NULL,
+plotDots_fields <- function(df, features, group = NULL, block=NULL,
                             exprs_values = "logcounts", detection_limit = 0, zlim = NULL, 
                             colour = color, color = NULL,
                             max_detected = NULL, other_fields = list(),
@@ -171,45 +171,32 @@ plotDots_fields <- function(object, features, group = NULL, block=NULL,
                             assay_name=exprs_values,
                             by_assay_name=by_exprs_values)
 {
-  noAll <- F
-  if (is.null(group)) {
-    group <- rep("all", ncol(object))
-  } else {
-    group <- scater::retrieveCellInfo(object, group, search="colData")$value
-    noAll <- T
-  }
   
+  # if (is.null(group)) {
+  #   group <- rep("all", ncol(object))
+  # } else {
+  #   group <- scater::retrieveCellInfo(object, group, search="colData")$value
+  #   noAll <- T
+  # }
   # object <- .swap_rownames(object, swap_rownames)
   # features <- .handle_features(features, object)
-  group <- factor(group)
+  summarized1 <- df %>% group_by(across(all_of(group))) %>% summarise(ave = across(all_of(features),mean,na.rm = TRUE),
+                                                                      prop = across(all_of(features),function(x){sum(x>0,na.rm = T)/length(x)})
+  )
   
-  # Computing, possibly also batch correcting.
-  ids <- DataFrame(group=group)
-  if (!is.null(block)) {
-    ids$block <- scater::retrieveCellInfo(object, block, search="colData")$value
-  }
+  ave <- summarized1$ave %>% t
+  ave[is.na(ave)] <- 0
+  num <- summarized1$prop %>% t
+  ave[is.na(num)] <- 0
+  group.names <- if(!is.null(group)){summarized1[,group,drop=T]} else{"All"}
   
-  summarized <- scuttle::summarizeAssayByGroup(
-    as.matrix(t(colData(object)[,as.character(features), drop = FALSE])),
-    ids=ids, statistics=c("mean", "prop.detected"),
-    threshold=detection_limit)
-  
-  ave <- assay(summarized, "mean")
-  num <- assay(summarized, "prop.detected")
-  group.names <- summarized$group
-  
-  if (!is.null(block)) {
-    ave <- scuttle::correctGroupSummary(ave, group=summarized$group, block=summarized$block)
-    num <- scuttle::correctGroupSummary(num, group=summarized$group, block=summarized$block, transform="logit")
-    group.names <- factor(colnames(ave), levels = levels(summarized$group))
-  }
   #Function from https://rdrr.io/github/davismcc/scater/src/R/plotHeatmap.R#sym-.heatmap_scale
   .heatmap_scale <- function(x, center, scale, colour=NULL, zlim=NULL, symmetric=NULL) {
     
-    if (center & noAll) {
+    if (center & !is.null(group)) {
       x <- x - rowMeans(x)
     }
-    if (scale & noAll) {
+    if (scale & !is.null(group)) {
       if (!center & any(rowSums(x) == 0)) {
         stop("Cannot include non-expressed genes when scale=TRUE.")
       }
@@ -249,9 +236,9 @@ plotDots_fields <- function(object, features, group = NULL, block=NULL,
     NumDetected=as.numeric(num),
     Average=as.numeric(heatmap_scale$x)
   )
-  if (!is.null(max_detected)) {
-    evals_long$NumDetected <- pmin(max_detected, evals_long$NumDetected)
-  }
+  # if (!is.null(max_detected)) {
+  #   evals_long$NumDetected <- pmin(max_detected, evals_long$NumDetected)
+  # }
   
   # Adding other fields, if requested.
   # vis_out <- .incorporate_common_vis_row(evals_long, se = object,
