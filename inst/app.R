@@ -57,10 +57,10 @@ ui <- function(){
 					             icon = icon('signal')
 					 ),
 					 menuSubItem('Fields', tabName = "g_numeric_exp",
-								 icon = icon('signal')
+								 icon = icon('audible')
 					 ),
 					 menuSubItem('Co-expression', tabName = "g_coexp",
-								 icon = icon('clone', class = 'fa-regular'))
+								 icon = icon('comments', class = 'fa-regular'))
 			),
 			menuItem("Differential Expression", tabName = "volcanoTab",
 					 icon = icon("chart-column")
@@ -68,10 +68,10 @@ ui <- function(){
 			menuItem("EDA", tabName = "EDATab",
 			         icon = icon("circle-nodes"), startExpanded = F,
 			         menuSubItem('Character', tabName = "clustersTab",
-			                     icon = icon('signal')
+			                     icon = icon('bars-progress')
 			         ),
 			         menuSubItem('Field', tabName = "fieldsTab",
-			                     icon = icon('signal')
+			                     icon = icon('clone')
 			         )
 			),
 			menuItem("Visual Tools", tabName = "toolsTab",
