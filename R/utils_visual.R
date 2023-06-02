@@ -203,7 +203,7 @@ plotDots_fields <- function(df, features, group = NULL, block=NULL,
       x <- x / sqrt(rowSums(x^2) / (ncol(x) - 1))
     }
     if (is.null(zlim)) {
-      if (center & noAll) {
+      if (center & !is.null(group)) {
         extreme <- max(abs(x))
         zlim <- c(-extreme, extreme)
       } else {

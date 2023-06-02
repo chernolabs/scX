@@ -271,7 +271,7 @@ MultiPlotsServer <- function(id,sce) {
       list_plots <- list()
       feature <- input$fieldType
       for(i in 1:length(feature)){
-        list_plots[[feature[i]]] <- plotReducedDim(object = sce, dimred = input$plotType,ncomponents = 2, colour_by=feature[i]) + ggtitle(feature[i]) + 
+        list_plots[[feature[i]]] <- scater::plotReducedDim(object = sce, dimred = input$plotType,ncomponents = 2, colour_by=feature[i]) + ggtitle(feature[i]) + 
           scale_color_distiller(palette ='YlOrRd',direction = 1) + labs(color=feature[i])
         
       }
@@ -279,7 +279,7 @@ MultiPlotsServer <- function(id,sce) {
     })
     
     output$plot_field <- renderPlot({
-      plot_grid(plotlist = list_field_plot())
+      cowplot::plot_grid(plotlist = list_field_plot())
     })
     
 

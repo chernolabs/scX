@@ -213,7 +213,7 @@ Fields_Server <- function(id,sce) {
       req(input$partitionType1)  
       req(input$partitionType2)
       req(input$partitionColor)  
-      req(input$scatter_heatmap == "scatter")
+      #req(input$scatter_heatmap == "scatter")
       if(input$partitionType2 == "None"){
         if(input$partitionColor == "None"){
           g <- df() %>% ggplot(aes(y=.data[[input$partitionType1]],x='All',fill='All')) + geom_boxplot() +
@@ -248,7 +248,7 @@ Fields_Server <- function(id,sce) {
     
     ### Heatmap ----
     Heatmap_DF <- eventReactive(c(feature(),input$norm_heat),{
-      req(input$scatter_heatmap == "heatmap")
+      #req(input$scatter_heatmap == "heatmap")
       req(length(feature()) > 0)
       
       # value <- ifelse(input$norm_heat,yes = "logcounts.norm",no = "logcounts") #To swtich between norm ot not normalize expression gene.
@@ -264,7 +264,7 @@ Fields_Server <- function(id,sce) {
     ### Heatmaps ----
     #Here I made everything in the same reactive object to manipulated all the reactive order at the same time
     Heatmap_Plot <- eventReactive(c(Heatmap_DF(),input$partitionColor,input$mean_heat,input$cluster_row,input$cluster_column),{
-      req(input$scatter_heatmap == "heatmap")
+      #req(input$scatter_heatmap == "heatmap")
       req(input$partitionColor)
       req(!is.null(Heatmap_DF()))
       
@@ -289,7 +289,7 @@ Fields_Server <- function(id,sce) {
         }
         
         h1 <- Heatmap(dta,
-                      col = if(max(dta,na.rm = T)==min(dta,na.rm = T)) {viridis(1)} else {viridis(100)},
+                      col = if(max(dta,na.rm = T)==min(dta,na.rm = T)) {viridis::viridis(1)} else {viridis::viridis(100)},
                       border =F,
                       na_col = "grey",
                       name = "Gene expression",
@@ -326,7 +326,7 @@ Fields_Server <- function(id,sce) {
         }
         # colnames(HeatmapF()) <- NULL
         h1 <- Heatmap(as.matrix(Heatmap_DF()),
-                      col = if(max(Heatmap_DF(),na.rm = T)==min(Heatmap_DF(),na.rm = T)) {viridis(1)} else {viridis(100)},
+                      col = if(max(Heatmap_DF(),na.rm = T)==min(Heatmap_DF(),na.rm = T)) {viridis::viridis(1)} else {viridis::viridis(100)},
                       border =F,
                       na_col = "grey",
                       name = "Gene expression",
@@ -354,7 +354,7 @@ Fields_Server <- function(id,sce) {
     })
     
     output$plot_heatmap <- renderPlot({
-      req(input$scatter_heatmap == "heatmap")
+      #req(input$scatter_heatmap == "heatmap")
       req(!is.null(Heatmap_Plot()))
       Heatmap_Plot()
     })
@@ -362,7 +362,7 @@ Fields_Server <- function(id,sce) {
     #### Dotplots ----
     output$plot_DotPlot <- renderPlotly({
       req(length(feature()) > 0)
-      req(input$scatter_heatmap == "dotplot")
+      #req(input$scatter_heatmap == "dotplot")
       req(input$partitionColor)
       
       byPartition <- if(input$partitionColor != 'None'){ input$partitionColor}else{NULL}
@@ -392,7 +392,7 @@ Fields_Server <- function(id,sce) {
     ### Stck Violin
     output$plot_stackVln <- renderPlot({
       req(length(feature()) > 0)
-      req(input$scatter_heatmap == "stackVln")
+      #req(input$scatter_heatmap == "stackVln")
       #Adaptated from https://github.com/ycl6/StackedVlnPlot
       df_plot <- df()[,feature(),drop=F] %>% as.data.frame
       # Add cell ID and identity classes
@@ -429,7 +429,7 @@ Fields_Server <- function(id,sce) {
         scale_y_continuous(expand = c(0, 0), position="right", labels = function(x)
           c(rep(x = "", times = max(length(x)-2, 0) ), x[length(x) - 1], "")) +
         facet_grid(rows = vars(Feat), scales = "free", switch = "y") +
-        theme_cowplot(font_size = 12) +
+        cowplot::theme_cowplot(font_size = 12) +
         theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1),
               legend.position = "none", panel.spacing = unit(0, "lines"),
               plot.title = element_text(hjust = 0.5),
@@ -450,7 +450,7 @@ Fields_Server <- function(id,sce) {
     ### Matrix ----
     
     Matrix_DF <- eventReactive(c(input$partitionColor,feature()),{
-      req(input$scatter_heatmap == "matrix")
+      #req(input$scatter_heatmap == "matrix")
       req(length(feature()) > 1)
       byPartition <- if(input$partitionColor != 'None'){input$partitionColor}else{NULL}
       df_corr <- df() %>% group_by(across(all_of(byPartition))) %>% summarise(Correlation = cor(cbind(across(all_of(feature())))),use = "complete.obs",method = "spearman")
@@ -458,7 +458,7 @@ Fields_Server <- function(id,sce) {
     })
     
     output$plot_Matrix <- renderPlot({
-      req(input$scatter_heatmap == "matrix")
+      #req(input$scatter_heatmap == "matrix")
       req(!is.null(Matrix_DF()))
       if(input$partitionColor != 'None'){
         # rownames(df_corr$Correlation)  <- paste0(mtx[,input$partitionColor,drop=T],"_",rownames(mtx$Correlation))
@@ -478,7 +478,7 @@ Fields_Server <- function(id,sce) {
         col_split <- NULL
       }
       Heatmap(mtx,
-              col = if(max(t(mtx),na.rm = T)==min(t(mtx),na.rm = T)) {viridis(1)} else {viridis(100)},
+              col = if(max(t(mtx),na.rm = T)==min(t(mtx),na.rm = T)) {viridis::viridis(1)} else {viridis::viridis(100)},
               border =F,
               name = "Gene expression",
               na_col = "grey",
@@ -500,7 +500,7 @@ Fields_Server <- function(id,sce) {
     })
     
     output$CorheatMapOutput <- renderUI({
-      req(input$scatter_heatmap == "matrix")
+      #req(input$scatter_heatmap == "matrix")
       req(!is.null(Matrix_DF()))
       #If there are only 1 and NA values, it doens't show any plot.
       if(all(unique(as.vector(Matrix_DF()$Correlation))%in% c(NA,1))){
