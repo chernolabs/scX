@@ -422,7 +422,7 @@ Numeric_ExpressionServer <- function(id,sce,point.size=20) {
       req(!is.null(HeatmapF()))
       # req(!is.null(OrderPartReact()))
       
-      col_fun = circlize::colorRamp2(c(0,max(sce$pt_pca,na.rm = T)), hcl_palette ='YlOrRd',reverse = T)
+      col_fun = circlize::colorRamp2(c(0, max(colData(sce)[,input$numericType,drop=T], na.rm = T)), hcl_palette ='YlOrRd',reverse = T)
       ht <-   HeatmapAnnotation(numeric = colData(sce)[,input$numericType],
                                 Type = if(input$partitionType == 'None') {NULL} else {colData(sce)[,input$partitionType]},
                                 col= if(input$partitionType == 'None') {list(numeric = col_fun)} else {list(numeric = col_fun,Type=OrderPartReact()$colPart)} ,
@@ -435,7 +435,7 @@ Numeric_ExpressionServer <- function(id,sce,point.size=20) {
         split_col <- colData(sce)[,input$partitionType]
         }
         h1 <- Heatmap(as.matrix(HeatmapF()),
-                      col = if(max(HeatmapF())==min(HeatmapF())) {viridis(1)} else {viridis(100)},
+                      col = if(max(HeatmapF())==min(HeatmapF())) {viridis::viridis(1)} else {viridis::viridis(100)},
                       border =F,
                       name = "Gene expression",
                       cluster_rows = input$cluster_row,
