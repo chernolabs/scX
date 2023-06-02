@@ -322,13 +322,17 @@ N_markersServer <- function(id,sce,point.size = 20) {
     
     SpikePlot <-reactive({
       req(!is.null(gene_marker_selected()) & input$Cell_Exp == "SpikePlot")
-      barplot(assay(sce,"logcounts")[gene_marker_selected(),][OrderPartReact()$ordPart],
+      m <- barplot(assay(sce,"logcounts")[gene_marker_selected(),][OrderPartReact()$ordPart],
               col = OrderPartReact()$colPart[colData(sce)[,input$partitionType]][OrderPartReact()$ordPart],
               border = OrderPartReact()$colPart[colData(sce)[,input$partitionType]][OrderPartReact()$ordPart],
               ylab = "log(counts)", main = paste(gene_marker_selected(), 'expression'), names.arg = F) 
       legend("bottom", legend = names(OrderPartReact()$colPart), col = OrderPartReact()$colPart,
              pch=19, ncol=6, xpd=T, inset=c(0,-0.25))
-      abline(h=mean(assay(sce,"logcounts")[gene_marker_selected(),][assay(sce,"logcounts")[gene_marker_selected(),]>0]),lty=2,col="grey")
+      lines(x = m,
+            tapply(assay(sce,"logcounts")[gene_marker_selected(),],
+                   INDEX = colData(sce)[,input$partitionType],
+                   FUN = mean)[colData(sce)[,input$partitionType]][OrderPartReact()$ordPart],
+            lty=2,col="black")
     })
     
     output$Violin.Bar_Plot <- renderPlot({
