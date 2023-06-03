@@ -44,7 +44,7 @@ COExpUI <- function(id) {
                          multiple=T)
         ),
         conditionalPanel("typeof output.plot !== 'undefined'", ns = NS(id), 
-          box(title = " Co-expression Summary",
+          box(title = " Co-detection Summary",
               width = NULL,solidHeader = F, collapsible = F, align="center",
             tableOutput(NS(id,"DTCoExp")) %>% withLoader(type='html',loader = 'loader6')
           )
@@ -67,7 +67,7 @@ COExpUI <- function(id) {
           plotlyOutput(NS(id,"plot"),height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
         ),
         conditionalPanel("typeof output.plot !== 'undefined'", ns = NS(id),
-          box(title="Co-expression Matrix",width = NULL,
+          box(title="Co-detection Matrix",width = NULL,
               solidHeader = T, collapsible=T,
             plotOutput(NS(id,"CorrPlot")) %>% withSpinner()
           )
