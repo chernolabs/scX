@@ -5,6 +5,7 @@
 ### Volcano UI Module -----
 VolcanoUI <- function(id) {
   tagList(
+    useShinyjs(),
     fluidRow(
       #### Side panel -----
       column(width = 4,
@@ -82,7 +83,28 @@ VolcanoUI <- function(id) {
                                                      tooltip = tooltipOptions(title = "Press to see DotPlot settings")
                                                    )
                                   ), 
-                                  uiOutput(NS(id,"Cell_Plots")) %>% withSpinner()
+                                  # uiOutput(NS(id,"Cell_Plots")) %>% withSpinner()
+                                  tabsetPanel(id = NS(id,"switcher"),
+                                              type = "hidden",
+                                              selected = "Violin_panel",
+                                              tabPanelBody("Violin_panel",
+                                                           plotOutput(NS(id,"plot_Violin"),
+                                                                      height = "100vh") %>% withSpinner()
+                                              ),
+                                              tabPanelBody("SpikePlot_panel",
+                                                           plotOutput(NS(id,"plot_SpikePlot"),
+                                                                      height = "100vh") %>% withSpinner()
+                                              ),
+                                              tabPanelBody("heatmap_panel",
+                                                           plotOutput(NS(id,"plot_heatmap"),
+                                                                      height = "100vh") %>% withSpinner()
+                                              ),
+                                              tabPanelBody("DotPlot_panel",
+                                                           plotlyOutput(NS(id,"plot_DotPlot"),
+                                                                      height = "100vh") %>% withSpinner()
+                                              )
+                                  )
+                                  #
                               ) 
              )  
       )
@@ -111,6 +133,12 @@ VolcanoServer <- function(id,sce,sce.markers) {
     observeEvent(input$partitionType,{
       updateSelectizeInput(session,inputId = "clusterType",choices = names(sce.markers[[input$partitionType]]),server = TRUE)
     }) 
+    
+    #When I change the partition if I had selected a cluster, it deleted the previous selection.
+    observeEvent(c(input$button,input$partitionType),ignoreInit = TRUE,{
+      req(!is.null(VolcanoC))
+      runjs("Shiny.setInputValue('plotly_selected-VolcanoPlot', null);")
+    })
     
     ### Volcano Plot ----
     #Preparing data 
@@ -245,6 +273,16 @@ VolcanoServer <- function(id,sce,sce.markers) {
       Col.and.Order(partition = input$partitionType, sce=sce)
     })
     
+    observeEvent(input$Cell_Exp,{
+      req(input$Cell_Exp)
+      switch(input$Cell_Exp,
+             'Violin'    = updateTabsetPanel(inputId = "switcher",  selected = "Violin_panel"),
+             'SpikePlot' = updateTabsetPanel(inputId = "switcher", selected = "SpikePlot_panel"),
+             'Heatmap'   = updateTabsetPanel(inputId = "switcher", selected = "heatmap_panel"),
+             'Dotplot'   = updateTabsetPanel(inputId = "switcher", selected = "DotPlot_panel"),
+      )
+    })
+    
     output$Violin.Bar_Input <- renderUI({
       req(!is.null(ExpressionL()))
       radioGroupButtons(inputId = NS(id,"Cell_Exp"), label=NULL,
@@ -253,7 +291,7 @@ VolcanoServer <- function(id,sce,sce.markers) {
     })
     
     ViolinReact <- reactive({
-      req(!is.null(ExpressionL()) & input$Cell_Exp == "Violin")
+      req(!is.null(ExpressionL()))
       df <- ExpressionL()$Exp
       df$X <- factor(colData(sce)[,input$partitionType])
       df
@@ -264,7 +302,7 @@ VolcanoServer <- function(id,sce,sce.markers) {
     })
     
     ViolinPlot <-reactive({
-      req(!is.null(ExpressionL()) & input$Cell_Exp == "Violin")
+      req(!is.null(ExpressionL()))
       ggplot(ViolinReact()) + 
         geom_violin(aes(y = Y, 
                         x = X, 
@@ -282,41 +320,42 @@ VolcanoServer <- function(id,sce,sce.markers) {
     })
     
     SpikePlot <-reactive({
-      req(!is.null(ExpressionL()) & input$Cell_Exp == "SpikePlot")
+      req(!is.null(ExpressionL()))
       df <- ExpressionL()$Exp
       lt <- df  %>% split(df$DiffExpression)
     })
     
-    output$Violin.Bar_Plot <- renderPlot({
+    output$plot_Violin <- renderPlot({
       req(!is.null(ExpressionL()))
-      req(input$Cell_Exp)
-      if(input$Cell_Exp == "Violin"){
-        ViolinPlot()
-      } else { 
-        par(mfrow=c((length(SpikePlot())),1))
-        for(i in 1:length(SpikePlot())){
-          m <-barplot(SpikePlot()[[i]][OrderPartReact()$ordPart,"Y",drop=T],
-                                    col = OrderPartReact()$colPart[colData(sce)[,input$partitionType]][OrderPartReact()$ordPart],
-                                    border = OrderPartReact()$colPart[colData(sce)[,input$partitionType]][OrderPartReact()$ordPart],
-                                    ylab = "log(counts)", main = names(SpikePlot())[i], names.arg = F)
-          lines(x = m,
-                tapply(SpikePlot()[[i]][,"Y",drop=T],
-                       INDEX = colData(sce)[,input$partitionType],
-                       FUN = mean)[colData(sce)[,input$partitionType]][OrderPartReact()$ordPart],
-                lty=2,col="black")
-        }
-        legend("bottom", legend = names(OrderPartReact()$colPart), col = OrderPartReact()$colPart,
-               pch=19, ncol=6, xpd=T, inset=c(0,-0.10))
-        par(mfrow=c(1,1))
+      # req(input$Cell_Exp)
+      ViolinPlot()
+    })
+    
+    output$plot_SpikePlot <- renderPlot({
+      req(!is.null(ExpressionL()))
+      # req(input$Cell_Exp)
+      par(mfrow=c((length(SpikePlot())),1))
+      for(i in 1:length(SpikePlot())){
+        m <-barplot(SpikePlot()[[i]][OrderPartReact()$ordPart,"Y",drop=T],
+                                  col = OrderPartReact()$colPart[colData(sce)[,input$partitionType]][OrderPartReact()$ordPart],
+                                  border = OrderPartReact()$colPart[colData(sce)[,input$partitionType]][OrderPartReact()$ordPart],
+                                  ylab = "log(counts)", main = names(SpikePlot())[i], names.arg = F)
+        lines(x = m,
+              tapply(SpikePlot()[[i]][,"Y",drop=T],
+                     INDEX = colData(sce)[,input$partitionType],
+                     FUN = mean)[colData(sce)[,input$partitionType]][OrderPartReact()$ordPart],
+              lty=2,col="black")
       }
-      
+      legend("bottom", legend = names(OrderPartReact()$colPart), col = OrderPartReact()$colPart,
+             pch=19, ncol=6, xpd=T, inset=c(0,-0.10))
+      par(mfrow=c(1,1))
     })
     
     ####  Heatmap ----
     
     HeatmapL <- eventReactive(c(Genes(),input$norm_heat),{
       req(length(Genes()) > 0)
-      req(input$Cell_Exp == "Heatmap")
+      # req(input$Cell_Exp == "Heatmap")
       value <- ifelse(input$norm_heat,yes = "logcounts.norm",no = "logcounts")
       exp_mtx <-as.matrix(assay(sce,value)[Genes(),])
       if(length(Genes()) == 1) {
@@ -333,7 +372,7 @@ VolcanoServer <- function(id,sce,sce.markers) {
     
     Heatmap_Plot <- eventReactive(c(HeatmapL(),input$partitionType,input$mean_heat,input$cluster_row,input$cluster_column),{
       req(input$partitionType)
-      req(input$Cell_Exp == "Heatmap")
+      # req(input$Cell_Exp == "Heatmap")
       req(!is.null(HeatmapL()))
       req(!is.null(ExpressionL()))
       req(!is.null(OrderPartReact()))
@@ -413,12 +452,13 @@ VolcanoServer <- function(id,sce,sce.markers) {
     })
     
     output$plot_heatmap <- renderPlot({
-      req(input$Cell_Exp == "Heatmap")
+      req(!is.null(Heatmap_Plot()))
+      # req(input$Cell_Exp == "Heatmap")
       Heatmap_Plot()
     })
     ####  Dotplots ----
     output$plot_DotPlot <- renderPlotly({
-      req(input$Cell_Exp == "Dotplot")
+      # req(input$Cell_Exp == "Dotplot")
       req(input$partitionType)
       req(length(Genes()) > 0)
       feature <- Genes()
@@ -443,20 +483,20 @@ VolcanoServer <- function(id,sce,sce.markers) {
       ggplotly(g) %>% config(modeBarButtonsToRemove = c("select2d", "lasso2d", "hoverCompareCartesian"))
     })
     
-    ####  Final output ---- 
-    output$Cell_Plots <- renderUI({
-      req(input$Cell_Exp)
-      if(input$Cell_Exp == "Heatmap"){
-        plotOutput(NS(id,"plot_heatmap"),height = "100vh")
-      }
-      else if(input$Cell_Exp == "Dotplot"){
-        plotlyOutput(NS(id,"plot_DotPlot"),height = "100vh")
-      }
-      else{
-        plotOutput(NS(id,"Violin.Bar_Plot"),height = "100vh") 
-      }
-    })
-    
+    # ####  Final output ---- 
+    # output$Cell_Plots <- renderUI({
+    #   req(input$Cell_Exp)
+    #   if(input$Cell_Exp == "Heatmap"){
+    #     plotOutput(NS(id,"plot_heatmap"),height = "100vh")
+    #   }
+    #   else if(input$Cell_Exp == "Dotplot"){
+    #     plotlyOutput(NS(id,"plot_DotPlot"),height = "100vh")
+    #   }
+    #   else{
+    #     plotOutput(NS(id,"Violin.Bar_Plot"),height = "100vh") 
+    #   }
+    # })
+    # 
     
   })
 }
