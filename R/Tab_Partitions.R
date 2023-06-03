@@ -144,7 +144,7 @@ Clusters_Server <- function(id,sce) {
     output$plot_cluster <- renderPlot({
       req(input$partitionType1)  
       req(input$partitionType2)  
-      req(input$barplot_matrix == "barplot")
+      # req(input$barplot_matrix == "barplot")
       if(input$partitionType2 == "None"){
         ### Simple BarPlot ----
               ### Proportion ----
@@ -258,7 +258,7 @@ Clusters_Server <- function(id,sce) {
     output$randValue <- renderText({
       req(input$partitionType1)  
       req(input$partitionType2 != "None")
-      req(input$barplot_matrix == "matrix")
+      #req(input$barplot_matrix == "matrix")
       rand <- bluster::pairwiseRand(colData(sce)[,input$partitionType1],
                    colData(sce)[,input$partitionType2],
                    mode="index")
@@ -267,7 +267,7 @@ Clusters_Server <- function(id,sce) {
     output$plot_matrix <- renderPlot({
       req(input$partitionType1)  
       req(input$partitionType2 != "None")
-      req(input$barplot_matrix == "matrix")
+      #req(input$barplot_matrix == "matrix")
       
       if(input$Metric == "Count"){
         tab <- table(colData(sce)[,input$partitionType1],

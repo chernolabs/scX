@@ -191,12 +191,12 @@ Numeric_ExpressionServer <- function(id,sce,point.size=20) {
     })
     
     observeEvent(c(dimVector()),{
-      req(input$scatter_heatmap == "scatter")
+      #req(input$scatter_heatmap == "scatter")
       updatePickerInput(session,inputId = "DimType", choices = (c("3","2")[c(3,2) %in% dimVector()]))
     })
     
     observeEvent(c(input$DimType,dimVector()), {
-      req(input$scatter_heatmap == "scatter")
+      #req(input$scatter_heatmap == "scatter")
       req(!is.null(dimVector()))
       req(input$DimType)
 	  updatePickerInput(session,inputId = "plotType", choices = rev(names(which(dimVector() == as.numeric(input$DimType)  | dimVector() > 3))))
@@ -211,7 +211,7 @@ Numeric_ExpressionServer <- function(id,sce,point.size=20) {
     })
     
     ExpressionL <- eventReactive(genes.L(),{
-      req(input$scatter_heatmap == "scatter")
+      #req(input$scatter_heatmap == "scatter")
       req(input$GL_T == F)
       req(!is.null(genes.L()))
       if(length(genes.L()) > 1) {
@@ -223,7 +223,7 @@ Numeric_ExpressionServer <- function(id,sce,point.size=20) {
     })
     
     HeatmapL <- eventReactive(c(genes.L(),input$norm_heat),{
-      req(input$scatter_heatmap == "heatmap")
+      #req(input$scatter_heatmap == "heatmap")
       req(input$GL_T == F)
       req(!is.null(genes.L()))
       value <- ifelse(input$norm_heat,yes = "logcounts.norm",no = "logcounts") #To swtich between norm ot not normalize expression gene.
@@ -255,7 +255,7 @@ Numeric_ExpressionServer <- function(id,sce,point.size=20) {
     })
     
     ExpressionGL <- eventReactive(genes.GL(),{
-      req(input$scatter_heatmap == "scatter")
+      #req(input$scatter_heatmap == "scatter")
       req(input$GL_T == T)
       req(length(genes.GL()$genes) > 0)
       
@@ -269,7 +269,7 @@ Numeric_ExpressionServer <- function(id,sce,point.size=20) {
     })
     
     HeatmapGL <- eventReactive(c(genes.GL(),input$norm_heat),{
-      req(input$scatter_heatmap == "heatmap")
+      #req(input$scatter_heatmap == "heatmap")
       req(input$GL_T == T)
       req(length(genes.GL()$genes) > 0)
       value <- ifelse(input$norm_heat,yes = "logcounts.norm",no = "logcounts") #To swtich between norm ot not normalize expression gene.
@@ -285,7 +285,7 @@ Numeric_ExpressionServer <- function(id,sce,point.size=20) {
     #### Selecting ----
     #I do that because if it change, it haven't to calculated everything again, just change the dataframe
     HeatmapF <- reactive({
-      req(input$scatter_heatmap == "heatmap")
+      #req(input$scatter_heatmap == "heatmap")
       if(input$GL_T){
         HeatmapGL()    
       } else { 
@@ -311,7 +311,7 @@ Numeric_ExpressionServer <- function(id,sce,point.size=20) {
     
     ### Scatter ----
     ClusterPlot <- eventReactive(c(input$plotType,input$partitionType,input$numericType),{
-      req(input$scatter_heatmap == "scatter")
+      #req(input$scatter_heatmap == "scatter")
       #3D
       if(input$DimType == "3"){
         plot_ly(type = "scatter3d", mode = "markers",source = "PlotMix",colors = 'YlOrRd')  %>%
@@ -416,7 +416,7 @@ Numeric_ExpressionServer <- function(id,sce,point.size=20) {
     ### Heatmaps ----
     #Here I made everything in the same reactive object to manipulated all the reactive order at the same time
     Heatmap_Plot <- eventReactive(c(HeatmapF(),input$partitionType,input$numericType,input$cluster_row,input$split_column),{
-      req(input$scatter_heatmap == "heatmap")
+      #req(input$scatter_heatmap == "heatmap")
       req(input$partitionType)
       req(input$numericType)
       req(!is.null(HeatmapF()))
@@ -459,7 +459,7 @@ Numeric_ExpressionServer <- function(id,sce,point.size=20) {
     })
 
     output$plot_heatmap <- renderPlot({
-      req(input$scatter_heatmap == "heatmap")
+      #req(input$scatter_heatmap == "heatmap")
       req(!is.null(Heatmap_Plot()))
       Heatmap_Plot()
     })
@@ -482,7 +482,7 @@ Numeric_ExpressionServer <- function(id,sce,point.size=20) {
      })
      
      output$scatter_lines  <- renderPlotly({
-       req(input$scatter_heatmap == "scatter")
+       #req(input$scatter_heatmap == "scatter")
        req(!is.null(ExpressionF()) & input$Cell_Exp == "Lines")
         p <- LinesReact() %>% ggplot(aes(y=Exp,x=Numeric)) + geom_point(aes(col = if(input$partitionType != 'None'){partitionType} else{NULL}),alpha=0.5) + geom_smooth(se = F) +
          labs(color = input$partitionType) + 
@@ -494,7 +494,7 @@ Numeric_ExpressionServer <- function(id,sce,point.size=20) {
      })
      
      output$SpikePlot <- renderPlot({
-       req(input$scatter_heatmap == "scatter")
+       #req(input$scatter_heatmap == "scatter")
        req(!is.null(ExpressionF()) & input$Cell_Exp == "SpikePlot")
        barplot(ExpressionF()$Exp[OrderPartReact()$ordPart],
                col = OrderPartReact()$colPart[colData(sce)[,input$partitionType]][OrderPartReact()$ordPart],
@@ -517,7 +517,7 @@ Numeric_ExpressionServer <- function(id,sce,point.size=20) {
      
      #### Line plot MultiGenes ----
      output$plot_MultiLines <- renderPlotly({
-       req(input$scatter_heatmap == "MultiLines")
+       #req(input$scatter_heatmap == "MultiLines")
        req(input$numericType)
        if(input$GL_T){
          req(length(genes.GL()$genes) > 0)
