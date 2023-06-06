@@ -38,8 +38,18 @@ QC_UI <- function(id) {
         box( width = NULL, title = "Quality Control",
              solidHeader = T,collapsible = T,
              footer = tagList(shiny::icon("cat"), "Nya"),
-          plotlyOutput(NS(id,"scatter_boxPlot"),
-                       height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
+             tabsetPanel(id = NS(id,"switcher2"),
+                         type = "hidden",
+                         selected = "Scatter_panel",
+                         tabPanelBody("Scatter_panel",
+                                      plotlyOutput(NS(id,"plot_scatter"),
+                                                   height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
+                         ),
+                         tabPanelBody("boxPlot_panel",
+                                      plotlyOutput(NS(id,"plot_boxPlot"),
+                                                   height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
+                         )
+             )
         )
       )
     )
@@ -53,6 +63,14 @@ QC_Server <- function(id,sce,descriptionText) {
     ### Observe Events ----
     updatePickerInput(session, 'partitionType', 
                       choices = c("None",names(colData(sce))[sapply(colData(sce), is.factor)]))
+    
+    observeEvent(input$scatter_box,{
+      req(input$scatter_box)
+      switch(input$scatter_box,
+             'Scatter'    = updateTabsetPanel(inputId = "switcher2",  selected = "Scatter_panel"),
+             'Boxplot'    = updateTabsetPanel(inputId = "switcher2", selected = "boxPlot_panel")
+      )
+    })
     
     ### Description Text -----
     output$DescriptionText <- renderUI({
@@ -115,18 +133,19 @@ QC_Server <- function(id,sce,descriptionText) {
     })
     
     #### Scatter & Boxplot ----
-    output$scatter_boxPlot <- renderPlotly({
-      by_color <- if(input$partitionType == "None") {NULL} else{colData(sce)[,input$partitionType]}
-      if(input$scatter_box == "Scatter"){
+    output$plot_scatter <- renderPlotly({
+        by_color <- if(input$partitionType == "None") {NULL} else{colData(sce)[,input$partitionType]}
         g <- ggplot(as.data.frame(colData(sce)),aes(x=nCounts,y=nFeatures)) + geom_point(alpha=0.5,aes(col=by_color))+ 
-          xlab('nCounts') + ylab('nFeatures') + 
-          labs(color = input$partitionType) + 
-          scale_colour_manual(values=OrderPartReact()$colPart)
-        
+             xlab('nCounts') + ylab('nFeatures') + 
+             labs(color = input$partitionType) + 
+             scale_colour_manual(values=OrderPartReact()$colPart)
+          
         g <- ggplotly(g) %>% config(modeBarButtonsToRemove = c("select2d", "lasso2d"))
-      }
+        g %>% toWebGL()
+      })
+    
+    output$plot_boxPlot <- renderPlotly({
       
-      else{
         df <-data.frame(Yratio=sce$nCounts/sce$nFeatures, Counts = sce$nCounts,Features  = sce$nFeatures)
         if(input$partitionType == "None") {
           df$X <- "All"
@@ -158,13 +177,12 @@ QC_Server <- function(id,sce,descriptionText) {
         
         
         g <- subplot(g_ratio,g_counts,g_feat,nrows = 3,shareX = T,shareY = F,titleY = T,heights = c(0.4,0.3,0.3)) %>% 
-			config(modeBarButtonsToRemove = c("select2d", "lasso2d"))
+          config(modeBarButtonsToRemove = c("select2d", "lasso2d"))
         
-        
-      }
-      g %>% toWebGL()
-      
+       g %>% toWebGL()
+       
     })
+      
     
   })
 }

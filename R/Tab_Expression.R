@@ -157,7 +157,16 @@ ExpressionUI <- function(id) {
                 width = NULL, solidHeader = T,collapsible = T,
                 footer = tagList(shiny::icon("cat"), "Nya"),
               uiOutput(NS(id,"Violin.Bar_Input")),
-              plotOutput(NS(id,"Violin.Bar_Plot")) %>% withSpinner()
+              tabsetPanel(id = NS(id,"switcher2"),
+                          type = "hidden",
+                          selected = "Violin_panel",
+                tabPanelBody("Violin_panel",
+                  plotOutput(NS(id,"plot_Violin")) %>% withSpinner()
+                ),
+                tabPanelBody("SpikePlot_panel",
+                             plotOutput(NS(id,"plot_SpikePlot")) %>% withSpinner()
+                )
+              )
             )
           ),
           tabPanel("Heatmap", value= "heatmap",
@@ -216,6 +225,14 @@ ExpressionServer <- function(id,sce,point.size=20) {
       req(!is.null(dimVector()))
       req(input$DimType)
 	    updatePickerInput(session,inputId = "plotType", choices = rev(names(which(dimVector() == as.numeric(input$DimType)  | dimVector() > 3))))
+    })
+    
+    observeEvent(input$Cell_Exp,{
+      req(input$Cell_Exp)
+      switch(input$Cell_Exp,
+             'Violin'    = updateTabsetPanel(inputId = "switcher2",  selected = "Violin_panel"),
+             'SpikePlot' = updateTabsetPanel(inputId = "switcher2", selected = "SpikePlot_panel")
+      )
     })
     
     ### Gen selected & data preparation ----
@@ -514,7 +531,7 @@ ExpressionServer <- function(id,sce,point.size=20) {
      })
      
      ViolinReact <- reactive({
-       req(!is.null(ExpressionF()) & input$Cell_Exp == "Violin")
+       req(!is.null(ExpressionF()))
        data.frame(Y =ExpressionF()$Exp,
                   X=factor(colData(sce)[,input$partitionType]))
      })
@@ -525,7 +542,7 @@ ExpressionServer <- function(id,sce,point.size=20) {
      
      ViolinPlot <-reactive({
        #req(input$scatter_heatmap == "scatter")
-       req(!is.null(ExpressionF()) & input$Cell_Exp == "Violin")
+       req(!is.null(ExpressionF()))
        ggplot(ViolinReact()) + 
          geom_violin(aes(y = Y, 
                          x = X, 
@@ -544,7 +561,7 @@ ExpressionServer <- function(id,sce,point.size=20) {
      
      SpikePlot <-reactive({
        #req(input$scatter_heatmap == "scatter")
-       req(!is.null(ExpressionF()) & input$Cell_Exp == "SpikePlot")
+       req(!is.null(ExpressionF()))
        m <- barplot(ExpressionF()$Exp[OrderPartReact()$ordPart],
                col = OrderPartReact()$colPart[colData(sce)[,input$partitionType]][OrderPartReact()$ordPart],
                border = OrderPartReact()$colPart[colData(sce)[,input$partitionType]][OrderPartReact()$ordPart],
@@ -556,16 +573,18 @@ ExpressionServer <- function(id,sce,point.size=20) {
                     INDEX = colData(sce)[,input$partitionType],
                     FUN = mean)[colData(sce)[,input$partitionType]][OrderPartReact()$ordPart],
              lty=2,col="black")
+       graph <- recordPlot()
+       graph
      })
      
-     output$Violin.Bar_Plot <- renderPlot({
-       req(!is.null(ExpressionF()))
-       req(input$Cell_Exp)
-       if(input$Cell_Exp == "Violin"){
-         ViolinPlot()
-       } else { 
-         SpikePlot()
-       }
+     output$plot_Violin <- renderPlot({
+       req(!is.null(ViolinPlot()))
+         ViolinPlot() %>% plot()
+     })
+     
+     output$plot_SpikePlot <- renderPlot({
+       req(!is.null(SpikePlot()))
+       SpikePlot() %>% print()
      })
      
      

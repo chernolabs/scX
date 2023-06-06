@@ -144,7 +144,16 @@ Numeric_ExpressionUI <- function(id) {
                 width = NULL, solidHeader = T,collapsible = T,
                 footer = tagList(shiny::icon("cat"), "Nya"),
               uiOutput(NS(id,"Lines.Bar_Input")),
-              uiOutput(NS(id,"Cell_Plots")) %>% withSpinner()
+              tabsetPanel(id = NS(id,"switcher2"),
+                          type = "hidden",
+                          selected = "Lines_panel",
+                          tabPanelBody("Lines_panel",
+                                       plotlyOutput(NS(id,"plot_Lines")) %>% withSpinner()
+                          ),
+                          tabPanelBody("SpikePlot_panel",
+                                       plotOutput(NS(id,"plot_SpikePlot")) %>% withSpinner()
+                          )
+              )
             )
           ),
           tabPanel("Heatmap", value= "heatmap",
@@ -202,6 +211,13 @@ Numeric_ExpressionServer <- function(id,sce,point.size=20) {
 	  updatePickerInput(session,inputId = "plotType", choices = rev(names(which(dimVector() == as.numeric(input$DimType)  | dimVector() > 3))))
     })
     
+    observeEvent(input$Cell_Exp,{
+      req(input$Cell_Exp)
+      switch(input$Cell_Exp,
+             'Lines'    = updateTabsetPanel(inputId = "switcher2",  selected = "Lines_panel"),
+             'SpikePlot' = updateTabsetPanel(inputId = "switcher2", selected = "SpikePlot_panel")
+      )
+    })
     ### Gen selected & data preparation ----
         #### Selected Gene -----
     genes.L <- eventReactive(input$action,{
@@ -472,7 +488,7 @@ Numeric_ExpressionServer <- function(id,sce,point.size=20) {
      })
      
      LinesReact <- reactive({
-       req(!is.null(ExpressionF()) & input$Cell_Exp == "Lines")
+       req(!is.null(ExpressionF()))
        
        p <- data.frame(Exp=ExpressionF()$Exp,Numeric = colData(sce)[,input$numericType])
        if(input$partitionType != 'None') {
@@ -481,9 +497,9 @@ Numeric_ExpressionServer <- function(id,sce,point.size=20) {
        p
      })
      
-     output$scatter_lines  <- renderPlotly({
+     output$plot_Lines  <- renderPlotly({
        #req(input$scatter_heatmap == "scatter")
-       req(!is.null(ExpressionF()) & input$Cell_Exp == "Lines")
+       req(!is.null(ExpressionF()))
         p <- LinesReact() %>% ggplot(aes(y=Exp,x=Numeric)) + geom_point(aes(col = if(input$partitionType != 'None'){partitionType} else{NULL}),alpha=0.5) + geom_smooth(se = F) +
          labs(color = input$partitionType) + 
           xlab(input$numericType) + 
@@ -493,9 +509,9 @@ Numeric_ExpressionServer <- function(id,sce,point.size=20) {
         p %>% ggplotly() %>% toWebGL()
      })
      
-     output$SpikePlot <- renderPlot({
+     output$plot_SpikePlot <- renderPlot({
        #req(input$scatter_heatmap == "scatter")
-       req(!is.null(ExpressionF()) & input$Cell_Exp == "SpikePlot")
+       req(!is.null(ExpressionF()))
        barplot(ExpressionF()$Exp[OrderPartReact()$ordPart],
                col = OrderPartReact()$colPart[colData(sce)[,input$partitionType]][OrderPartReact()$ordPart],
                border = OrderPartReact()$colPart[colData(sce)[,input$partitionType]][OrderPartReact()$ordPart],
@@ -503,16 +519,8 @@ Numeric_ExpressionServer <- function(id,sce,point.size=20) {
        legend("bottom", legend = names(OrderPartReact()$colPart), col = OrderPartReact()$colPart,
               pch=19, ncol=6, xpd=T, inset=c(0,-0.25))
        abline(h=mean(ExpressionF()$Exp[ExpressionF()$Exp>0]),lty=2,col="grey")
-     })
-     
-     output$Cell_Plots <- renderUI({
-       req(input$Cell_Exp)
-       if(input$Cell_Exp == "SpikePlot"){
-         plotOutput(NS(id,"scatter_lines"),height = "100vh")
-       }
-       else if(input$Cell_Exp == "Lines"){
-         plotlyOutput(NS(id,"scatter_lines"),height = "100vh")
-       }
+       # graph <- recordPlot()
+       # graph
      })
      
      #### Line plot MultiGenes ----

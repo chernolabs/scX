@@ -79,7 +79,16 @@ N_markersUI <- function(id) {
                 width = NULL,solidHeader = T,collapsible = T,
                 footer = tagList(shiny::icon("cat"), "Nya"),
               uiOutput(NS(id,"Violin.Bar_Input")),
-              plotOutput(NS(id,"Violin.Bar_Plot")) %>%  shinycssloaders::withSpinner()
+              tabsetPanel(id = NS(id,"switcher2"),
+                          type = "hidden",
+                          selected = "Violin_panel",
+                          tabPanelBody("Violin_panel",
+                                       plotOutput(NS(id,"plot_Violin")) %>% withSpinner()
+                          ),
+                          tabPanelBody("SpikePlot_panel",
+                                       plotOutput(NS(id,"plot_SpikePlot")) %>% withSpinner()
+                          )
+              )
             )
           )
         )
@@ -129,6 +138,14 @@ N_markersServer <- function(id,sce,point.size = 20) {
       req(!is.null(cells_selected()))
       updateTabsetPanel(inputId = "switcher", selected = "panel1")
       runjs("Shiny.setInputValue('plotly_selected-PlotMix', null);")
+    })
+    
+    observeEvent(input$Cell_Exp,{
+      req(input$Cell_Exp)
+      switch(input$Cell_Exp,
+             'Violin'    = updateTabsetPanel(inputId = "switcher2",  selected = "Violin_panel"),
+             'SpikePlot' = updateTabsetPanel(inputId = "switcher2", selected = "SpikePlot_panel")
+      )
     })
     
     ### Cluster and Gen selected ----
@@ -295,7 +312,7 @@ N_markersServer <- function(id,sce,point.size = 20) {
     })
     
     ViolinReact <- reactive({
-      req(!is.null(gene_marker_selected()) & input$Cell_Exp == "Violin")
+      req(!is.null(gene_marker_selected()))
       data.frame(Y = logcounts(sce)[gene_marker_selected(),],
                  X=factor(colData(sce)[,input$partitionType]))
     })
@@ -305,7 +322,7 @@ N_markersServer <- function(id,sce,point.size = 20) {
     })
     
     ViolinPlot <-reactive({
-      req(!is.null(gene_marker_selected()) & input$Cell_Exp == "Violin")
+      req(!is.null(gene_marker_selected()))
       ggplot(ViolinReact()) + 
         geom_violin(aes(y = Y, 
                         x = X, 
@@ -321,7 +338,7 @@ N_markersServer <- function(id,sce,point.size = 20) {
     })
     
     SpikePlot <-reactive({
-      req(!is.null(gene_marker_selected()) & input$Cell_Exp == "SpikePlot")
+      req(!is.null(gene_marker_selected()))
       m <- barplot(assay(sce,"logcounts")[gene_marker_selected(),][OrderPartReact()$ordPart],
               col = OrderPartReact()$colPart[colData(sce)[,input$partitionType]][OrderPartReact()$ordPart],
               border = OrderPartReact()$colPart[colData(sce)[,input$partitionType]][OrderPartReact()$ordPart],
@@ -333,20 +350,20 @@ N_markersServer <- function(id,sce,point.size = 20) {
                    INDEX = colData(sce)[,input$partitionType],
                    FUN = mean)[colData(sce)[,input$partitionType]][OrderPartReact()$ordPart],
             lty=2,col="black")
+      graph <- recordPlot()
+      graph
     })
     
-    output$Violin.Bar_Plot <- renderPlot({
-      req(!is.null(gene_marker_selected()))
-      req(input$Cell_Exp)
-      if(input$Cell_Exp == "Violin"){
-        ViolinPlot()
-      } else { 
-        SpikePlot()
-      }
+    output$plot_Violin <- renderPlot({
+      req(!is.null(ViolinPlot()))
+      ViolinPlot() %>% plot()
     })
     
+    output$plot_SpikePlot <- renderPlot({
+      req(!is.null(SpikePlot()))
+      SpikePlot() %>% print()
+    })
     
-      
   })
 }
 
