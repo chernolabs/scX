@@ -512,13 +512,31 @@ Numeric_ExpressionServer <- function(id,sce,point.size=20) {
      output$plot_SpikePlot <- renderPlot({
        #req(input$scatter_heatmap == "scatter")
        req(!is.null(ExpressionF()))
-       barplot(ExpressionF()$Exp[OrderPartReact()$ordPart],
-               col = OrderPartReact()$colPart[colData(sce)[,input$partitionType]][OrderPartReact()$ordPart],
-               border = OrderPartReact()$colPart[colData(sce)[,input$partitionType]][OrderPartReact()$ordPart],
-               ylab = "log(counts)", main = ifelse(length(ExpressionF()$Genes)>1,"mean expression","expression"), names.arg = F) 
-       legend("bottom", legend = names(OrderPartReact()$colPart), col = OrderPartReact()$colPart,
-              pch=19, ncol=6, xpd=T, inset=c(0,-0.25))
-       abline(h=mean(ExpressionF()$Exp[ExpressionF()$Exp>0]),lty=2,col="grey")
+       if(input$partitionType == 'None'){
+         ord <- order(colData(sce)[,input$numericType])
+         barplot(ExpressionF()$Exp[ord],
+                      col = "black",
+                      border = "black",
+                      ylab = "log(counts)",
+                 main = ifelse(length(ExpressionF()$Genes)>1,"mean expression","expression"),
+                 names.arg = F) 
+         # legend("bottom", legend = names(OrderPartReact()$colPart), col = OrderPartReact()$colPart,
+                # pch=19, ncol=6, xpd=T, inset=c(0,-0.25))
+         abline(h=mean(ExpressionF()$Exp[ExpressionF()$Exp>0]),lty=2,col="grey")
+       } else{
+         ord <- order(ordered(colData(sce)[,input$partitionType]), colData(sce)[,input$numericType])
+         m <- barplot(ExpressionF()$Exp[ord],
+                      col = OrderPartReact()$colPart[colData(sce)[,input$partitionType]][ord],
+                      border = OrderPartReact()$colPart[colData(sce)[,input$partitionType]][ord],
+                      ylab = "log(counts)", main = ifelse(length(ExpressionF()$Genes)>1,"mean expression","expression"), names.arg = F) 
+         legend("bottom", legend = names(OrderPartReact()$colPart), col = OrderPartReact()$colPart,
+                pch=19, ncol=6, xpd=T, inset=c(0,-0.25))
+         lines(x = m,
+               tapply(ExpressionF()$Exp,
+                      INDEX = colData(sce)[,input$partitionType],
+                      FUN = mean)[colData(sce)[,input$partitionType]][ord],
+               lty=2,col="black")
+       }
        # graph <- recordPlot()
        # graph
      })
