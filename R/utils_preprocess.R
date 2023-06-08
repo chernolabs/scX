@@ -13,12 +13,15 @@
 #' @param metadata Optional dataframe with cell metadata.
 #' @param toFactors Optional metadata column names (or colData) to use as factors. If `NULL` (default),
 #'		a quick clusterization will be computed.
+#' @param toKeep Additional metadata column names (or colData) to use only for coloring in plots. If `NULL` (default),
+#'    all columns will be available for coloring plots in the app. 
 #' @param chosen.hvg Optional list of Highly Variable Genes.
 #' @param nHVGs Number of Highly Variable Genes to use if `chosen.hvg=NULL`. Defaults to 3000.
 #' @param nPCs Number of Principal Components to use in PCA. Defaults to 50.
 #' @param verbose Step by step status while function is running. Defaults to `TRUE`.
 #' @param calcRedDim Whether to compute reduced dimensions (PCA, UMAP, TSNE, UMAP2D, TSNE2D) or not.
 #'		Defaults to `TRUE`.
+#' @param descriptionText The short description of the object being analized. This can help when you are working with multiple tabs. 
 #' @returns List with a SingleCellExperiment object and additional data ready for use in scXplorer.
 #' @export
 createSCEobject <- function(xx,
@@ -26,10 +29,12 @@ createSCEobject <- function(xx,
                             assay.name.normalization="logcounts",
                             metadata=NULL,
                             toFactors=NULL,
+                            toKeep=NULL,
                             chosen.hvg=NULL,
                             nHVGs=3000,
                             nPCs=50,
                             calcRedDim=TRUE,
+                            descriptionText=NULL,
                             verbose=TRUE){
   
   csceo <- list()
@@ -213,7 +218,17 @@ createSCEobject <- function(xx,
 	}
   if(verbose) cat(' Finished\n')
   
+  # Subsetting SCE object ----
+  # Keep only colData names that will be use for coloring plots
+  if(!is.null(toKeep)){
+    coldatanames <- names(colData(xx.sce))
+    if(!all(toKeep%in%coldatanames)) warning(" Can't find '",paste0(toKeep[!toKeep%in%coldatanames],collapse = ' & '),"' in coldata.\n '",paste0(toKeep[toKeep%in%coldatanames],collapse = ' & '), "' will be available for coloring plots in the app.")
+    if(all(!toKeep%in%coldatanames)) warning(" Can't find 'toKeep' in coldata.\n Only 'toFactors' will be available for coloring plots in the app.")
+    coldatanames <- coldatanames[coldatanames%in%c("nCounts", "nFeatures", toFactors, toKeep)]
+    colData(xx.sce) <- colData(xx.sce)[,coldatanames]
+  }
   
+
   # Attaching SCE to output ----
   csceo[["SCE"]] <- xx.sce
   
@@ -225,6 +240,7 @@ createSCEobject <- function(xx,
     sce.markers[[i]] <- scran::findMarkers(xx.sce, 
                                     assay.type = "logcounts",
                                     group = colData(xx.sce)[,i],
+                                    test.type="wilcox",
                                     direction="any",pval.type="all",log.p=T,full.stats=T)
   }
   if(verbose) cat(' Finished\n')
@@ -244,6 +260,9 @@ createSCEobject <- function(xx,
   
   # Attaching ldf to output ----
   csceo[["ldf"]] <- ldf
+  
+  # Adding description text to output ----
+  csceo[["text"]] <- descriptionText
   
   gc() # free memory
   return(csceo)
@@ -307,6 +326,7 @@ ldf_func <- function(sce, partition,minSize=50){
     lfmrk[[type[itype]]]    <- scran::findMarkers(sce,
                                            assay.type = "logcounts",
                                            groups=colData(sce)[,partition],
+                                           test.type="wilcox",
                                            full.stats=TRUE,
                                            direction='up',
                                            pval.type=type[itype])
@@ -355,7 +375,8 @@ ldf_func <- function(sce, partition,minSize=50){
                         }
         )
         df <- data.frame(boxcor=boxcor,
-                         robustness=a[names(mrkrs)]
+                         robustness=a[names(mrkrs)],
+                         fM_FDR=formatC(lfmrk[['all']][[coi]][names(mrkrs),'FDR'],digits = 3)
         )
       }
       else {
