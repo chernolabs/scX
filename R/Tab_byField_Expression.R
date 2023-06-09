@@ -33,7 +33,7 @@ Numeric_ExpressionUI <- function(id) {
               )
             )  
           ),
-          conditionalPanel("(typeof output.plot !== 'undefined' || input.scatter_heatmap == 'heatmap') && input.scatter_heatmap !== 'MultiLines'", ns = NS(id),
+          conditionalPanel("(typeof output.plot_expression !== 'undefined' || input.scatter_heatmap == 'heatmap') && input.scatter_heatmap !== 'MultiLines'", ns = NS(id),
             fluidRow(
               column(8,style='padding-left:12px; padding-right:3px;',
                 pickerInput(inputId = NS(id,"partitionType"), 
@@ -138,7 +138,16 @@ Numeric_ExpressionUI <- function(id) {
             box(title = "Scatter Plot",
                 width = NULL, solidHeader = T, collapsible = T,
                 footer = tagList(shiny::icon("cat"), "Nya"),
-              plotlyOutput(NS(id,"plot"),height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
+                tabsetPanel(id = NS(id,"switcher3"),
+                            type = "hidden",
+                            selected = "expression_panel",
+                            tabPanelBody("cluster_panel",
+                                         plotlyOutput(NS(id,"plot_cluster"),height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
+                            ),
+                            tabPanelBody("expression_panel",
+                                         plotlyOutput(NS(id,"plot_expression"),height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
+                            )
+                )
             ),
             box(title = "Expression Plots",
                 width = NULL, solidHeader = T,collapsible = T,
@@ -184,6 +193,14 @@ Numeric_ExpressionServer <- function(id,sce,point.size=20) {
         updateTabsetPanel(inputId = "switcher", selected = "panel2")
       } else{
         updateTabsetPanel(inputId = "switcher", selected = "panel1")
+      }
+    })
+    
+    observeEvent(ignoreInit = T,input$button,{
+      if(input$button) {
+        updateTabsetPanel(inputId = "switcher3", selected = "cluster_panel")
+      } else{
+        updateTabsetPanel(inputId = "switcher3", selected = "expression_panel")
       }
     })
     
@@ -421,13 +438,16 @@ Numeric_ExpressionServer <- function(id,sce,point.size=20) {
       
     })
     
-    output$plot <- renderPlotly({
-      if(input$button == T){
-        ClusterPlot()
-      } else{
-        ExpressionPlot()
-      }
+    output$plot_cluster <- renderPlotly({
+      req(!is.null(ClusterPlot()))
+      ClusterPlot()
     })
+    
+    output$plot_expression <- renderPlotly({
+      req(!is.null(ExpressionPlot()))
+      ExpressionPlot()
+    })
+    
     
     ### Heatmaps ----
     #Here I made everything in the same reactive object to manipulated all the reactive order at the same time

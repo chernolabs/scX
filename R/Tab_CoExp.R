@@ -17,7 +17,7 @@ COExpUI <- function(id) {
               pickerInput(NS(id,"plotType"), "  Plot Type", choices = NULL,width = NULL)
             )
           ),
-          conditionalPanel("typeof output.plot !== 'undefined'", ns = NS(id), 
+          conditionalPanel("typeof output.plot_expression !== 'undefined'", ns = NS(id), 
             fluidRow(
               column(8,style='padding-left:12px; padding-right:3px;',
                 pickerInput(inputId = NS(id,"partitionType"), 
@@ -43,7 +43,7 @@ COExpUI <- function(id) {
                                         placeholder = 'Select two genes for co-expression'),
                          multiple=T)
         ),
-        conditionalPanel("typeof output.plot !== 'undefined'", ns = NS(id), 
+        conditionalPanel("typeof output.plot_expression !== 'undefined'", ns = NS(id), 
           box(title = " Co-detection Summary",
               width = NULL,solidHeader = F, collapsible = F, align="center",
             tableOutput(NS(id,"DTCoExp")) %>% withLoader(type='html',loader = 'loader6')
@@ -53,7 +53,7 @@ COExpUI <- function(id) {
       column(9,
         box(title = "Scatter Plot",
             width = NULL, solidHeader = T, collapsible = T,
-          conditionalPanel("!input.button && typeof output.plot !== 'undefined'", ns = NS(id),
+          conditionalPanel("!input.button && typeof output.plot_expression !== 'undefined'", ns = NS(id),
             fluidRow(column=12,align = "left",style='padding-left:12px; padding-right:12px;',
               dropdownButton(
                 plotOutput(NS(id,"plot_gradient"),width = "400px",height =  "400px") %>% withSpinner(),
@@ -64,14 +64,23 @@ COExpUI <- function(id) {
               )
             )
           ),
-          plotlyOutput(NS(id,"plot"),height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
-        ),
-        conditionalPanel("typeof output.plot !== 'undefined'", ns = NS(id),
-          box(title="Co-detection Matrix",width = NULL,
-              solidHeader = T, collapsible=T,
-            plotOutput(NS(id,"CorrPlot")) %>% withSpinner()
+          tabsetPanel(id = NS(id,"switcher3"),
+                      type = "hidden",
+                      selected = "expression_panel",
+                      tabPanelBody("cluster_panel",
+                                   plotlyOutput(NS(id,"plot_cluster"),height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
+                      ),
+                      tabPanelBody("expression_panel",
+                                   plotlyOutput(NS(id,"plot_expression"),height = "100vh") %>% withLoader(type='html',loader = 'dnaspin'),
+                                   conditionalPanel("typeof output.plot_expression !== 'undefined'", ns = NS(id),
+                                   box(title="Co-detection Matrix",width = NULL,
+                                       solidHeader = T, collapsible=T,
+                                       plotOutput(NS(id,"CorrPlot")) %>% withSpinner()
+                                   )
+                              )
+                      )
           )
-        )
+        ),
       )
     )
   )
@@ -100,6 +109,13 @@ COExpServer <- function(id,sce,point.size=20) {
 	  updatePickerInput(session,inputId = "plotType", choices = rev(names(which(dimVector() == as.numeric(input$DimType)  | dimVector() > 3))))
     })
     
+    observeEvent(ignoreInit = T,input$button,{
+      if(input$button) {
+        updateTabsetPanel(inputId = "switcher3", selected = "cluster_panel")
+      } else{
+        updateTabsetPanel(inputId = "switcher3", selected = "expression_panel")
+      }
+    })
     ### Table and Gen selected ----
     
     CoExpressionL <- reactive({
@@ -211,17 +227,19 @@ COExpServer <- function(id,sce,point.size=20) {
       
     })
     
-    output$plot <- renderPlotly({
-      if(input$button == T){
+    output$plot_cluster <- renderPlotly({
+      req(!is.null(ClusterPlot()))
         ClusterPlot()
-      } else{
-        CoExpressionPlot()
-      }
+    })
+    
+    output$plot_expression <- renderPlotly({
+      req(!is.null(CoExpressionPlot()))
+      CoExpressionPlot()
     })
     
      output$plot_gradient <- renderPlot({
        req(length(input$gen_coexp) >1)
-       req(input$button == F)
+       # req(input$button == F)
        plot2dgradient(gen1 = input$gen_coexp[1],gen2 = input$gen_coexp[2])
      })
     
