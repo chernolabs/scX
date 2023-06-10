@@ -253,7 +253,7 @@ QC_Server <- function(id,sce,descriptionText) {
           axis.ticks.x = element_blank()
         )
         
-        g <- plot_grid(
+        g <- cowplot::plot_grid(
           g1, g2, BoxPlot()$g3,
           ncol = 1,  # Number of columns in the grid
           align = "v",  # Align the plots vertically
