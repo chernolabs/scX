@@ -56,50 +56,82 @@ VolcanoUI <- function(id) {
              conditionalPanel("typeof output.VolcanoPlot !== 'undefined'", ns = NS(id),
                               box(title="Expression Plots",width = NULL, solidHeader = T, collapsible=T,
                                   uiOutput(NS(id,"Violin.Bar_Input")),
-                                  conditionalPanel("input.Cell_Exp == 'Heatmap'", ns = NS(id),
-                                                   dropdownButton(
-                                                     prettySwitch(NS(id,"cluster_row"),"Cluster Row",value = F,status = "primary",
-                                                                  fill = TRUE),
-                                                     prettySwitch(NS(id,"cluster_column"),"Cluster Column",value = F,status = "primary",
-                                                                  fill = TRUE),
-                                                     prettySwitch(NS(id,"norm_heat"),"Norm per gene",value = F,status = "primary",
-                                                                  fill = TRUE),
-                                                     prettySwitch(NS(id,"mean_heat"),"Mean per group",value = F,status = "primary",
-                                                                  fill = TRUE),
-                                                     circle = FALSE, status = "primary", icon = icon("cog"), width = "300px", size= "sm",
-                                                     tooltip = tooltipOptions(title = "Press to see Heatmap settings")
-                                                   )
-                                  ),
-                                  conditionalPanel("input.Cell_Exp == 'Dotplot'", ns = NS(id),
-                                                   dropdownButton(
-                                                     prettySwitch(NS(id,"ord_dotplot"),"Cluster Row",value = F,status = "primary",
-                                                                  fill = TRUE),
-                                                     prettySwitch(NS(id,"scale_dotplot"),"Scale",value = F,status = "primary",
-                                                                  fill = TRUE),
-                                                     prettySwitch(NS(id,"center_dotplot"),"Center",value = F,status = "primary",
-                                                                  fill = TRUE),
-                                                     circle = FALSE, status = "primary", icon = icon("cog"), width = "300px",
-                                                     size= "sm",
-                                                     tooltip = tooltipOptions(title = "Press to see DotPlot settings")
-                                                   )
-                                  ), 
                                   # uiOutput(NS(id,"Cell_Plots")) %>% withSpinner()
                                   tabsetPanel(id = NS(id,"switcher"),
                                               type = "hidden",
                                               selected = "Violin_panel",
                                               tabPanelBody("Violin_panel",
+                                                           dropdownButton(
+                                                             numericInput(NS(id,"pdf_widht_violin"),"Widht",value = 7),
+                                                             numericInput(NS(id,"pdf_heigth_violin"),"Heigth",value = 7),
+                                                             downloadButton(NS(id,'export_violin')),
+                                                             circle = FALSE,
+                                                             status = "primary",
+                                                             icon = icon("cog"),
+                                                             width = "300px",
+                                                             size= "sm",
+                                                             up = T,
+                                                             tooltip = tooltipOptions(title = "Press to Download")
+                                                           ),
                                                            plotOutput(NS(id,"plot_Violin"),
                                                                       height = "100vh") %>% withSpinner()
                                               ),
                                               tabPanelBody("SpikePlot_panel",
+                                                           dropdownButton(
+                                                             numericInput(NS(id,"pdf_widht_SpikePlot"),"Widht",value = 7),
+                                                             numericInput(NS(id,"pdf_heigth_SpikePlot"),"Heigth",value = 7),
+                                                             downloadButton(NS(id,'export_SpikePlot')),
+                                                             circle = FALSE,
+                                                             status = "primary",
+                                                             icon = icon("cog"),
+                                                             width = "300px",
+                                                             size= "sm",
+                                                             up = T,
+                                                             tooltip = tooltipOptions(title = "Press to Download")
+                                                           ),
                                                            plotOutput(NS(id,"plot_SpikePlot"),
                                                                       height = "100vh") %>% withSpinner()
                                               ),
                                               tabPanelBody("heatmap_panel",
+                                                           dropdownButton(
+                                                             h5('Settings'),
+                                                             prettySwitch(NS(id,"cluster_row"),"Cluster Row",value = F,status = "primary",
+                                                                          fill = TRUE),
+                                                             prettySwitch(NS(id,"cluster_column"),"Cluster Column",value = F,status = "primary",
+                                                                          fill = TRUE),
+                                                             prettySwitch(NS(id,"norm_heat"),"Norm per gene",value = F,status = "primary",
+                                                                          fill = TRUE),
+                                                             prettySwitch(NS(id,"mean_heat"),"Mean per group",value = F,status = "primary",
+                                                                          fill = TRUE),
+                                                             hr(style = "border-top: 1px solid #0073b7;"),
+                                                             h5('Download'),
+                                                             numericInput(NS(id,"pdf_widht_heatmap"),"Widht",value = 7),
+                                                             numericInput(NS(id,"pdf_heigth_heatmap"),"Heigth",value = 7),
+                                                             downloadButton(NS(id,'export_heatmap')),
+                                                             circle = FALSE, status = "primary", icon = icon("cog"), width = "300px", size= "sm",up = T,
+                                                             tooltip = tooltipOptions(title = "Press to see Heatmap settings & Download")
+                                                           ),
                                                            plotOutput(NS(id,"plot_heatmap"),
                                                                       height = "100vh") %>% withSpinner()
                                               ),
                                               tabPanelBody("DotPlot_panel",
+                                                           dropdownButton(
+                                                             h5('Settings'),
+                                                             prettySwitch(NS(id,"ord_dotplot"),"Cluster Row",value = F,status = "primary",
+                                                                          fill = TRUE),
+                                                             prettySwitch(NS(id,"scale_dotplot"),"Scale",value = F,status = "primary",
+                                                                          fill = TRUE),
+                                                             prettySwitch(NS(id,"center_dotplot"),"Center",value = F,status = "primary",
+                                                                          fill = TRUE),
+                                                             hr(style = "border-top: 1px solid #0073b7;"),
+                                                             h5('Download'),
+                                                             numericInput(NS(id,"pdf_widht_dotplot"),"Widht",value = 7),
+                                                             numericInput(NS(id,"pdf_heigth_dotplot"),"Heigth",value = 7),
+                                                             downloadButton(NS(id,'export_dotplot')),
+                                                             circle = FALSE, status = "primary", icon = icon("cog"), width = "300px",
+                                                             size= "sm", up = T,
+                                                             tooltip = tooltipOptions(title = "Press to see DotPlot settings & Download")
+                                                           ),
                                                            plotlyOutput(NS(id,"plot_DotPlot"),
                                                                       height = "100vh") %>% withSpinner()
                                               )
@@ -326,12 +358,12 @@ VolcanoServer <- function(id,sce,sce.markers) {
     })
     
     output$plot_Violin <- renderPlot({
-      req(!is.null(ExpressionL()))
+      req(!is.null(ViolinPlot()))
       # req(input$Cell_Exp)
       ViolinPlot()
     })
     
-    output$plot_SpikePlot <- renderPlot({
+    SpikePlot_react <- reactive({
       req(!is.null(ExpressionL()))
       # req(input$Cell_Exp)
       par(mfrow=c((length(SpikePlot())),1))
@@ -349,8 +381,14 @@ VolcanoServer <- function(id,sce,sce.markers) {
       legend("bottom", legend = names(OrderPartReact()$colPart), col = OrderPartReact()$colPart,
              pch=19, ncol=6, xpd=T, inset=c(0,-0.10))
       par(mfrow=c(1,1))
+      graph <- recordPlot()
+      graph
     })
     
+    output$plot_SpikePlot <- renderPlot({
+      req(!is.null(SpikePlot_react()))
+      SpikePlot_react() %>% print()
+    })
     ####  Heatmap ----
     
     HeatmapL <- eventReactive(c(Genes(),input$norm_heat),{
@@ -457,7 +495,7 @@ VolcanoServer <- function(id,sce,sce.markers) {
       Heatmap_Plot()
     })
     ####  Dotplots ----
-    output$plot_DotPlot <- renderPlotly({
+    DotPlot  <- reactive({
       # req(input$Cell_Exp == "Dotplot")
       req(input$partitionType)
       req(length(Genes()) > 0)
@@ -480,23 +518,60 @@ VolcanoServer <- function(id,sce,sce.markers) {
       diff_Exp <- droplevels(diff_Exp)
       g$data$Diff <- diff_Exp
       g <- g + facet_wrap(.~Diff,scales="free_y",ncol=1)
-      ggplotly(g) %>% config(modeBarButtonsToRemove = c("select2d", "lasso2d", "hoverCompareCartesian"))
+      g
     })
     
-    # ####  Final output ---- 
-    # output$Cell_Plots <- renderUI({
-    #   req(input$Cell_Exp)
-    #   if(input$Cell_Exp == "Heatmap"){
-    #     plotOutput(NS(id,"plot_heatmap"),height = "100vh")
-    #   }
-    #   else if(input$Cell_Exp == "Dotplot"){
-    #     plotlyOutput(NS(id,"plot_DotPlot"),height = "100vh")
-    #   }
-    #   else{
-    #     plotOutput(NS(id,"Violin.Bar_Plot"),height = "100vh") 
-    #   }
-    # })
-    # 
+    output$plot_DotPlot <- renderPlotly({
+      req(!is.null(DotPlot()))
+      DotPlot() %>% ggplotly() %>% config(modeBarButtonsToRemove = c("select2d", "lasso2d", "hoverCompareCartesian"))
+    })
+    ### Downloads -----
+    
+    output$export_violin = downloadHandler(
+      filename = function() {"Violin_DiffExp.pdf"},
+      content = function(file) {
+        pdf(file,
+            width = input$pdf_widht_violin,
+            height = input$pdf_heigth_violin
+        )
+        ViolinPlot() %>% plot()
+        dev.off()
+      })
+    
+    output$export_SpikePlot = downloadHandler(
+      filename = function() {"SpikePlot_DiffExp.pdf"},
+      content = function(file) {
+        pdf(file,
+            width = input$pdf_widht_SpikePlot,
+            height = input$pdf_heigth_SpikePlot
+        )
+        SpikePlot_react() %>% print()
+        dev.off()
+      })
+    
+    output$export_heatmap = downloadHandler(
+      filename = function() {"Heatmap_DiffExp.pdf"},
+      content = function(file) {
+        pdf(file,
+            width = input$pdf_widht_heatmap,
+            height = input$pdf_heigth_heatmap
+        )
+        Heatmap_Plot() %>% plot()
+        dev.off()
+      }
+    )
+    
+    output$export_dotplot = downloadHandler(
+      filename = function() {"DotPlot_DiffExp.pdf"},
+      content = function(file) {
+        pdf(file,
+            width = input$pdf_widht_dotplot,
+            height = input$pdf_heigth_dotplot
+        )
+        DotPlot() %>% plot()
+        dev.off()
+      }
+    )
     
   })
 }

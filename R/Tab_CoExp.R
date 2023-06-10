@@ -75,6 +75,18 @@ COExpUI <- function(id) {
                                    conditionalPanel("typeof output.plot_expression !== 'undefined'", ns = NS(id),
                                    box(title="Co-detection Matrix",width = NULL,
                                        solidHeader = T, collapsible=T,
+                                       dropdownButton(
+                                         numericInput(NS(id,"pdf_widht_corrplot"),"Widht",value = 7),
+                                         numericInput(NS(id,"pdf_heigth_corrplot"),"Heigth",value = 7),
+                                         downloadButton(NS(id,'export_corrplot')),
+                                         circle = FALSE,
+                                         status = "primary",
+                                         icon = icon("cog"),
+                                         width = "300px",
+                                         size= "sm",
+                                         up = T,
+                                         tooltip = tooltipOptions(title = "Press to Download")
+                                       ),
                                        plotOutput(NS(id,"CorrPlot")) %>% withSpinner()
                                    )
                               )
@@ -245,7 +257,9 @@ COExpServer <- function(id,sce,point.size=20) {
     
       
         #### CorrPlot ----
-     output$CorrPlot <- renderPlot({
+     
+     
+     CorrPlot <- reactive({
        req(!is.null(CoExpressionVtor()))
        req(input$partitionType)
        apply(table(CoExpressionVtor(),colData(sce)[,input$partitionType]),2,function(x){(x/sum(x))}) %>% 
@@ -254,5 +268,23 @@ COExpServer <- function(id,sce,point.size=20) {
          ggcorrplot::ggcorrplot(lab=T) +
          scale_fill_gradient2(midpoint = 0.5,low="white",high ="#E46726",mid="#ffa18c") + labs(fill="Proportion")
      })
+     
+     output$CorrPlot <- renderPlot({
+       req(!is.null(CorrPlot()))
+       CorrPlot()
+     })
+     
+     output$export_corrplot = downloadHandler(
+       filename = function() {"CoDetection_Matrix.pdf"},
+       content = function(file) {
+         pdf(file,
+             width = input$pdf_widht_corrplot,
+             height = input$pdf_heigth_corrplot
+         )
+         CorrPlot() %>% plot()
+         dev.off()
+       }
+     )
+     
   }) 
 }

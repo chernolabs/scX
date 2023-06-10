@@ -158,22 +158,44 @@ ExpressionUI <- function(id) {
                   plotlyOutput(NS(id,"plot_cluster"),height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
                 ),
                 tabPanelBody("expression_panel",
-                             plotlyOutput(NS(id,"plot_expression"),height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
-                )
-              )
-            ),
-            box(title = "Expression Plots",
-                width = NULL, solidHeader = T,collapsible = T,
-                footer = tagList(shiny::icon("cat"), "Nya"),
-              uiOutput(NS(id,"Violin.Bar_Input")),
-              tabsetPanel(id = NS(id,"switcher2"),
-                          type = "hidden",
-                          selected = "Violin_panel",
-                tabPanelBody("Violin_panel",
-                  plotOutput(NS(id,"plot_Violin")) %>% withSpinner()
-                ),
-                tabPanelBody("SpikePlot_panel",
-                             plotOutput(NS(id,"plot_SpikePlot")) %>% withSpinner()
+                             plotlyOutput(NS(id,"plot_expression"),height = "100vh") %>% withLoader(type='html',loader = 'dnaspin'),
+                             uiOutput(NS(id,"Violin.Bar_Input")),
+                             conditionalPanel("typeof output.plot_expression !== 'undefined'", ns = NS(id),
+                                 tabsetPanel(id = NS(id,"switcher2"),
+                                             type = "hidden",
+                                             selected = "Violin_panel",
+                                             tabPanelBody("Violin_panel",
+                                                          dropdownButton(
+                                                            numericInput(NS(id,"pdf_widht_violin"),"Widht",value = 7),
+                                                            numericInput(NS(id,"pdf_heigth_violin"),"Heigth",value = 7),
+                                                            downloadButton(NS(id,'export_violin')),
+                                                            circle = FALSE,
+                                                            status = "primary",
+                                                            icon = icon("cog"),
+                                                            width = "300px",
+                                                            size= "sm",
+                                                            up = T,
+                                                            tooltip = tooltipOptions(title = "Press to Download")
+                                                          ),
+                                                          plotOutput(NS(id,"plot_Violin")) %>% withSpinner()
+                                             ),
+                                             tabPanelBody("SpikePlot_panel",
+                                                          dropdownButton(
+                                                            numericInput(NS(id,"pdf_widht_SpikePlot"),"Widht",value = 7),
+                                                            numericInput(NS(id,"pdf_heigth_SpikePlot"),"Heigth",value = 7),
+                                                            downloadButton(NS(id,'export_SpikePlot')),
+                                                            circle = FALSE,
+                                                            status = "primary",
+                                                            icon = icon("cog"),
+                                                            width = "300px",
+                                                            size= "sm",
+                                                            up = T,
+                                                            tooltip = tooltipOptions(title = "Press to Download")
+                                                          ),
+                                                          plotOutput(NS(id,"plot_SpikePlot")) %>% withSpinner()
+                                             )
+                                 )
+                             )
                 )
               )
             )
@@ -181,18 +203,54 @@ ExpressionUI <- function(id) {
           tabPanel("Heatmap", value= "heatmap",
             box(width = NULL, solidHeader = T, collapsible = F,
                 footer = tagList(shiny::icon("cat"), "Nya"),
+                dropdownButton(
+                  numericInput(NS(id,"pdf_widht_heatmap"),"Widht",value = 7),
+                  numericInput(NS(id,"pdf_heigth_heatmap"),"Heigth",value = 7),
+                  downloadButton(NS(id,'export_heatmap')),
+                  circle = FALSE,
+                  status = "primary",
+                  icon = icon("cog"),
+                  width = "300px",
+                  size= "sm",
+                  up = F,
+                  tooltip = tooltipOptions(title = "Press to Download")
+                ),
               plotOutput(NS(id,"plot_heatmap"),height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
             )
           ),
           tabPanel("DotPlot", value= "dotplot",
             box(width = NULL,solidHeader = T,collapsible = F,
                 footer = tagList(shiny::icon("cat"), "Nya"),
+                dropdownButton(
+                  numericInput(NS(id,"pdf_widht_dotplot"),"Widht",value = 7),
+                  numericInput(NS(id,"pdf_heigth_dotplot"),"Heigth",value = 7),
+                  downloadButton(NS(id,'export_dotplot')),
+                  circle = FALSE,
+                  status = "primary",
+                  icon = icon("cog"),
+                  width = "300px",
+                  size= "sm",
+                  up = F,
+                  tooltip = tooltipOptions(title = "Press to Download")
+                ),
               plotlyOutput(NS(id,"plot_DotPlot"),height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
             )
           ),
           tabPanel("StackedViolin", value= "stackVln",
             box(width = NULL,solidHeader = T,collapsible = F,
                 footer = tagList(shiny::icon("cat"), "Nya"),
+                dropdownButton(
+                  numericInput(NS(id,"pdf_widht_StackedViolin"),"Widht",value = 7),
+                  numericInput(NS(id,"pdf_heigth_StackedViolin"),"Heigth",value = 7),
+                  downloadButton(NS(id,'export_StackedViolin')),
+                  circle = FALSE,
+                  status = "primary",
+                  icon = icon("cog"),
+                  width = "300px",
+                  size= "sm",
+                  up = F,
+                  tooltip = tooltipOptions(title = "Press to Download")
+                ),
               plotOutput(NS(id,"plot_stackVln"),height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
             )
           )
@@ -608,7 +666,7 @@ ExpressionServer <- function(id,sce,point.size=20) {
      
      
      #### Dotplots ----
-     output$plot_DotPlot <- renderPlotly({
+     DotPlot  <- reactive({
         #req(input$scatter_heatmap == "dotplot")
         req(input$partitionType)
         if(input$GL_T){
@@ -633,14 +691,19 @@ ExpressionServer <- function(id,sce,point.size=20) {
         }
         
          g$data$Feature <- factor(g$data$Feature,levels = vtor)
+         g
          
-         ggplotly(g) %>% config(modeBarButtonsToRemove = c("select2d", "lasso2d", "hoverCompareCartesian"))
          
 
      })
      
+     output$plot_DotPlot <- renderPlotly({
+       req(!is.null(DotPlot()))
+       DotPlot() %>% ggplotly() %>% config(modeBarButtonsToRemove = c("select2d", "lasso2d", "hoverCompareCartesian"))
+     })
+     
      #### Stacked Violin ----
-     output$plot_stackVln <- renderPlot({
+     stackVln <- reactive({
        #req(input$scatter_heatmap == "stackVln")
        req(input$partitionType)
        if(input$GL_T){
@@ -686,5 +749,69 @@ ExpressionServer <- function(id,sce,point.size=20) {
        
        g
      })
+     
+     output$plot_stackVln <- renderPlot({
+       req(!is.null(stackVln()))
+       stackVln()
+     })
+     ### Downloads -----
+     
+     output$export_violin = downloadHandler(
+       filename = function() {"Violin_Categories.pdf"},
+       content = function(file) {
+         pdf(file,
+             width = input$pdf_widht_violin,
+             height = input$pdf_heigth_violin
+         )
+         ViolinPlot() %>% plot()
+         dev.off()
+       })
+     
+     output$export_SpikePlot = downloadHandler(
+       filename = function() {"SpikePlot_Categories.pdf"},
+       content = function(file) {
+         pdf(file,
+             width = input$pdf_widht_SpikePlot,
+             height = input$pdf_heigth_SpikePlot
+         )
+         SpikePlot() %>% print()
+         dev.off()
+       })
+     
+     output$export_heatmap = downloadHandler(
+       filename = function() {"Heatmap_Categories.pdf"},
+       content = function(file) {
+         pdf(file,
+             width = input$pdf_widht_heatmap,
+             height = input$pdf_heigth_heatmap
+         )
+         Heatmap_Plot() %>% plot()
+         dev.off()
+       }
+     )
+     
+     output$export_dotplot = downloadHandler(
+       filename = function() {"DotPlot_Categories.pdf"},
+       content = function(file) {
+         pdf(file,
+             width = input$pdf_widht_dotplot,
+             height = input$pdf_heigth_dotplot
+         )
+         DotPlot() %>% plot()
+         dev.off()
+       }
+     )
+     
+     output$export_StackedViolin = downloadHandler(
+       filename = function() {"StackedViolin_Categories.pdf"},
+       content = function(file) {
+         pdf(file,
+             width = input$pdf_widht_StackedViolin,
+             height = input$pdf_heigth_StackedViolin
+         )
+         stackVln() %>% plot()
+         dev.off()
+       }
+     )
   }) 
 }

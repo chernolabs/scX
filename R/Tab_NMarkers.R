@@ -73,21 +73,43 @@ N_markersUI <- function(id) {
                                          placement= "right"),
                 right = F
               ),
-              plotlyOutput(NS(id,"plot2"),height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
-            ),
-            box(title = "Expression Plots",
-                width = NULL,solidHeader = T,collapsible = T,
-                footer = tagList(shiny::icon("cat"), "Nya"),
+              plotlyOutput(NS(id,"plot2"),height = "100vh") %>% withLoader(type='html',loader = 'dnaspin'),
               uiOutput(NS(id,"Violin.Bar_Input")),
-              tabsetPanel(id = NS(id,"switcher2"),
-                          type = "hidden",
-                          selected = "Violin_panel",
-                          tabPanelBody("Violin_panel",
-                                       plotOutput(NS(id,"plot_Violin")) %>% withSpinner()
-                          ),
-                          tabPanelBody("SpikePlot_panel",
-                                       plotOutput(NS(id,"plot_SpikePlot")) %>% withSpinner()
-                          )
+              conditionalPanel("typeof output.plot2 !== 'undefined'", ns = NS(id),
+                               tabsetPanel(id = NS(id,"switcher2"),
+                                           type = "hidden",
+                                           selected = "Violin_panel",
+                                           tabPanelBody("Violin_panel",
+                                                        dropdownButton(
+                                                          numericInput(NS(id,"pdf_widht_violin"),"Widht",value = 7),
+                                                          numericInput(NS(id,"pdf_heigth_violin"),"Heigth",value = 7),
+                                                          downloadButton(NS(id,'export_violin')),
+                                                          circle = FALSE,
+                                                          status = "primary",
+                                                          icon = icon("cog"),
+                                                          width = "300px",
+                                                          size= "sm",
+                                                          up = T,
+                                                          tooltip = tooltipOptions(title = "Press to Download")
+                                                        ),
+                                                        plotOutput(NS(id,"plot_Violin")) %>% withSpinner()
+                                           ),
+                                           tabPanelBody("SpikePlot_panel",
+                                                        dropdownButton(
+                                                          numericInput(NS(id,"pdf_widht_SpikePlot"),"Widht",value = 7),
+                                                          numericInput(NS(id,"pdf_heigth_SpikePlot"),"Heigth",value = 7),
+                                                          downloadButton(NS(id,'export_SpikePlot')),
+                                                          circle = FALSE,
+                                                          status = "primary",
+                                                          icon = icon("cog"),
+                                                          width = "300px",
+                                                          size= "sm",
+                                                          up = T,
+                                                          tooltip = tooltipOptions(title = "Press to Download")
+                                                        ),
+                                                        plotOutput(NS(id,"plot_SpikePlot")) %>% withSpinner()
+                                           )
+                               )
               )
             )
           )
@@ -363,6 +385,30 @@ N_markersServer <- function(id,sce,point.size = 20) {
       req(!is.null(SpikePlot()))
       SpikePlot() %>% print()
     })
+    
+    ### Downloads -----
+    
+    output$export_violin = downloadHandler(
+      filename = function() {"Violin_NewMarkers.pdf"},
+      content = function(file) {
+        pdf(file,
+            width = input$pdf_widht_violin,
+            height = input$pdf_heigth_violin
+        )
+        ViolinPlot() %>% plot()
+        dev.off()
+      })
+    
+    output$export_SpikePlot = downloadHandler(
+      filename = function() {"SpikePlot_NewMarkers.pdf"},
+      content = function(file) {
+        pdf(file,
+            width = input$pdf_widht_SpikePlot,
+            height = input$pdf_heigth_SpikePlot
+        )
+        SpikePlot() %>% print()
+        dev.off()
+      })
     
   })
 }

@@ -42,10 +42,34 @@ QC_UI <- function(id) {
                          type = "hidden",
                          selected = "Scatter_panel",
                          tabPanelBody("Scatter_panel",
+                                      dropdownButton(
+                                        numericInput(NS(id,"pdf_widht_scatter"),"Widht",value = 7),
+                                        numericInput(NS(id,"pdf_heigth_scatter"),"Heigth",value = 7),
+                                        downloadButton(NS(id,'export_scatter')),
+                                        circle = FALSE,
+                                        status = "primary",
+                                        icon = icon("cog"),
+                                        width = "300px",
+                                        size= "sm",
+                                        up = F,
+                                        tooltip = tooltipOptions(title = "Press to Download")
+                                      ),
                                       plotlyOutput(NS(id,"plot_scatter"),
                                                    height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
                          ),
                          tabPanelBody("boxPlot_panel",
+                                      dropdownButton(
+                                        numericInput(NS(id,"pdf_widht_boxplot"),"Widht",value = 7),
+                                        numericInput(NS(id,"pdf_heigth_boxplot"),"Heigth",value = 7),
+                                        downloadButton(NS(id,'export_boxplot')),
+                                        circle = FALSE,
+                                        status = "primary",
+                                        icon = icon("cog"),
+                                        width = "300px",
+                                        size= "sm",
+                                        up = F,
+                                        tooltip = tooltipOptions(title = "Press to Download")
+                                      ),
                                       plotlyOutput(NS(id,"plot_boxPlot"),
                                                    height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
                          )
@@ -133,18 +157,23 @@ QC_Server <- function(id,sce,descriptionText) {
     })
     
     #### Scatter & Boxplot ----
-    output$plot_scatter <- renderPlotly({
+    ScatterPlot <- reactive({
         by_color <- if(input$partitionType == "None") {NULL} else{colData(sce)[,input$partitionType]}
         g <- ggplot(as.data.frame(colData(sce)),aes(x=nCounts,y=nFeatures)) + geom_point(alpha=0.5,aes(col=by_color))+ 
              xlab('nCounts') + ylab('nFeatures') + 
              labs(color = input$partitionType) + 
              scale_colour_manual(values=OrderPartReact()$colPart)
           
-        g <- ggplotly(g) %>% config(modeBarButtonsToRemove = c("select2d", "lasso2d"))
-        g %>% toWebGL()
+        g
       })
     
-    output$plot_boxPlot <- renderPlotly({
+    output$plot_scatter <- renderPlotly({
+      req(!is.null(ScatterPlot()))
+      g <- ggplotly(ScatterPlot()) %>% config(modeBarButtonsToRemove = c("select2d", "lasso2d"))
+      g %>% toWebGL()
+    })
+    
+    BoxPlot <- reactive({
       
         df <-data.frame(Yratio=sce$nCounts/sce$nFeatures, Counts = sce$nCounts,Features  = sce$nFeatures)
         if(input$partitionType == "None") {
@@ -160,29 +189,83 @@ QC_Server <- function(id,sce,descriptionText) {
           ylab('nCounts/nFeatures') +
           xlab(input$partitionType) + scale_fill_manual(values=OrderPartReact()$colPart)
         
-        g_ratio <- ggplotly(g_ratio)
+        # g_ratio <- ggplotly(g_ratio)
         
         g_counts <- ggplot(df, aes(y=Counts,x=X,fill=X)) + geom_boxplot() +
           theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1),legend.position = "none") +
           ylab('nCounts') +
           xlab(input$partitionType) + scale_fill_manual(values=OrderPartReact()$colPart)
-        g_counts <- g_counts %>% ggplotly()
+        # g_counts <- g_counts %>% ggplotly()
         
         g_feat <- ggplot(df, aes(y=Features,x=X,fill=X)) + geom_boxplot() +
           theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1),legend.position = "none") + 
           ylab('nFeatures') +
           xlab(input$partitionType) + scale_fill_manual(values=OrderPartReact()$colPart)
         
-        g_feat <- g_feat %>% ggplotly()
+        # g_feat <- g_feat %>% ggplotly()
         
         
-        g <- subplot(g_ratio,g_counts,g_feat,nrows = 3,shareX = T,shareY = F,titleY = T,heights = c(0.4,0.3,0.3)) %>% 
-          config(modeBarButtonsToRemove = c("select2d", "lasso2d"))
-        
-       g %>% toWebGL()
+      list(g1 = g_ratio,g2= g_counts,g3= g_feat)        
+       #  g <- subplot(g_ratio,g_counts,g_feat,nrows = 3,shareX = T,shareY = F,titleY = T,heights = c(0.4,0.3,0.3)) %>% 
+       #    config(modeBarButtonsToRemove = c("select2d", "lasso2d"))
+       #  
+       # g %>% toWebGL()
        
     })
-      
     
+    output$plot_boxPlot <- renderPlotly({
+      req(!is.null(BoxPlot()))
+      g <- subplot(ggplotly(BoxPlot()$g1),ggplotly(BoxPlot()$g2),ggplotly(BoxPlot()$g3),nrows = 3,shareX = T,shareY = F,titleY = T,heights = c(0.4,0.3,0.3)) %>% 
+        config(modeBarButtonsToRemove = c("select2d", "lasso2d"))
+      g %>% toWebGL()
+    })
+    
+    #### Download ----
+    output$export_scatter = downloadHandler(
+      filename = function() {"ScatterPlot_QC.pdf"},
+      content = function(file) {
+        pdf(file,
+            width = input$pdf_widht_scatter,
+            height = input$pdf_heigth_scatter
+        )
+        ScatterPlot() %>% plot()
+        dev.off()
+      }
+    )
+    
+    output$export_boxplot = downloadHandler(
+      filename = function() {"BoxPlot_QC.pdf"},
+      content = function(file) {
+        pdf(file,
+            width = input$pdf_widht_boxplot,
+            height = input$pdf_heigth_boxplot
+        )
+        
+        g1 <- BoxPlot()$g1 + theme(
+          axis.text.x = element_blank(),
+          axis.title.x = element_blank(),
+          axis.ticks.x = element_blank()
+        )
+
+        g2 <- BoxPlot()$g2 + theme(
+          axis.text.x = element_blank(),
+          axis.title.x = element_blank(),
+          axis.ticks.x = element_blank()
+        )
+        
+        g <- plot_grid(
+          g1, g2, BoxPlot()$g3,
+          ncol = 1,  # Number of columns in the grid
+          align = "v",  # Align the plots vertically
+          axis = "x",  # Display left and right axes
+          nrow = 3,  # Number of rows in the grid
+          rel_heights = c(0.3,0.3,0.4),  # Heights for each row
+          labels = NULL  # Automatically label the plots
+        )
+        
+        g %>% plot()
+        dev.off()
+      }
+    )
   })
 }

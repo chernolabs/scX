@@ -137,14 +137,50 @@ MultiPlotsUI <- function(id) {
                selected = "gene",
                width = NULL,
           tabPanel("by Gene Expression",value = "gene",
+                   dropdownButton(
+                     numericInput(NS(id,"pdf_widht_bygene"),"Widht",value = 7),
+                     numericInput(NS(id,"pdf_heigth_bygene"),"Heigth",value = 7),
+                     downloadButton(NS(id,'export_bygene')),
+                     circle = FALSE,
+                     status = "primary",
+                     icon = icon("cog"),
+                     width = "300px",
+                     size= "sm",
+                     up = F,
+                     tooltip = tooltipOptions(title = "Press to Download")
+                   ),
             plotOutput(NS(id,"plot_gene"),
                        height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
           ),
           tabPanel("by Cluster",value = "cluster",
+                   dropdownButton(
+                     numericInput(NS(id,"pdf_widht_bycluster"),"Widht",value = 7),
+                     numericInput(NS(id,"pdf_heigth_bycluster"),"Heigth",value = 7),
+                     downloadButton(NS(id,'export_bycluster')),
+                     circle = FALSE,
+                     status = "primary",
+                     icon = icon("cog"),
+                     width = "300px",
+                     size= "sm",
+                     up = F,
+                     tooltip = tooltipOptions(title = "Press to Download")
+                   ),
             plotOutput(NS(id,"plot_cluster"),
                       height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
           ),
           tabPanel("by Field",value = "field",
+                   dropdownButton(
+                     numericInput(NS(id,"pdf_widht_byfield"),"Widht",value = 7),
+                     numericInput(NS(id,"pdf_heigth_byfield"),"Heigth",value = 7),
+                     downloadButton(NS(id,'export_byfield')),
+                     circle = FALSE,
+                     status = "primary",
+                     icon = icon("cog"),
+                     width = "300px",
+                     size= "sm",
+                     up = F,
+                     tooltip = tooltipOptions(title = "Press to Download")
+                   ),
                    plotOutput(NS(id,"plot_field"),
                               height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
           )
@@ -220,7 +256,7 @@ MultiPlotsServer <- function(id,sce) {
     
     #### Plots ----
     list_plots <- reactive({
-      req(!is.null(input$plotType))
+      req(input$plotType)
       if(input$GL_T){
         req(length(genes.GL()$genes) > 0)
         feature <- genes.GL()$genes
@@ -237,7 +273,7 @@ MultiPlotsServer <- function(id,sce) {
       list_plots
     })
     
-    output$plot_gene <- renderPlot({
+    list_gene_plot <- reactive({
       f_plot <- list_plots()
       if(input$colPal != "viridis"){
       for(i in 1:length(f_plot)){
@@ -247,6 +283,13 @@ MultiPlotsServer <- function(id,sce) {
       
       cowplot::plot_grid(plotlist = f_plot)
     })
+      
+    output$plot_gene <- renderPlot({
+      req(!is.null(list_gene_plot()))
+      list_gene_plot()
+      })
+    
+    ### Clusters ----
     
     list_cluster_plot <- eventReactive(c(input$actionButton,input$plotType,input$colPal_cluster),{
       req(length(input$clusterType) > 0)
@@ -256,11 +299,13 @@ MultiPlotsServer <- function(id,sce) {
         f_plot[[i]] <- reducedDimPlot_cluster(sce = sce,reducedDim = input$plotType,partition = input$partitionType,
                                               cluster = input$clusterType[i],alpha = 0.5,palette = input$colPal_cluster)
       }
-      f_plot
+      cowplot::plot_grid(plotlist = f_plot)
+      
     })
     
     output$plot_cluster <- renderPlot({
-      cowplot::plot_grid(plotlist = list_cluster_plot())
+      req(!is.null(list_cluster_plot()))
+      list_cluster_plot()
     })
     
     ### Fields ---
@@ -275,14 +320,52 @@ MultiPlotsServer <- function(id,sce) {
           scale_color_distiller(palette ='YlOrRd',direction = 1) + labs(color=feature[i])
         
       }
-      list_plots
+      
+      cowplot::plot_grid(plotlist = list_plots)
     })
+    
     
     output$plot_field <- renderPlot({
-      cowplot::plot_grid(plotlist = list_field_plot())
+      req(!is.null(list_field_plot()))
+      list_field_plot()
     })
     
-
+  
+    ### Downloads -----
+    
+    output$export_bygene = downloadHandler(
+      filename = function() {"MultiPlot_byGeneExpression.pdf"},
+      content = function(file) {
+        pdf(file,
+            width = input$pdf_widht_bygene,
+            height = input$pdf_heigth_bygene
+        )
+        list_cluster_plot() %>% plot()
+        dev.off()
+      })
+    
+    output$export_bycluster = downloadHandler(
+      filename = function() {"MultiPlot_byCluster.pdf"},
+      content = function(file) {
+        pdf(file,
+            width = input$pdf_widht_bycluster,
+            height = input$pdf_heigth_bycluster
+        )
+        list_cluster_plot() %>% plot()
+        dev.off()
+      })
+    
+    output$export_byfield = downloadHandler(
+      filename = function() {"MultiPlot_byField.pdf"},
+      content = function(file) {
+        pdf(file,
+            width = input$pdf_widht_byfield,
+            height = input$pdf_heigth_byfield
+        )
+        list_field_plot() %>% plot()
+        dev.off()
+      })
+    
   })
 }
 

@@ -145,35 +145,81 @@ Numeric_ExpressionUI <- function(id) {
                                          plotlyOutput(NS(id,"plot_cluster"),height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
                             ),
                             tabPanelBody("expression_panel",
-                                         plotlyOutput(NS(id,"plot_expression"),height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
+                                         plotlyOutput(NS(id,"plot_expression"),height = "100vh") %>% withLoader(type='html',loader = 'dnaspin'),
+                                         uiOutput(NS(id,"Lines.Bar_Input")),
+                                         conditionalPanel("typeof output.plot_expression !== 'undefined'", ns = NS(id),
+                                         tabsetPanel(id = NS(id,"switcher2"),
+                                                     type = "hidden",
+                                                     selected = "Lines_panel",
+                                                     tabPanelBody("Lines_panel",
+                                                                  dropdownButton(
+                                                                    numericInput(NS(id,"pdf_widht_linesplot"),"Widht",value = 7),
+                                                                    numericInput(NS(id,"pdf_heigth_linesplot"),"Heigth",value = 7),
+                                                                    downloadButton(NS(id,'export_linesplot')),
+                                                                    circle = FALSE,
+                                                                    status = "primary",
+                                                                    icon = icon("cog"),
+                                                                    width = "300px",
+                                                                    size= "sm",
+                                                                    up = T,
+                                                                    tooltip = tooltipOptions(title = "Press to Download")
+                                                                  ),
+                                                                  plotlyOutput(NS(id,"plot_Lines")) %>% withSpinner(),
+                                                     ),
+                                                     tabPanelBody("SpikePlot_panel",
+                                                                  dropdownButton(
+                                                                    numericInput(NS(id,"pdf_widht_SpikePlot"),"Widht",value = 7),
+                                                                    numericInput(NS(id,"pdf_heigth_SpikePlot"),"Heigth",value = 7),
+                                                                    downloadButton(NS(id,'export_SpikePlot')),
+                                                                    circle = FALSE,
+                                                                    status = "primary",
+                                                                    icon = icon("cog"),
+                                                                    width = "300px",
+                                                                    size= "sm",
+                                                                    up = T,
+                                                                    tooltip = tooltipOptions(title = "Press to Download")
+                                                                  ),
+                                                                  plotOutput(NS(id,"plot_SpikePlot")) %>% withSpinner()
+                                                     )
+                                         )
+                                         )
                             )
                 )
-            ),
-            box(title = "Expression Plots",
-                width = NULL, solidHeader = T,collapsible = T,
-                footer = tagList(shiny::icon("cat"), "Nya"),
-              uiOutput(NS(id,"Lines.Bar_Input")),
-              tabsetPanel(id = NS(id,"switcher2"),
-                          type = "hidden",
-                          selected = "Lines_panel",
-                          tabPanelBody("Lines_panel",
-                                       plotlyOutput(NS(id,"plot_Lines")) %>% withSpinner()
-                          ),
-                          tabPanelBody("SpikePlot_panel",
-                                       plotOutput(NS(id,"plot_SpikePlot")) %>% withSpinner()
-                          )
-              )
             )
           ),
           tabPanel("Heatmap", value= "heatmap",
             box(width = NULL, solidHeader = T, collapsible = F,
                 footer = tagList(shiny::icon("cat"), "Nya"),
+                dropdownButton(
+                  numericInput(NS(id,"pdf_widht_heatmap"),"Widht",value = 7),
+                  numericInput(NS(id,"pdf_heigth_heatmap"),"Heigth",value = 7),
+                  downloadButton(NS(id,'export_heatmap')),
+                  circle = FALSE,
+                  status = "primary",
+                  icon = icon("cog"),
+                  width = "300px",
+                  size= "sm",
+                  up = F,
+                  tooltip = tooltipOptions(title = "Press to Download")
+                ),
               plotOutput(NS(id,"plot_heatmap"),height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
             )
           ),
           tabPanel("MultiLines", value= "MultiLines",
             box(width = NULL,solidHeader = T,collapsible = F,
                 footer = tagList(shiny::icon("cat"), "Nya"),
+                dropdownButton(
+                  numericInput(NS(id,"pdf_widht_multilines"),"Widht",value = 7),
+                  numericInput(NS(id,"pdf_heigth_multilines"),"Heigth",value = 7),
+                  downloadButton(NS(id,'export_multilines')),
+                  circle = FALSE,
+                  status = "primary",
+                  icon = icon("cog"),
+                  width = "300px",
+                  size= "sm",
+                  up = F,
+                  tooltip = tooltipOptions(title = "Press to Download")
+                ),
               plotlyOutput(NS(id,"plot_MultiLines"),height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
             )
           )
@@ -517,19 +563,25 @@ Numeric_ExpressionServer <- function(id,sce,point.size=20) {
        p
      })
      
-     output$plot_Lines  <- renderPlotly({
+     LinesPlot  <- reactive({
        #req(input$scatter_heatmap == "scatter")
-       req(!is.null(ExpressionF()))
+       req(!is.null(LinesReact()))
         p <- LinesReact() %>% ggplot(aes(y=Exp,x=Numeric)) + geom_point(aes(col = if(input$partitionType != 'None'){partitionType} else{NULL}),alpha=0.5) + geom_smooth(se = F) +
          labs(color = input$partitionType) + 
           xlab(input$numericType) + 
           ylab("log(counts)") +
           ggtitle(ifelse(length(ExpressionF()$Genes)>1,"mean expression","expression"))  + 
           scale_color_manual(values=if(input$partitionType != 'None'){ OrderPartReact()$colPart} else{'grey'})
-        p %>% ggplotly() %>% toWebGL()
+        p 
      })
      
-     output$plot_SpikePlot <- renderPlot({
+     output$plot_Lines  <- renderPlotly({
+       #req(input$scatter_heatmap == "scatter")
+       req(!is.null(LinesPlot()))
+       LinesPlot() %>% ggplotly() %>% toWebGL()
+     })
+     
+     SpikePlot <-reactive({
        #req(input$scatter_heatmap == "scatter")
        req(!is.null(ExpressionF()))
        if(input$partitionType == 'None'){
@@ -557,12 +609,17 @@ Numeric_ExpressionServer <- function(id,sce,point.size=20) {
                       FUN = mean)[colData(sce)[,input$partitionType]][ord],
                lty=2,col="black")
        }
-       # graph <- recordPlot()
-       # graph
+       graph <- recordPlot()
+       graph
+     })
+     
+     output$plot_SpikePlot <- renderPlot({
+       req(!is.null(SpikePlot()))
+       SpikePlot() %>% print()
      })
      
      #### Line plot MultiGenes ----
-     output$plot_MultiLines <- renderPlotly({
+     MultiLinesPlot <- reactive({
        #req(input$scatter_heatmap == "MultiLines")
        req(input$numericType)
        if(input$GL_T){
@@ -584,9 +641,62 @@ Numeric_ExpressionServer <- function(id,sce,point.size=20) {
          xlab(input$numericType) + 
          ylab("log(counts)") +
          ggtitle("Expression")   
-       p %>% ggplotly() %>% toWebGL()
+       p 
      })
      
+     output$plot_MultiLines <- renderPlotly({
+       req(!is.null(MultiLinesPlot()))
+       MultiLinesPlot() %>% ggplotly() %>% toWebGL()
+     })
+     
+     ### Downloads -----
+     
+     output$export_SpikePlot = downloadHandler(
+       filename = function() {"SpikePlot_Fields.pdf"},
+       content = function(file) {
+         pdf(file,
+             width = input$pdf_widht_SpikePlot,
+             height = input$pdf_heigth_SpikePlot
+         )
+         SpikePlot() %>% print()
+         dev.off()
+       })
+     
+     output$export_heatmap = downloadHandler(
+       filename = function() {"Heatmap_Fields.pdf"},
+       content = function(file) {
+         pdf(file,
+             width = input$pdf_widht_heatmap,
+             height = input$pdf_heigth_heatmap
+         )
+         Heatmap_Plot() %>% plot()
+         dev.off()
+       }
+     )
+     
+     output$export_linesplot = downloadHandler(
+       filename = function() {"LinesPlot_Fields.pdf"},
+       content = function(file) {
+         pdf(file,
+             width = input$pdf_widht_linesplot,
+             height = input$pdf_heigth_linesplot
+         )
+         LinesPlot() %>% plot()
+         dev.off()
+       }
+     )
+     
+     output$export_multilines = downloadHandler(
+       filename = function() {"MultiLines_Fields.pdf"},
+       content = function(file) {
+         pdf(file,
+             width = input$pdf_widht_multilines,
+             height = input$pdf_heigth_multilines
+         )
+         MultiLinesPlot() %>% plot()
+         dev.off()
+       }
+     )
   }) 
 }
 
