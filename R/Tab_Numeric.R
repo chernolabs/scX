@@ -138,7 +138,7 @@ Fields_UI <- function(id) {
                                    downloadButton(NS(id,'export_scatter')),
                                    circle = FALSE,
                                    status = "primary",
-                                   icon = icon("cog"),
+                                   icon = icon("fa-thin fa-download"),
                                    width = "300px",
                                    size= "sm",
                                    up = F,
@@ -156,7 +156,7 @@ Fields_UI <- function(id) {
                                    downloadButton(NS(id,'export_heatmap')),
                                    circle = FALSE,
                                    status = "primary",
-                                   icon = icon("cog"),
+                                   icon = icon("fa-thin fa-download"),
                                    width = "300px",
                                    size= "sm",
                                    up = F,
@@ -174,7 +174,7 @@ Fields_UI <- function(id) {
                                    downloadButton(NS(id,'export_dotplot')),
                                    circle = FALSE,
                                    status = "primary",
-                                   icon = icon("cog"),
+                                   icon = icon("fa-thin fa-download"),
                                    width = "300px",
                                    size= "sm",
                                    up = F,
@@ -192,7 +192,7 @@ Fields_UI <- function(id) {
                                    downloadButton(NS(id,'export_StackedViolin')),
                                    circle = FALSE,
                                    status = "primary",
-                                   icon = icon("cog"),
+                                   icon = icon("fa-thin fa-download"),
                                    width = "300px",
                                    size= "sm",
                                    up = F,
@@ -344,7 +344,7 @@ Fields_Server <- function(id,sce) {
                       col = if(max(dta,na.rm = T)==min(dta,na.rm = T)) {viridis::viridis(1)} else {viridis::viridis(100)},
                       border =F,
                       na_col = "grey",
-                      name = "Gene expression",
+                      name = "Value",
                       cluster_rows = input$cluster_row,
                       cluster_columns = input$cluster_column,
                       row_names_side = "left",
@@ -353,7 +353,7 @@ Fields_Server <- function(id,sce) {
                       # column_title_gp = gpar(fontsize = 10),
                       column_title_side = "bottom",
                       # column_title = "Partition",
-                      row_title = "Genes",
+                      row_title = "Fields",
                       row_gap = unit(1, "mm"),
                       column_gap = unit(1, "mm"),
                       show_row_names = T,
@@ -381,7 +381,7 @@ Fields_Server <- function(id,sce) {
                       col = if(max(Heatmap_DF(),na.rm = T)==min(Heatmap_DF(),na.rm = T)) {viridis::viridis(1)} else {viridis::viridis(100)},
                       border =F,
                       na_col = "grey",
-                      name = "Gene expression",
+                      name = "Value",
                       cluster_rows = input$cluster_row,
                       cluster_columns = input$cluster_column,
                       row_names_side = "left",
@@ -390,7 +390,7 @@ Fields_Server <- function(id,sce) {
                       # column_title_gp = gpar(fontsize = 10),
                       column_title_side = "bottom",
                       # column_title = "Partition",
-                      row_title = "Genes",
+                      row_title = "Fields",
                       row_gap = unit(1, "mm"),
                       column_gap = unit(1, "mm"),
                       show_row_names = T,
@@ -423,7 +423,7 @@ Fields_Server <- function(id,sce) {
                             group = byPartition,
                      scale = input$scale_dotplot,center = input$center_dotplot) + 
         theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1,size=15)) +
-        xlab(input$partitionType) + ylab("Genes")
+        xlab(input$partitionType) + ylab("Fields")
       if(input$ord_dotplot){ #Define the order if the input is selected and the is not a heatmap of 1 row, received the order vector
         vtor <- if(length(feature())>1) {
           ord <- matrix(g$data$Average,byrow = F,nrow=length(unique(g$data$Feature))) %>% dist %>% hclust %>% .$order
@@ -491,7 +491,7 @@ Fields_Server <- function(id,sce) {
               strip.background = element_blank(),
               strip.text = element_text(face = "bold"),
               strip.text.y.left = element_text(angle = 0)) +
-         ylab("Expression Level")
+         ylab("Value")
       
         if(input$partitionColor == "None"){
           g <- g + scale_fill_manual(values="grey") + xlab("")
@@ -538,14 +538,14 @@ Fields_Server <- function(id,sce) {
       Heatmap(mtx,
               col = if(max(t(mtx),na.rm = T)==min(t(mtx),na.rm = T)) {viridis::viridis(1)} else {viridis::viridis(100)},
               border =F,
-              name = "Gene expression",
+              name = "Correlation",
               na_col = "grey",
               cluster_rows = input$matrix_cluster_row,
               cluster_columns = input$matrix_cluster_column,
               row_names_side = "left",
               column_title_rot = 45,
               column_title_side = "bottom",
-              row_title = "Genes",
+              row_title = "Fields",
               row_gap = unit(1, "mm"),
               column_gap = unit(1, "mm"),
               show_row_names = T,
@@ -578,7 +578,7 @@ Fields_Server <- function(id,sce) {
                 downloadButton(NS(id,'export_matrix')),
                 circle = FALSE,
                 status = "primary",
-                icon = icon("cog"),
+                icon = icon("fa-thin fa-download"),
                 width = "300px",
                 size= "sm",
                 up = F,

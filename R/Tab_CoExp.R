@@ -81,7 +81,7 @@ COExpUI <- function(id) {
                                          downloadButton(NS(id,'export_corrplot')),
                                          circle = FALSE,
                                          status = "primary",
-                                         icon = icon("cog"),
+                                         icon = icon("fa-thin fa-download"),
                                          width = "300px",
                                          size= "sm",
                                          up = T,
