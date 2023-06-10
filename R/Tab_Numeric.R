@@ -132,24 +132,72 @@ Fields_UI <- function(id) {
                              box(title = "Scatter Plot",
                                  width = NULL, solidHeader = T, collapsible = T,
                                  footer = tagList(shiny::icon("cat"), "Nya"),
+                                 dropdownButton(
+                                   numericInput(NS(id,"pdf_widht_scatter"),"Widht",value = 7),
+                                   numericInput(NS(id,"pdf_heigth_scatter"),"Heigth",value = 7),
+                                   downloadButton(NS(id,'export_scatter')),
+                                   circle = FALSE,
+                                   status = "primary",
+                                   icon = icon("cog"),
+                                   width = "300px",
+                                   size= "sm",
+                                   up = F,
+                                   tooltip = tooltipOptions(title = "Press to Download")
+                                 ),
                                  plotlyOutput(NS(id,"plot_numeric"),height = "100vh") %>% withSpinner()
                              )
                     ),
                     tabPanel("Heatmap", value= "heatmap",
                              box(width = NULL, solidHeader = T, collapsible = F,
                                  footer = tagList(shiny::icon("cat"), "Nya"),
+                                 dropdownButton(
+                                   numericInput(NS(id,"pdf_widht_heatmap"),"Widht",value = 7),
+                                   numericInput(NS(id,"pdf_heigth_heatmap"),"Heigth",value = 7),
+                                   downloadButton(NS(id,'export_heatmap')),
+                                   circle = FALSE,
+                                   status = "primary",
+                                   icon = icon("cog"),
+                                   width = "300px",
+                                   size= "sm",
+                                   up = F,
+                                   tooltip = tooltipOptions(title = "Press to Download")
+                                 ),
                                  plotOutput(NS(id,"plot_heatmap"),height = "100vh") %>% withSpinner()
                              )
                     ),
                     tabPanel("DotPlot", value= "dotplot",
                              box(width = NULL,solidHeader = T,collapsible = F,
                                  footer = tagList(shiny::icon("cat"), "Nya"),
+                                 dropdownButton(
+                                   numericInput(NS(id,"pdf_widht_dotplot"),"Widht",value = 7),
+                                   numericInput(NS(id,"pdf_heigth_dotplot"),"Heigth",value = 7),
+                                   downloadButton(NS(id,'export_dotplot')),
+                                   circle = FALSE,
+                                   status = "primary",
+                                   icon = icon("cog"),
+                                   width = "300px",
+                                   size= "sm",
+                                   up = F,
+                                   tooltip = tooltipOptions(title = "Press to Download")
+                                 ),
                                  plotlyOutput(NS(id,"plot_DotPlot"),height = "100vh") %>% withSpinner()
                              )
                     ),
                     tabPanel("StackedViolin", value= "stackVln",
                              box(width = NULL,solidHeader = T,collapsible = F,
                                  footer = tagList(shiny::icon("cat"), "Nya"),
+                                 dropdownButton(
+                                   numericInput(NS(id,"pdf_widht_StackedViolin"),"Widht",value = 7),
+                                   numericInput(NS(id,"pdf_heigth_StackedViolin"),"Heigth",value = 7),
+                                   downloadButton(NS(id,'export_StackedViolin')),
+                                   circle = FALSE,
+                                   status = "primary",
+                                   icon = icon("cog"),
+                                   width = "300px",
+                                   size= "sm",
+                                   up = F,
+                                   tooltip = tooltipOptions(title = "Press to Download")
+                                 ),
                                  plotOutput(NS(id,"plot_stackVln"),height = "100vh") %>% withSpinner()
                              )
                     ),
@@ -208,7 +256,7 @@ Fields_Server <- function(id,sce) {
     
     ### scatters ----
     
-    output$plot_numeric <- renderPlotly({
+    PlotNumeric <- reactive({
       req(!is.null(df()))
       req(input$partitionType1)  
       req(input$partitionType2)
@@ -237,9 +285,13 @@ Fields_Server <- function(id,sce) {
             xlab(input$partitionType1) + ylab(input$partitionType2) + scale_color_manual(values=OrderPartReact()$colPart)
         }
       }
-       ggplotly(g) %>% toWebGL()
+       g
     })
     
+    output$plot_numeric <- renderPlotly({
+      req(!is.null(PlotNumeric()))
+      PlotNumeric() %>% ggplotly() %>% toWebGL()
+      })
     
     feature <- eventReactive(input$action,{
       req(length(input$numeric_columns) >0)
@@ -360,7 +412,7 @@ Fields_Server <- function(id,sce) {
     })
     
     #### Dotplots ----
-    output$plot_DotPlot <- renderPlotly({
+    DotPlot <- reactive({
       req(length(feature()) > 0)
       #req(input$scatter_heatmap == "dotplot")
       req(input$partitionColor)
@@ -383,14 +435,16 @@ Fields_Server <- function(id,sce) {
       
       g$data$Feature <- factor(g$data$Feature,levels = vtor)
       
-      ggplotly(g) %>% config(modeBarButtonsToRemove = c("select2d", "lasso2d", "hoverCompareCartesian"))
-      
-      
+      g
     })
     
+    output$plot_DotPlot <- renderPlotly({
+      req(!is.null(DotPlot()))
+      DotPlot() %>% ggplotly() %>% config(modeBarButtonsToRemove = c("select2d", "lasso2d", "hoverCompareCartesian"))
+    })
     
     ### Stck Violin
-    output$plot_stackVln <- renderPlot({
+    stackVln <- reactive({
       req(length(feature()) > 0)
       #req(input$scatter_heatmap == "stackVln")
       #Adaptated from https://github.com/ycl6/StackedVlnPlot
@@ -446,7 +500,11 @@ Fields_Server <- function(id,sce) {
         }
       g
     })
-  
+    
+    output$plot_stackVln <- renderPlot({
+      req(!is.null(stackVln()))
+      stackVln()
+    })
     ### Matrix ----
     
     Matrix_DF <- eventReactive(c(input$partitionColor,feature()),{
@@ -457,7 +515,7 @@ Fields_Server <- function(id,sce) {
       df_corr
     })
     
-    output$plot_Matrix <- renderPlot({
+    PlotMatrix <- reactive({
       #req(input$scatter_heatmap == "matrix")
       req(!is.null(Matrix_DF()))
       if(input$partitionColor != 'None'){
@@ -499,6 +557,11 @@ Fields_Server <- function(id,sce) {
       )
     })
     
+    output$plot_Matrix <- renderPlot({
+      req(!is.null(PlotMatrix()))
+      PlotMatrix()
+    })
+    
     output$CorheatMapOutput <- renderUI({
       #req(input$scatter_heatmap == "matrix")
       req(!is.null(Matrix_DF()))
@@ -509,11 +572,85 @@ Fields_Server <- function(id,sce) {
         tagList(
           box(width = NULL, solidHeader = T, collapsible = F,
               footer = tagList(shiny::icon("cat"), "Nya"),
+              dropdownButton(
+                numericInput(NS(id,"pdf_widht_matrix"),"Widht",value = 7),
+                numericInput(NS(id,"pdf_heigth_matrix"),"Heigth",value = 7),
+                downloadButton(NS(id,'export_matrix')),
+                circle = FALSE,
+                status = "primary",
+                icon = icon("cog"),
+                width = "300px",
+                size= "sm",
+                up = F,
+                tooltip = tooltipOptions(title = "Press to Download")
+              ),
         plotOutput(NS(id,"plot_Matrix"),height = "100vh") %>% withSpinner()
           )
         )
       }
     })
+    
+    ### Downloads -----
+    
+    output$export_scatter = downloadHandler(
+      filename = function() {"Scatter_Numerics.pdf"},
+      content = function(file) {
+        pdf(file,
+            width = input$pdf_widht_scatter,
+            height = input$pdf_heigth_scatter
+        )
+        PlotNumeric() %>% plot()
+        dev.off()
+      })
+    
+    output$export_heatmap = downloadHandler(
+      filename = function() {"Heatmap_Numerics.pdf"},
+      content = function(file) {
+        pdf(file,
+            width = input$pdf_widht_heatmap,
+            height = input$pdf_heigth_heatmap
+        )
+        Heatmap_Plot() %>% plot()
+        dev.off()
+      }
+    )
+    
+    output$export_dotplot = downloadHandler(
+      filename = function() {"DotPlot_Numerics.pdf"},
+      content = function(file) {
+        pdf(file,
+            width = input$pdf_widht_dotplot,
+            height = input$pdf_heigth_dotplot
+        )
+        DotPlot() %>% plot()
+        dev.off()
+      }
+    )
+    
+    output$export_StackedViolin = downloadHandler(
+      filename = function() {"StackedViolin_Numerics.pdf"},
+      content = function(file) {
+        pdf(file,
+            width = input$pdf_widht_StackedViolin,
+            height = input$pdf_heigth_StackedViolin
+        )
+        stackVln() %>% plot()
+        dev.off()
+      }
+    )
+    
+    output$export_matrix = downloadHandler(
+      filename = function() {"CorrMatrix_Numerics.pdf"},
+      content = function(file) {
+        pdf(file,
+            width = input$pdf_widht_matrix,
+            height = input$pdf_heigth_matrix
+        )
+        PlotMatrix() %>% plot()
+        dev.off()
+      }
+    )
+    
   })
 }
 # 

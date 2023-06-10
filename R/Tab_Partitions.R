@@ -71,10 +71,34 @@ Clusters_UI <- function(id) {
                selected = "barplot",
                width = NULL,
           tabPanel("BarPlot",value = "barplot",
+                   dropdownButton(
+                     numericInput(NS(id,"pdf_widht_barplot"),"Widht",value = 7),
+                     numericInput(NS(id,"pdf_heigth_barplot"),"Heigth",value = 7),
+                     downloadButton(NS(id,'export_barplot')),
+                     circle = FALSE,
+                     status = "primary",
+                     icon = icon("cog"),
+                     width = "300px",
+                     size= "sm",
+                     up = F,
+                     tooltip = tooltipOptions(title = "Press to Download")
+                   ),
             plotOutput(NS(id,"plot_cluster"),
                      height = "100vh") %>% withSpinner()
           ),
           tabPanel("Matrix",value = "matrix",
+                   dropdownButton(
+                     numericInput(NS(id,"pdf_widht_matrix"),"Widht",value = 7),
+                     numericInput(NS(id,"pdf_heigth_matrix"),"Heigth",value = 7),
+                     downloadButton(NS(id,'export_matrix')),
+                     circle = FALSE,
+                     status = "primary",
+                     icon = icon("cog"),
+                     width = "300px",
+                     size= "sm",
+                     up = F,
+                     tooltip = tooltipOptions(title = "Press to Download")
+                   ),
             plotOutput(NS(id,"plot_matrix"),
                        height = "100vh") %>% withSpinner()
           )
@@ -141,7 +165,7 @@ Clusters_Server <- function(id,sce) {
     
     ### BarPlots ----
     
-    output$plot_cluster <- renderPlot({
+    Barplot_cluster <- reactive({
       req(input$partitionType1)  
       req(input$partitionType2)  
       # req(input$barplot_matrix == "barplot")
@@ -252,6 +276,11 @@ Clusters_Server <- function(id,sce) {
       
     })
     
+    output$plot_cluster <- renderPlot({
+      req(!is.null(Barplot_cluster()))
+      Barplot_cluster()
+    })
+    
     #### Matrix  -----
     #### Metric ----
     
@@ -264,7 +293,8 @@ Clusters_Server <- function(id,sce) {
                    mode="index")
       paste('<b style="color:black;">Rand Index:',round(rand,2),'<b><br>')
     })
-    output$plot_matrix <- renderPlot({
+    
+    PlotMatrix <- reactive({
       req(input$partitionType1)  
       req(input$partitionType2 != "None")
       #req(input$barplot_matrix == "matrix")
@@ -300,6 +330,37 @@ Clusters_Server <- function(id,sce) {
       
       
     })
+    
+    output$plot_matrix <- renderPlot({
+    req(!is.null(PlotMatrix()))
+      PlotMatrix()
+    })
+    
+    ### Downloads -----
+    
+    output$export_barplot = downloadHandler(
+      filename = function() {"BarPlots_Categories.pdf"},
+      content = function(file) {
+        pdf(file,
+            width = input$pdf_widht_barplot,
+            height = input$pdf_heigth_barplot
+        )
+        Barplot_cluster() %>% plot()
+        dev.off()
+      }
+    )
+    
+    output$export_matrix = downloadHandler(
+      filename = function() {"Matrix_Categories.pdf"},
+      content = function(file) {
+        pdf(file,
+            width = input$pdf_widht_matrix,
+            height = input$pdf_heigth_matrix
+        )
+        PlotMatrix() %>% plot()
+        dev.off()
+      }
+    )
     
   })
 }
