@@ -65,7 +65,7 @@ ui <- function(){
 			menuItem("Differential Expression", tabName = "volcanoTab",
 					 icon = icon("chart-column")
 			),
-			menuItem("EDA", tabName = "EDATab",
+			menuItem("Exploratory Data Analysis", tabName = "EDATab",
 			         icon = icon("circle-nodes"), startExpanded = F,
 			         menuSubItem('Categories', tabName = "clustersTab",
 			                     icon = icon('bars-progress')
