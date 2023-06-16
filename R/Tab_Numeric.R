@@ -128,8 +128,8 @@ Fields_UI <- function(id) {
              tabBox(id = NS(id,"scatter_heatmap"),
                     selected = "scatter",
                     width = NULL,
-                    tabPanel("Scatter",value = "scatter",
-                             box(title = "Scatter Plot",
+                    tabPanel("Distribution",value = "scatter",
+                             box(title = "Distribution Plot",
                                  width = NULL, solidHeader = T, collapsible = T,
                                  footer = tagList(shiny::icon("cat"), "Nya"),
                                  dropdownButton(
@@ -593,7 +593,7 @@ Fields_Server <- function(id,sce) {
     ### Downloads -----
     
     output$export_scatter = downloadHandler(
-      filename = function() {"Scatter_Numerics.pdf"},
+      filename = function() {"Distribution_Numerics.pdf"},
       content = function(file) {
         pdf(file,
             width = input$pdf_widht_scatter,
