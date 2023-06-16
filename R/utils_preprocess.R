@@ -320,7 +320,7 @@ ldf_func <- function(sce, partition, minSize=50){
   # colData(sce)[,partition] <- droplevels(colData(sce)[,partition])
   
   # calculate lfmrk ----
-  type           <- c('all','any','some')
+  type           <- c('all','any','some') # esto puede ir afuera de ldf
   lfmrk <- list()
   for(itype in seq_along(type)){
     lfmrk[[type[itype]]]    <- scran::findMarkers(sce,
@@ -335,7 +335,7 @@ ldf_func <- function(sce, partition, minSize=50){
   
   # calculate ldf ----
   ldf_t <-list()
-  numCores <- max(1, parallel::detectCores() - 2, na.rm = TRUE)
+  numCores <- max(1, parallel::detectCores() - 2, na.rm = TRUE) # esto puede ir afuera de ldf
   if(require("doParallel", quietly = T)) doParallel::registerDoParallel(numCores)
   # lfmrk <- lfmrk_t
   
@@ -347,7 +347,7 @@ ldf_func <- function(sce, partition, minSize=50){
   lfmrk <- lapply(lfmrk,function(x){x[labOK]})
   
   if(length(lfmrk[[1]])>0){ #At least one group to calculate
-    for(ic in seq_along(lfmrk[[1]])){
+    for(ic in seq_along(lfmrk[[1]])){ #acá se podría hacer una paralelizacion
       coi <- names(lfmrk[[1]])[ic]
       cat('\t', coi,'- ')
       any  <- rownames(lfmrk[['any']][[coi]])[lfmrk[['any']][[coi]][,'FDR']<0.05 & 
