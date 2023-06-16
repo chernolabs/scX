@@ -313,7 +313,7 @@ applyReducedDim <- function(sce, reddimstocalculate, chosen.hvgs, nPCs, assaynam
 # returns: markers, robustness, correlation with a binary vector "turned on" in that cluster
 #' @keywords internal
 #' @noRd
-ldf_func <- function(sce, partition,minSize=50){
+ldf_func <- function(sce, partition, minSize=50){
   
   cat(partition, ":\n", sep = "")
   # remove empty factors
