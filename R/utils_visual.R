@@ -7,11 +7,17 @@
 Col.and.Order <- function(partition,sce){
   #Color
   lvs <- levels(colData(sce)[,partition])
+  L <- length(lvs)
   
   cellTypeCol <- c(brewer.pal(12, "Set3"),
                    brewer.pal(8, "Dark2"),
                    brewer.pal(8, "Accent"),
-                   brewer.pal(9, "Pastel1"))[3:(2+length(lvs))]
+                   brewer.pal(9, "Pastel1"))
+	if (L<length(cellTypeCol)-2){
+		cellTypeCol <- cellTypeCol[3:(2+L)]
+	}else{
+		cellTypeCol <- rainbow(L)
+	}
   names(cellTypeCol) <- lvs
   
   #Order
