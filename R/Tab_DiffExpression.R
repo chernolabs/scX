@@ -62,9 +62,11 @@ VolcanoUI <- function(id) {
                                               selected = "Violin_panel",
                                               tabPanelBody("Violin_panel",
                                                            dropdownButton(
-                                                             numericInput(NS(id,"pdf_widht_violin"),"Widht",value = 7),
-                                                             numericInput(NS(id,"pdf_heigth_violin"),"Heigth",value = 7),
-                                                             downloadButton(NS(id,'export_violin')),
+															fluidRow(
+																column(4, style='padding-left:12px; padding-right:3px;', numericInput(NS(id,"pdf_width_violin"),"Width",value = 7)),
+																column(4, style='padding-left:3px; padding-right:3px;', numericInput(NS(id,"pdf_height_violin"),"Height",value = 7)),
+																column(4, style='padding-left:3px; padding-right:12px; padding:16px', downloadButton(NS(id,'export_violin')))
+															),
                                                              circle = FALSE,
                                                              status = "primary",
                                                              icon = icon("fa-thin fa-download"),
@@ -78,9 +80,11 @@ VolcanoUI <- function(id) {
                                               ),
                                               tabPanelBody("SpikePlot_panel",
                                                            dropdownButton(
-                                                             numericInput(NS(id,"pdf_widht_SpikePlot"),"Widht",value = 7),
-                                                             numericInput(NS(id,"pdf_heigth_SpikePlot"),"Heigth",value = 7),
-                                                             downloadButton(NS(id,'export_SpikePlot')),
+															fluidRow(
+																column(4, style='padding-left:12px; padding-right:3px;', numericInput(NS(id,"pdf_width_SpikePlot"),"Width",value = 7)),
+																column(4, style='padding-left:3px; padding-right:3px;', numericInput(NS(id,"pdf_height_SpikePlot"),"Height",value = 7)),
+																column(4, style='padding-left:3px; padding-right:12px; padding:16px', downloadButton(NS(id,'export_SpikePlot')))
+															),
                                                              circle = FALSE,
                                                              status = "primary",
                                                              icon = icon("fa-thin fa-download"),
@@ -105,9 +109,11 @@ VolcanoUI <- function(id) {
                                                                           fill = TRUE),
                                                              hr(style = "border-top: 1px solid #0073b7;"),
                                                              h5('Download'),
-                                                             numericInput(NS(id,"pdf_widht_heatmap"),"Widht",value = 7),
-                                                             numericInput(NS(id,"pdf_heigth_heatmap"),"Heigth",value = 7),
-                                                             downloadButton(NS(id,'export_heatmap')),
+															 fluidRow(
+																column(4, style='padding-left:12px; padding-right:3px;', numericInput(NS(id,"pdf_width_heatmap"),"Width",value = 7)),
+																column(4, style='padding-left:3px; padding-right:3px;', numericInput(NS(id,"pdf_height_heatmap"),"Height",value = 7)),
+																column(4, style='padding-left:3px; padding-right:12px; padding:16px', downloadButton(NS(id,'export_heatmap')))
+															),
                                                              circle = FALSE, status = "primary", icon = icon("fa-thin fa-download"), width = "300px", size= "sm",up = T,
                                                              tooltip = tooltipOptions(title = "Press to see Heatmap settings & Download")
                                                            ),
@@ -125,9 +131,11 @@ VolcanoUI <- function(id) {
                                                                           fill = TRUE),
                                                              hr(style = "border-top: 1px solid #0073b7;"),
                                                              h5('Download'),
-                                                             numericInput(NS(id,"pdf_widht_dotplot"),"Widht",value = 7),
-                                                             numericInput(NS(id,"pdf_heigth_dotplot"),"Heigth",value = 7),
-                                                             downloadButton(NS(id,'export_dotplot')),
+															 fluidRow(
+																column(4, style='padding-left:12px; padding-right:3px;', numericInput(NS(id,"pdf_width_dotplot"),"Width",value = 7)),
+																column(4, style='padding-left:3px; padding-right:3px;', numericInput(NS(id,"pdf_height_dotplot"),"Height",value = 7)),
+																column(4, style='padding-left:3px; padding-right:12px; padding:16px', downloadButton(NS(id,'export_dotplot')))
+															),
                                                              circle = FALSE, status = "primary", icon = icon("fa-thin fa-download"), width = "300px",
                                                              size= "sm", up = T,
                                                              tooltip = tooltipOptions(title = "Press to see DotPlot settings & Download")
@@ -531,8 +539,8 @@ VolcanoServer <- function(id,sce,sce.markers) {
       filename = function() {"Violin_DiffExp.pdf"},
       content = function(file) {
         pdf(file,
-            width = input$pdf_widht_violin,
-            height = input$pdf_heigth_violin
+            width = input$pdf_width_violin,
+            height = input$pdf_height_violin
         )
         ViolinPlot() %>% plot()
         dev.off()
@@ -542,8 +550,8 @@ VolcanoServer <- function(id,sce,sce.markers) {
       filename = function() {"SpikePlot_DiffExp.pdf"},
       content = function(file) {
         pdf(file,
-            width = input$pdf_widht_SpikePlot,
-            height = input$pdf_heigth_SpikePlot
+            width = input$pdf_width_SpikePlot,
+            height = input$pdf_height_SpikePlot
         )
         SpikePlot_react() %>% print()
         dev.off()
@@ -553,8 +561,8 @@ VolcanoServer <- function(id,sce,sce.markers) {
       filename = function() {"Heatmap_DiffExp.pdf"},
       content = function(file) {
         pdf(file,
-            width = input$pdf_widht_heatmap,
-            height = input$pdf_heigth_heatmap
+            width = input$pdf_width_heatmap,
+            height = input$pdf_height_heatmap
         )
         Heatmap_Plot() %>% plot()
         dev.off()
@@ -565,8 +573,8 @@ VolcanoServer <- function(id,sce,sce.markers) {
       filename = function() {"DotPlot_DiffExp.pdf"},
       content = function(file) {
         pdf(file,
-            width = input$pdf_widht_dotplot,
-            height = input$pdf_heigth_dotplot
+            width = input$pdf_width_dotplot,
+            height = input$pdf_height_dotplot
         )
         DotPlot() %>% plot()
         dev.off()

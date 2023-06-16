@@ -72,9 +72,11 @@ Clusters_UI <- function(id) {
                width = NULL,
           tabPanel("BarPlot",value = "barplot",
                    dropdownButton(
-                     numericInput(NS(id,"pdf_widht_barplot"),"Widht",value = 7),
-                     numericInput(NS(id,"pdf_heigth_barplot"),"Heigth",value = 7),
-                     downloadButton(NS(id,'export_barplot')),
+					fluidRow(
+						column(4, style='padding-left:12px; padding-right:3px;', numericInput(NS(id,"pdf_width_barplot"),"Width",value = 7)),
+						column(4, style='padding-left:3px; padding-right:3px;', numericInput(NS(id,"pdf_height_barplot"),"Height",value = 7)),
+						column(4, style='padding-left:3px; padding-right:12px; padding:16px', downloadButton(NS(id,'export_barplot')))
+					),
                      circle = FALSE,
                      status = "primary",
                      icon = icon("fa-thin fa-download"),
@@ -88,9 +90,11 @@ Clusters_UI <- function(id) {
           ),
           tabPanel("Matrix",value = "matrix",
                    dropdownButton(
-                     numericInput(NS(id,"pdf_widht_matrix"),"Widht",value = 7),
-                     numericInput(NS(id,"pdf_heigth_matrix"),"Heigth",value = 7),
-                     downloadButton(NS(id,'export_matrix')),
+					fluidRow(
+						column(4, style='padding-left:12px; padding-right:3px;', numericInput(NS(id,"pdf_width_matrix"),"Width",value = 7)),
+						column(4, style='padding-left:3px; padding-right:3px;', numericInput(NS(id,"pdf_height_matrix"),"Height",value = 7)),
+						column(4, style='padding-left:3px; padding-right:12px; padding:16px', downloadButton(NS(id,'export_matrix')))
+					),
                      circle = FALSE,
                      status = "primary",
                      icon = icon("fa-thin fa-download"),
@@ -342,8 +346,8 @@ Clusters_Server <- function(id,sce) {
       filename = function() {"BarPlots_Categories.pdf"},
       content = function(file) {
         pdf(file,
-            width = input$pdf_widht_barplot,
-            height = input$pdf_heigth_barplot
+            width = input$pdf_width_barplot,
+            height = input$pdf_height_barplot
         )
         Barplot_cluster() %>% plot()
         dev.off()
@@ -354,8 +358,8 @@ Clusters_Server <- function(id,sce) {
       filename = function() {"Matrix_Categories.pdf"},
       content = function(file) {
         pdf(file,
-            width = input$pdf_widht_matrix,
-            height = input$pdf_heigth_matrix
+            width = input$pdf_width_matrix,
+            height = input$pdf_height_matrix
         )
         PlotMatrix() %>% plot()
         dev.off()

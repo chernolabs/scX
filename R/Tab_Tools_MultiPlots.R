@@ -138,9 +138,11 @@ MultiPlotsUI <- function(id) {
                width = NULL,
           tabPanel("by Gene Expression",value = "gene",
                    dropdownButton(
-                     numericInput(NS(id,"pdf_widht_bygene"),"Widht",value = 7),
-                     numericInput(NS(id,"pdf_heigth_bygene"),"Heigth",value = 7),
-                     downloadButton(NS(id,'export_bygene')),
+					fluidRow(
+						column(4, style='padding-left:12px; padding-right:3px;', numericInput(NS(id,"pdf_width_bygene"),"Width",value = 7)),
+						column(4, style='padding-left:3px; padding-right:3px;', numericInput(NS(id,"pdf_height_bygene"),"Height",value = 7)),
+						column(4, style='padding-left:3px; padding-right:12px; padding:16px', downloadButton(NS(id,'export_bygene')))
+					),
                      circle = FALSE,
                      status = "primary",
                      icon = icon("fa-thin fa-download"),
@@ -154,9 +156,11 @@ MultiPlotsUI <- function(id) {
           ),
           tabPanel("by Cluster",value = "cluster",
                    dropdownButton(
-                     numericInput(NS(id,"pdf_widht_bycluster"),"Widht",value = 7),
-                     numericInput(NS(id,"pdf_heigth_bycluster"),"Heigth",value = 7),
-                     downloadButton(NS(id,'export_bycluster')),
+					fluidRow(
+						column(4, style='padding-left:12px; padding-right:3px;', numericInput(NS(id,"pdf_width_bycluster"),"Width",value = 7)),
+						column(4, style='padding-left:3px; padding-right:3px;', numericInput(NS(id,"pdf_height_bycluster"),"Height",value = 7)),
+						column(4, style='padding-left:3px; padding-right:12px; padding:16px', downloadButton(NS(id,'export_bycluster')))
+					),
                      circle = FALSE,
                      status = "primary",
                      icon = icon("fa-thin fa-download"),
@@ -170,9 +174,11 @@ MultiPlotsUI <- function(id) {
           ),
           tabPanel("by Field",value = "field",
                    dropdownButton(
-                     numericInput(NS(id,"pdf_widht_byfield"),"Widht",value = 7),
-                     numericInput(NS(id,"pdf_heigth_byfield"),"Heigth",value = 7),
-                     downloadButton(NS(id,'export_byfield')),
+					fluidRow(
+						column(4, style='padding-left:12px; padding-right:3px;', numericInput(NS(id,"pdf_width_byfield"),"Width",value = 7)),
+						column(4, style='padding-left:3px; padding-right:3px;', numericInput(NS(id,"pdf_height_byfield"),"Height",value = 7)),
+						column(4, style='padding-left:3px; padding-right:12px; padding:16px', downloadButton(NS(id,'export_byfield')))
+					),
                      circle = FALSE,
                      status = "primary",
                      icon = icon("fa-thin fa-download"),
@@ -337,8 +343,8 @@ MultiPlotsServer <- function(id,sce) {
       filename = function() {"MultiPlot_byGeneExpression.pdf"},
       content = function(file) {
         pdf(file,
-            width = input$pdf_widht_bygene,
-            height = input$pdf_heigth_bygene
+            width = input$pdf_width_bygene,
+            height = input$pdf_height_bygene
         )
         list_cluster_plot() %>% plot()
         dev.off()
@@ -348,8 +354,8 @@ MultiPlotsServer <- function(id,sce) {
       filename = function() {"MultiPlot_byCluster.pdf"},
       content = function(file) {
         pdf(file,
-            width = input$pdf_widht_bycluster,
-            height = input$pdf_heigth_bycluster
+            width = input$pdf_width_bycluster,
+            height = input$pdf_height_bycluster
         )
         list_cluster_plot() %>% plot()
         dev.off()
@@ -359,8 +365,8 @@ MultiPlotsServer <- function(id,sce) {
       filename = function() {"MultiPlot_byField.pdf"},
       content = function(file) {
         pdf(file,
-            width = input$pdf_widht_byfield,
-            height = input$pdf_heigth_byfield
+            width = input$pdf_width_byfield,
+            height = input$pdf_height_byfield
         )
         list_field_plot() %>% plot()
         dev.off()

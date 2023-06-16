@@ -166,9 +166,11 @@ ExpressionUI <- function(id) {
                                              selected = "Violin_panel",
                                              tabPanelBody("Violin_panel",
                                                           dropdownButton(
-                                                            numericInput(NS(id,"pdf_widht_violin"),"Widht",value = 7),
-                                                            numericInput(NS(id,"pdf_heigth_violin"),"Heigth",value = 7),
-                                                            downloadButton(NS(id,'export_violin')),
+                                                            fluidRow(
+																column(4, style='padding-left:12px; padding-right:3px;', numericInput(NS(id,"pdf_width_violin"),"Width",value = 7)),
+																column(4, style='padding-left:3px; padding-right:3px;', numericInput(NS(id,"pdf_height_violin"),"Height",value = 7)),
+																column(4, style='padding-left:3px; padding-right:12px; padding:16px', downloadButton(NS(id,'export_violin')))
+															),
                                                             circle = FALSE,
                                                             status = "primary",
                                                             icon = icon("fa-thin fa-download"),
@@ -181,9 +183,11 @@ ExpressionUI <- function(id) {
                                              ),
                                              tabPanelBody("SpikePlot_panel",
                                                           dropdownButton(
-                                                            numericInput(NS(id,"pdf_widht_SpikePlot"),"Widht",value = 7),
-                                                            numericInput(NS(id,"pdf_heigth_SpikePlot"),"Heigth",value = 7),
-                                                            downloadButton(NS(id,'export_SpikePlot')),
+                                                            fluidRow(
+																column(4, style='padding-left:12px; padding-right:3px;', numericInput(NS(id,"pdf_width_SpikePlot"),"Width",value = 7)),
+																column(4, style='padding-left:3px; padding-right:3px;', numericInput(NS(id,"pdf_height_SpikePlot"),"Height",value = 7)),
+																column(4, style='padding-left:3px; padding-right:12px; padding:16px', downloadButton(NS(id,'export_SpikePlot')))
+															),
                                                             circle = FALSE,
                                                             status = "primary",
                                                             icon = icon("fa-thin fa-download"),
@@ -204,9 +208,11 @@ ExpressionUI <- function(id) {
             box(width = NULL, solidHeader = T, collapsible = F,
                 footer = tagList(shiny::icon("cat"), "Nya"),
                 dropdownButton(
-                  numericInput(NS(id,"pdf_widht_heatmap"),"Widht",value = 7),
-                  numericInput(NS(id,"pdf_heigth_heatmap"),"Heigth",value = 7),
-                  downloadButton(NS(id,'export_heatmap')),
+                  fluidRow(
+						column(4, style='padding-left:12px; padding-right:3px;', numericInput(NS(id,"pdf_width_heatmap"),"Width",value = 7)),
+						column(4, style='padding-left:3px; padding-right:3px;', numericInput(NS(id,"pdf_height_heatmap"),"Height",value = 7)),
+						column(4, style='padding-left:3px; padding-right:12px; padding:16px', downloadButton(NS(id,'export_heatmap')))
+					),
                   circle = FALSE,
                   status = "primary",
                   icon = icon("fa-thin fa-download"),
@@ -222,9 +228,11 @@ ExpressionUI <- function(id) {
             box(width = NULL,solidHeader = T,collapsible = F,
                 footer = tagList(shiny::icon("cat"), "Nya"),
                 dropdownButton(
-                  numericInput(NS(id,"pdf_widht_dotplot"),"Widht",value = 7),
-                  numericInput(NS(id,"pdf_heigth_dotplot"),"Heigth",value = 7),
-                  downloadButton(NS(id,'export_dotplot')),
+                  fluidRow(
+						column(4, style='padding-left:12px; padding-right:3px;', numericInput(NS(id,"pdf_width_dotplot"),"Width",value = 7)),
+						column(4, style='padding-left:3px; padding-right:3px;', numericInput(NS(id,"pdf_height_dotplot"),"Height",value = 7)),
+						column(4, style='padding-left:3px; padding-right:12px; padding:16px', downloadButton(NS(id,'export_dotplot')))
+					),
                   circle = FALSE,
                   status = "primary",
                   icon = icon("fa-thin fa-download"),
@@ -240,9 +248,11 @@ ExpressionUI <- function(id) {
             box(width = NULL,solidHeader = T,collapsible = F,
                 footer = tagList(shiny::icon("cat"), "Nya"),
                 dropdownButton(
-                  numericInput(NS(id,"pdf_widht_StackedViolin"),"Widht",value = 7),
-                  numericInput(NS(id,"pdf_heigth_StackedViolin"),"Heigth",value = 7),
-                  downloadButton(NS(id,'export_StackedViolin')),
+					fluidRow(
+						column(4, style='padding-left:12px; padding-right:3px;', numericInput(NS(id,"pdf_width_StackedViolin"),"Width",value = 7)),
+						column(4, style='padding-left:3px; padding-right:3px;', numericInput(NS(id,"pdf_height_StackedViolin"),"Height",value = 7)),
+						column(4, style='padding-left:3px; padding-right:12px; padding:16px', downloadButton(NS(id,'export_StackedViolin')))
+					),
                   circle = FALSE,
                   status = "primary",
                   icon = icon("fa-thin fa-download"),
@@ -760,8 +770,8 @@ ExpressionServer <- function(id,sce,point.size=20) {
        filename = function() {"Violin_Categories.pdf"},
        content = function(file) {
          pdf(file,
-             width = input$pdf_widht_violin,
-             height = input$pdf_heigth_violin
+             width = input$pdf_width_violin,
+             height = input$pdf_height_violin
          )
          ViolinPlot() %>% plot()
          dev.off()
@@ -771,8 +781,8 @@ ExpressionServer <- function(id,sce,point.size=20) {
        filename = function() {"SpikePlot_Categories.pdf"},
        content = function(file) {
          pdf(file,
-             width = input$pdf_widht_SpikePlot,
-             height = input$pdf_heigth_SpikePlot
+             width = input$pdf_width_SpikePlot,
+             height = input$pdf_height_SpikePlot
          )
          SpikePlot() %>% print()
          dev.off()
@@ -782,8 +792,8 @@ ExpressionServer <- function(id,sce,point.size=20) {
        filename = function() {"Heatmap_Categories.pdf"},
        content = function(file) {
          pdf(file,
-             width = input$pdf_widht_heatmap,
-             height = input$pdf_heigth_heatmap
+             width = input$pdf_width_heatmap,
+             height = input$pdf_height_heatmap
          )
          Heatmap_Plot() %>% plot()
          dev.off()
@@ -794,8 +804,8 @@ ExpressionServer <- function(id,sce,point.size=20) {
        filename = function() {"DotPlot_Categories.pdf"},
        content = function(file) {
          pdf(file,
-             width = input$pdf_widht_dotplot,
-             height = input$pdf_heigth_dotplot
+             width = input$pdf_width_dotplot,
+             height = input$pdf_height_dotplot
          )
          DotPlot() %>% plot()
          dev.off()
@@ -806,8 +816,8 @@ ExpressionServer <- function(id,sce,point.size=20) {
        filename = function() {"StackedViolin_Categories.pdf"},
        content = function(file) {
          pdf(file,
-             width = input$pdf_widht_StackedViolin,
-             height = input$pdf_heigth_StackedViolin
+             width = input$pdf_width_StackedViolin,
+             height = input$pdf_height_StackedViolin
          )
          stackVln() %>% plot()
          dev.off()

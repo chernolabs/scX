@@ -153,9 +153,11 @@ Numeric_ExpressionUI <- function(id) {
                                                      selected = "Lines_panel",
                                                      tabPanelBody("Lines_panel",
                                                                   dropdownButton(
-                                                                    numericInput(NS(id,"pdf_widht_linesplot"),"Widht",value = 7),
-                                                                    numericInput(NS(id,"pdf_heigth_linesplot"),"Heigth",value = 7),
-                                                                    downloadButton(NS(id,'export_linesplot')),
+																	fluidRow(
+																		column(4, style='padding-left:12px; padding-right:3px;', numericInput(NS(id,"pdf_width_linesplot"),"Width",value = 7)),
+																		column(4, style='padding-left:3px; padding-right:3px;', numericInput(NS(id,"pdf_height_linesplot"),"Height",value = 7)),
+																		column(4, style='padding-left:3px; padding-right:12px; padding:16px', downloadButton(NS(id,'export_linesplot')))
+																	),
                                                                     circle = FALSE,
                                                                     status = "primary",
                                                                     icon = icon("fa-thin fa-download"),
@@ -168,9 +170,11 @@ Numeric_ExpressionUI <- function(id) {
                                                      ),
                                                      tabPanelBody("SpikePlot_panel",
                                                                   dropdownButton(
-                                                                    numericInput(NS(id,"pdf_widht_SpikePlot"),"Widht",value = 7),
-                                                                    numericInput(NS(id,"pdf_heigth_SpikePlot"),"Heigth",value = 7),
-                                                                    downloadButton(NS(id,'export_SpikePlot')),
+																	fluidRow(
+																		column(4, style='padding-left:12px; padding-right:3px;', numericInput(NS(id,"pdf_width_SpikePlot"),"Width",value = 7)),
+																		column(4, style='padding-left:3px; padding-right:3px;', numericInput(NS(id,"pdf_height_SpikePlot"),"Height",value = 7)),
+																		column(4, style='padding-left:3px; padding-right:12px; padding:16px', downloadButton(NS(id,'export_SpikePlot')))
+																	),
                                                                     circle = FALSE,
                                                                     status = "primary",
                                                                     icon = icon("fa-thin fa-download"),
@@ -191,9 +195,11 @@ Numeric_ExpressionUI <- function(id) {
             box(width = NULL, solidHeader = T, collapsible = F,
                 footer = tagList(shiny::icon("cat"), "Nya"),
                 dropdownButton(
-                  numericInput(NS(id,"pdf_widht_heatmap"),"Widht",value = 7),
-                  numericInput(NS(id,"pdf_heigth_heatmap"),"Heigth",value = 7),
-                  downloadButton(NS(id,'export_heatmap')),
+					fluidRow(
+						column(4, style='padding-left:12px; padding-right:3px;', numericInput(NS(id,"pdf_width_heatmap"),"Width",value = 7)),
+						column(4, style='padding-left:3px; padding-right:3px;', numericInput(NS(id,"pdf_height_heatmap"),"Height",value = 7)),
+						column(4, style='padding-left:3px; padding-right:12px; padding:16px', downloadButton(NS(id,'export_heatmap')))
+					),
                   circle = FALSE,
                   status = "primary",
                   icon = icon("fa-thin fa-download"),
@@ -209,9 +215,11 @@ Numeric_ExpressionUI <- function(id) {
             box(width = NULL,solidHeader = T,collapsible = F,
                 footer = tagList(shiny::icon("cat"), "Nya"),
                 dropdownButton(
-                  numericInput(NS(id,"pdf_widht_multilines"),"Widht",value = 7),
-                  numericInput(NS(id,"pdf_heigth_multilines"),"Heigth",value = 7),
-                  downloadButton(NS(id,'export_multilines')),
+					fluidRow(
+						column(4, style='padding-left:12px; padding-right:3px;', numericInput(NS(id,"pdf_width_multilines"),"Width",value = 7)),
+						column(4, style='padding-left:3px; padding-right:3px;', numericInput(NS(id,"pdf_height_multilines"),"Height",value = 7)),
+						column(4, style='padding-left:3px; padding-right:12px; padding:16px', downloadButton(NS(id,'export_multilines')))
+					),
                   circle = FALSE,
                   status = "primary",
                   icon = icon("fa-thin fa-download"),
@@ -655,8 +663,8 @@ Numeric_ExpressionServer <- function(id,sce,point.size=20) {
        filename = function() {"SpikePlot_Fields.pdf"},
        content = function(file) {
          pdf(file,
-             width = input$pdf_widht_SpikePlot,
-             height = input$pdf_heigth_SpikePlot
+             width = input$pdf_width_SpikePlot,
+             height = input$pdf_height_SpikePlot
          )
          SpikePlot() %>% print()
          dev.off()
@@ -666,8 +674,8 @@ Numeric_ExpressionServer <- function(id,sce,point.size=20) {
        filename = function() {"Heatmap_Fields.pdf"},
        content = function(file) {
          pdf(file,
-             width = input$pdf_widht_heatmap,
-             height = input$pdf_heigth_heatmap
+             width = input$pdf_width_heatmap,
+             height = input$pdf_height_heatmap
          )
          Heatmap_Plot() %>% plot()
          dev.off()
@@ -678,8 +686,8 @@ Numeric_ExpressionServer <- function(id,sce,point.size=20) {
        filename = function() {"LinesPlot_Fields.pdf"},
        content = function(file) {
          pdf(file,
-             width = input$pdf_widht_linesplot,
-             height = input$pdf_heigth_linesplot
+             width = input$pdf_width_linesplot,
+             height = input$pdf_height_linesplot
          )
          LinesPlot() %>% plot()
          dev.off()
@@ -690,8 +698,8 @@ Numeric_ExpressionServer <- function(id,sce,point.size=20) {
        filename = function() {"MultiLines_Fields.pdf"},
        content = function(file) {
          pdf(file,
-             width = input$pdf_widht_multilines,
-             height = input$pdf_heigth_multilines
+             width = input$pdf_width_multilines,
+             height = input$pdf_height_multilines
          )
          MultiLinesPlot() %>% plot()
          dev.off()

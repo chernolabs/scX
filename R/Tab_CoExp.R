@@ -76,9 +76,11 @@ COExpUI <- function(id) {
                                    box(title="Co-detection Matrix",width = NULL,
                                        solidHeader = T, collapsible=T,
                                        dropdownButton(
-                                         numericInput(NS(id,"pdf_widht_corrplot"),"Widht",value = 7),
-                                         numericInput(NS(id,"pdf_heigth_corrplot"),"Heigth",value = 7),
-                                         downloadButton(NS(id,'export_corrplot')),
+										fluidRow(
+											column(4, style='padding-left:12px; padding-right:3px;', numericInput(NS(id,"pdf_width_corrplot"),"Width",value = 7)),
+											column(4, style='padding-left:3px; padding-right:3px;', numericInput(NS(id,"pdf_height_corrplot"),"Height",value = 7)),
+											column(4, style='padding-left:3px; padding-right:12px; padding:16px', downloadButton(NS(id,'export_corrplot')))
+										),
                                          circle = FALSE,
                                          status = "primary",
                                          icon = icon("fa-thin fa-download"),
@@ -278,8 +280,8 @@ COExpServer <- function(id,sce,point.size=20) {
        filename = function() {"CoDetection_Matrix.pdf"},
        content = function(file) {
          pdf(file,
-             width = input$pdf_widht_corrplot,
-             height = input$pdf_heigth_corrplot
+             width = input$pdf_width_corrplot,
+             height = input$pdf_height_corrplot
          )
          CorrPlot() %>% plot()
          dev.off()

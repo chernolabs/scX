@@ -43,9 +43,11 @@ QC_UI <- function(id) {
                          selected = "Scatter_panel",
                          tabPanelBody("Scatter_panel",
                                       dropdownButton(
-                                        numericInput(NS(id,"pdf_widht_scatter"),"Widht",value = 7),
-                                        numericInput(NS(id,"pdf_heigth_scatter"),"Heigth",value = 7),
-                                        downloadButton(NS(id,'export_scatter')),
+										fluidRow(
+											column(4, style='padding-left:12px; padding-right:3px;', numericInput(NS(id,"pdf_width_scatter"),"Width",value = 7)),
+											column(4, style='padding-left:3px; padding-right:3px;', numericInput(NS(id,"pdf_height_scatter"),"Height",value = 7)),
+											column(4, style='padding-left:3px; padding-right:12px; padding:16px', downloadButton(NS(id,'export_scatter')))
+										),
                                         circle = FALSE,
                                         status = "primary",
                                         icon = icon("fa-thin fa-download"),
@@ -59,9 +61,11 @@ QC_UI <- function(id) {
                          ),
                          tabPanelBody("boxPlot_panel",
                                       dropdownButton(
-                                        numericInput(NS(id,"pdf_widht_boxplot"),"Widht",value = 7),
-                                        numericInput(NS(id,"pdf_heigth_boxplot"),"Heigth",value = 7),
-                                        downloadButton(NS(id,'export_boxplot')),
+										fluidRow(
+											column(4, style='padding-left:12px; padding-right:3px;', numericInput(NS(id,"pdf_width_boxplot"),"Width",value = 7)),
+											column(4, style='padding-left:3px; padding-right:3px;', numericInput(NS(id,"pdf_height_boxplot"),"Height",value = 7)),
+											column(4, style='padding-left:3px; padding-right:12px; padding:16px', downloadButton(NS(id,'export_boxplot')))
+										),
                                         circle = FALSE,
                                         status = "primary",
                                         icon = icon("fa-thin fa-download"),
@@ -225,8 +229,8 @@ QC_Server <- function(id,sce,descriptionText) {
       filename = function() {"ScatterPlot_QC.pdf"},
       content = function(file) {
         pdf(file,
-            width = input$pdf_widht_scatter,
-            height = input$pdf_heigth_scatter
+            width = input$pdf_width_scatter,
+            height = input$pdf_height_scatter
         )
         ScatterPlot() %>% plot()
         dev.off()
@@ -237,8 +241,8 @@ QC_Server <- function(id,sce,descriptionText) {
       filename = function() {"BoxPlot_QC.pdf"},
       content = function(file) {
         pdf(file,
-            width = input$pdf_widht_boxplot,
-            height = input$pdf_heigth_boxplot
+            width = input$pdf_width_boxplot,
+            height = input$pdf_height_boxplot
         )
         
         g1 <- BoxPlot()$g1 + theme(

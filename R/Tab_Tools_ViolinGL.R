@@ -180,9 +180,9 @@ VT_Server <- function(id,sce) {
         hr(),
         fluidRow(
           column(3,style='padding-left:9px; padding-right:1px;',align="center",
-                 numericInput(NS(id,"pdf_widht"),"Widht",value = 7)),
+                 numericInput(NS(id,"pdf_width"),"Width",value = 7)),
           column(3,style='padding-left:1px; padding-right:3px;',align="center",
-                 numericInput(NS(id,"pdf_heigth"),"Heigth",value = 7)),
+                 numericInput(NS(id,"pdf_height"),"Height",value = 7)),
           column(6,style='padding-left:3px; padding-right:12px;padding-top:25px;',align="center",
                  downloadButton(NS(id,'export'))
           ) 
@@ -201,8 +201,8 @@ VT_Server <- function(id,sce) {
             feature <- genes.L() 
           }
           pdf(file,
-              width = input$pdf_widht,
-              height = input$pdf_heigth
+              width = input$pdf_width,
+              height = input$pdf_height
               )
           for (i in 1:length(feature)){
             if(input$partitionType_wrap != "None"){

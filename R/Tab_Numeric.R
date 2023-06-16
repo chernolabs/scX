@@ -133,9 +133,11 @@ Fields_UI <- function(id) {
                                  width = NULL, solidHeader = T, collapsible = T,
                                  footer = tagList(shiny::icon("cat"), "Nya"),
                                  dropdownButton(
-                                   numericInput(NS(id,"pdf_widht_scatter"),"Widht",value = 7),
-                                   numericInput(NS(id,"pdf_heigth_scatter"),"Heigth",value = 7),
-                                   downloadButton(NS(id,'export_scatter')),
+									fluidRow(
+										column(4, style='padding-left:12px; padding-right:3px;', numericInput(NS(id,"pdf_width_scatter"),"Width",value = 7)),
+										column(4, style='padding-left:3px; padding-right:3px;', numericInput(NS(id,"pdf_height_scatter"),"Height",value = 7)),
+										column(4, style='padding-left:3px; padding-right:12px; padding:16px', downloadButton(NS(id,'export_scatter')))
+									),
                                    circle = FALSE,
                                    status = "primary",
                                    icon = icon("fa-thin fa-download"),
@@ -151,9 +153,11 @@ Fields_UI <- function(id) {
                              box(width = NULL, solidHeader = T, collapsible = F,
                                  footer = tagList(shiny::icon("cat"), "Nya"),
                                  dropdownButton(
-                                   numericInput(NS(id,"pdf_widht_heatmap"),"Widht",value = 7),
-                                   numericInput(NS(id,"pdf_heigth_heatmap"),"Heigth",value = 7),
-                                   downloadButton(NS(id,'export_heatmap')),
+									fluidRow(
+										column(4, style='padding-left:12px; padding-right:3px;', numericInput(NS(id,"pdf_width_heatmap"),"Width",value = 7)),
+										column(4, style='padding-left:3px; padding-right:3px;', numericInput(NS(id,"pdf_height_heatmap"),"Height",value = 7)),
+										column(4, style='padding-left:3px; padding-right:12px; padding:16px', downloadButton(NS(id,'export_heatmap')))
+									),
                                    circle = FALSE,
                                    status = "primary",
                                    icon = icon("fa-thin fa-download"),
@@ -169,9 +173,11 @@ Fields_UI <- function(id) {
                              box(width = NULL,solidHeader = T,collapsible = F,
                                  footer = tagList(shiny::icon("cat"), "Nya"),
                                  dropdownButton(
-                                   numericInput(NS(id,"pdf_widht_dotplot"),"Widht",value = 7),
-                                   numericInput(NS(id,"pdf_heigth_dotplot"),"Heigth",value = 7),
-                                   downloadButton(NS(id,'export_dotplot')),
+									fluidRow(
+										column(4, style='padding-left:12px; padding-right:3px;', numericInput(NS(id,"pdf_width_dotplot"),"Width",value = 7)),
+										column(4, style='padding-left:3px; padding-right:3px;', numericInput(NS(id,"pdf_height_dotplot"),"Height",value = 7)),
+										column(4, style='padding-left:3px; padding-right:12px; padding:16px', downloadButton(NS(id,'export_dotplot')))
+									),
                                    circle = FALSE,
                                    status = "primary",
                                    icon = icon("fa-thin fa-download"),
@@ -187,9 +193,11 @@ Fields_UI <- function(id) {
                              box(width = NULL,solidHeader = T,collapsible = F,
                                  footer = tagList(shiny::icon("cat"), "Nya"),
                                  dropdownButton(
-                                   numericInput(NS(id,"pdf_widht_StackedViolin"),"Widht",value = 7),
-                                   numericInput(NS(id,"pdf_heigth_StackedViolin"),"Heigth",value = 7),
-                                   downloadButton(NS(id,'export_StackedViolin')),
+									fluidRow(
+										column(4, style='padding-left:12px; padding-right:3px;', numericInput(NS(id,"pdf_width_StackedViolin"),"Width",value = 7)),
+										column(4, style='padding-left:3px; padding-right:3px;', numericInput(NS(id,"pdf_height_StackedViolin"),"Height",value = 7)),
+										column(4, style='padding-left:3px; padding-right:12px; padding:16px', downloadButton(NS(id,'export_StackedViolin')))
+									),
                                    circle = FALSE,
                                    status = "primary",
                                    icon = icon("fa-thin fa-download"),
@@ -573,9 +581,11 @@ Fields_Server <- function(id,sce) {
           box(width = NULL, solidHeader = T, collapsible = F,
               footer = tagList(shiny::icon("cat"), "Nya"),
               dropdownButton(
-                numericInput(NS(id,"pdf_widht_matrix"),"Widht",value = 7),
-                numericInput(NS(id,"pdf_heigth_matrix"),"Heigth",value = 7),
-                downloadButton(NS(id,'export_matrix')),
+				fluidRow(
+					column(4, style='padding-left:12px; padding-right:3px;', numericInput(NS(id,"pdf_width_matrix"),"Width",value = 7)),
+					column(4, style='padding-left:3px; padding-right:3px;', numericInput(NS(id,"pdf_height_matrix"),"Height",value = 7)),
+					column(4, style='padding-left:3px; padding-right:12px; padding:16px', downloadButton(NS(id,'export_matrix')))
+				),
                 circle = FALSE,
                 status = "primary",
                 icon = icon("fa-thin fa-download"),
@@ -596,8 +606,8 @@ Fields_Server <- function(id,sce) {
       filename = function() {"Distribution_Numerics.pdf"},
       content = function(file) {
         pdf(file,
-            width = input$pdf_widht_scatter,
-            height = input$pdf_heigth_scatter
+            width = input$pdf_width_scatter,
+            height = input$pdf_height_scatter
         )
         PlotNumeric() %>% plot()
         dev.off()
@@ -607,8 +617,8 @@ Fields_Server <- function(id,sce) {
       filename = function() {"Heatmap_Numerics.pdf"},
       content = function(file) {
         pdf(file,
-            width = input$pdf_widht_heatmap,
-            height = input$pdf_heigth_heatmap
+            width = input$pdf_width_heatmap,
+            height = input$pdf_height_heatmap
         )
         Heatmap_Plot() %>% plot()
         dev.off()
@@ -619,8 +629,8 @@ Fields_Server <- function(id,sce) {
       filename = function() {"DotPlot_Numerics.pdf"},
       content = function(file) {
         pdf(file,
-            width = input$pdf_widht_dotplot,
-            height = input$pdf_heigth_dotplot
+            width = input$pdf_width_dotplot,
+            height = input$pdf_height_dotplot
         )
         DotPlot() %>% plot()
         dev.off()
@@ -631,8 +641,8 @@ Fields_Server <- function(id,sce) {
       filename = function() {"StackedViolin_Numerics.pdf"},
       content = function(file) {
         pdf(file,
-            width = input$pdf_widht_StackedViolin,
-            height = input$pdf_heigth_StackedViolin
+            width = input$pdf_width_StackedViolin,
+            height = input$pdf_height_StackedViolin
         )
         stackVln() %>% plot()
         dev.off()
@@ -643,8 +653,8 @@ Fields_Server <- function(id,sce) {
       filename = function() {"CorrMatrix_Numerics.pdf"},
       content = function(file) {
         pdf(file,
-            width = input$pdf_widht_matrix,
-            height = input$pdf_heigth_matrix
+            width = input$pdf_width_matrix,
+            height = input$pdf_height_matrix
         )
         PlotMatrix() %>% plot()
         dev.off()

@@ -55,9 +55,11 @@ markersUI <- function(id = "markers") {
                                            selected = "Violin_panel",
                                            tabPanelBody("Violin_panel",
                                                         dropdownButton(
-                                                          numericInput(NS(id,"pdf_widht_violin"),"Widht",value = 7),
-                                                          numericInput(NS(id,"pdf_heigth_violin"),"Heigth",value = 7),
-                                                          downloadButton(NS(id,'export_violin')),
+															fluidRow(
+																column(4, style='padding-left:12px; padding-right:3px;', numericInput(NS(id,"pdf_width_violin"),"Width",value = 7)),
+																column(4, style='padding-left:3px; padding-right:3px;', numericInput(NS(id,"pdf_height_violin"),"Height",value = 7)),
+																column(4, style='padding-left:3px; padding-right:12px; padding:16px', downloadButton(NS(id,'export_violin')))
+															),
                                                           circle = FALSE,
                                                           status = "primary",
                                                           icon = icon("fa-thin fa-download"),
@@ -70,9 +72,11 @@ markersUI <- function(id = "markers") {
                                            ),
                                            tabPanelBody("SpikePlot_panel",
                                                         dropdownButton(
-                                                          numericInput(NS(id,"pdf_widht_SpikePlot"),"Widht",value = 7),
-                                                          numericInput(NS(id,"pdf_heigth_SpikePlot"),"Heigth",value = 7),
-                                                          downloadButton(NS(id,'export_SpikePlot')),
+															fluidRow(
+																column(4, style='padding-left:12px; padding-right:3px;', numericInput(NS(id,"pdf_width_SpikePlot"),"Width",value = 7)),
+																column(4, style='padding-left:3px; padding-right:3px;', numericInput(NS(id,"pdf_height_SpikePlot"),"Height",value = 7)),
+																column(4, style='padding-left:3px; padding-right:12px; padding:16px', downloadButton(NS(id,'export_SpikePlot')))
+															),
                                                           circle = FALSE,
                                                           status = "primary",
                                                           icon = icon("fa-thin fa-download"),
@@ -393,8 +397,8 @@ markersServer <- function(id = "markers",sce,ldf,point.size = 20) {
       filename = function() {"Violin_Markers.pdf"},
       content = function(file) {
         pdf(file,
-            width = input$pdf_widht_violin,
-            height = input$pdf_heigth_violin
+            width = input$pdf_width_violin,
+            height = input$pdf_height_violin
         )
         ViolinPlot() %>% plot()
         dev.off()
@@ -404,8 +408,8 @@ markersServer <- function(id = "markers",sce,ldf,point.size = 20) {
       filename = function() {"SpikePlot_Markers.pdf"},
       content = function(file) {
         pdf(file,
-            width = input$pdf_widht_SpikePlot,
-            height = input$pdf_heigth_SpikePlot
+            width = input$pdf_width_SpikePlot,
+            height = input$pdf_height_SpikePlot
         )
         SpikePlot() %>% print()
         dev.off()
