@@ -58,3 +58,13 @@ In the summary section, you can explore the relationship between the number of f
 ## Visual Tools
 ### Violin by Partition
 ### Multiplots
+
+## FAQs
+
+FAQ
+---
+0 - cómo está estructurado un objeto SCE y qué cosas usa el shiny
+1 - cómo levantar un objeto 10x, convertirlo en SCE y meterlo en la función
+2 - cómo calcular particiones (tipo louvain) y agregarlas al SCE
+3 - agregar funcion aparte para el subsampleo (que entre cseo y salga cseo).. y que pongamos que recomendamos hacerlo en el caso de > tantas (100k) células
+4 - si tengo un objeto Seurat con un assay específico distinto a los típicos, cómo convertir el objeto Seurat a SCE por fuera de la fución
