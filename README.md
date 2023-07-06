@@ -1,28 +1,46 @@
 <h1 align="center">  scXplorer package </h1>
-scXplorer is an R package that enables interactive visualization and analysis of single-cell experiment data by creating a Shiny-based application.
+
+scXplorer is an R package that enables interactive visualization and analysis of single-cell experiment data by creating a Shiny-based application. With scXplorer all aspects of single-cell data can be explored using a large number of different types of plots, such as scatter plots, heatmaps, boxplots, dot and violins plots, etc. All the information associated with the cells can be displayed in a customized way: both numerical variables such as logcounts or pseudotime values, and categorical variables such as cell types or sample. One of the main hallmarks of scXplorer is the possibility to plot the main embeddings used for single cell - UMAP, tsNE and PCA - both in 2D and 3D in an interactive way. Thus, embeddings can be rotated, translated and zoomed. But scXplorer is not only a visualization tool, it also allows you to perform different types of analysis on single cell data, such as finding the markers of a cell type or determining the differential genes between two different conditions.
+
+## Table of Contents
+- [Install](#install)
+- [Quick Start Guide](#quick-start-guide)
+  * [Summary](#summary)
+  * [Markers](#markers)
+  * [Gene expression](#gene-expression)
+  * [Differential expression](#differential-expression)
+  * [Exploratory Data Analysis](#exploratory-data-analysis)
+  * [Visual Tools](#visual-tools)
+- [FAQs](#faqs)
+
 
 ## Install
+scXplorer can be installed from Github as follows:
 ```R
 devtools::install_github("tvegawaichman/scXplorer")
 ```
-
-## Loading Datasets
+## Quick Start Guide
+### Loading Datasets
+To show the different features that scXplorer has we will use single cell data related to the oligodendrocyte developmental lineage ([Marques et al. 2016](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5221728/)). In this dataset we have cells from 12 regions of the central nervous system of juvenile and adult mice, and 10 distinct cell populations were identified. The data can be obtained using the "scRNAseq" package as follows:
 
 ```R
 setwd("/working/directory")
 library(devtools)
 library(scRNAseq)
 load_all()
-
-# Creating SCE object ----
 sce <- MarquesBrainData()
+```
+scXplorer app can be created and launched with only two functions. createSCEobject() creates the single cell experiment object that will be used inside the app. With this function we can configure the main features of our dataset, such as what is the main partition and what metadata information we want to analyze with scXplorer.  On the other hand, different aspects of the data preprocessing are also defined. Finally with launch_scXplorer() we can initiate the app.
+
+```R
+# Creating SCE object
 cseo <- createSCEobject(xx = sce, 
                         toFactors = "inferred cell type", 
                         toKeep = c("source_name", "age", "Sex", "strain", "treatment"))
 
 launch_scXplorer(cseo)
 ```
-<details><summary> <h2>  Summary </h2> </summary>
+## Summary
   
 scXplorer displays a summary of the main descriptive information of the dataset: number of cells and genes, mean number of genes detected per cell, average library size, etc.
 
@@ -37,9 +55,12 @@ In the summary section, you can explore the relationship between the number of f
 
 </details>
 
-<details><summary> <h2>  Markers </h2> </summary><blockquote>
+##  Markers
+
+In "Markers" section there are two types of analysis. On the one hand, in "Cluster markers" clicking on a cell displays a table with the marker genes of the cluster to which that cell belongs. On the other hand, in "Find new markers" you can select a set of cells in the embedding and scXplorer will calculate their marker genes.
+
 <details><summary> <h3>  Clusters markers </h3>  </summary><blockquote>
-</p>
+</p> Bla bla
 </blockquote></details>
 
 <details><summary> <h3>  Find new markers </h3> </summary><blockquote>
@@ -47,10 +68,21 @@ In the summary section, you can explore the relationship between the number of f
 </blockquote></details>
 </blockquote></details>
 
-## Gene Expression
-### Categories
-### Fields
-### Co-expression
+##  Gene Expression
+<details><summary> <h3> Categories </h3>  </summary><blockquote>
+</p>
+</blockquote></details>
+
+<details><summary> <h3>  Fields </h3> </summary><blockquote>
+</p>
+</blockquote></details>
+</blockquote></details>
+
+<details><summary> <h3>  Co-expression </h3> </summary><blockquote>
+</p>
+</blockquote></details>
+</blockquote></details>
+
 ## Differential expression
 ## Exploratory Data Analysis
 ### Categories
