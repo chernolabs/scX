@@ -60,9 +60,10 @@ In the summary section, you can explore the relationship between the number of f
 In "Markers" section there are two types of analysis. On the one hand, in "Cluster markers" clicking on a cell displays a table with the marker genes of the cluster to which that cell belongs. On the other hand, in "Find new markers" you can select a set of cells in the embedding and scXplorer will calculate their marker genes.
 
 <details><summary> <h3>  Clusters markers </h3>  </summary><blockquote>
+ 
  Aca tenes el gif
  
-![04]()
+<img src="/images/scXplorer-Google-Chrome-2023-07-05-22-45-05.gif" width="80%" />
 
 </blockquote></details>
 
