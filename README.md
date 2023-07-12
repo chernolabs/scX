@@ -44,14 +44,9 @@ launch_scXplorer(cseo)
   
 scXplorer displays a summary of the main descriptive information of the dataset: number of cells and genes, mean number of genes detected per cell, average library size, etc.
 
-![01](/images/01_image_intro.png)
-
 In the summary section, you can explore the relationship between the number of features and the count numbers through graphical visualization.
 
-<p float="left">
-  <img src="/images/02_image_summary.png" width="48%" />
-  <img src="/images/03_image_summary.png" width="48%" /> 
-</p>
+<img src="/images/summary.gif" width="100%" />
 
 </details>
 
@@ -63,27 +58,35 @@ In "Markers" section there are two types of analysis. On the one hand, in "Clust
  
  Aca tenes el gif
  
-<img src="/images/scXplorer-Google-Chrome-2023-07-05-22-45-05.gif" width="80%" />
+<img src="/images/cluster_markers.gif" width="100%" />
 
 </blockquote></details>
 
 <details><summary> <h3>  Find new markers </h3> </summary><blockquote>
-</p>
+
+<img src="/images/new_markers.gif" width="100%" />
+
 </blockquote></details>
 </blockquote></details>
 
 ##  Gene Expression
 <details><summary> <h3> Categories </h3>  </summary><blockquote>
-</p>
+
+<img src="/images/categories.gif" width="100%" />
+
 </blockquote></details>
 
 <details><summary> <h3>  Fields </h3> </summary><blockquote>
-</p>
+
+<img src="/images/fields.gif" width="100%" />
+
 </blockquote></details>
 </blockquote></details>
 
 <details><summary> <h3>  Co-expression </h3> </summary><blockquote>
-</p>
+
+<img src="/images/coexpression.gif" width="100%" />
+
 </blockquote></details>
 </blockquote></details>
 
@@ -91,21 +94,29 @@ In "Markers" section there are two types of analysis. On the one hand, in "Clust
 
 ##  Exploratory Data Analysis
 <details><summary> <h3> Categories </h3>  </summary><blockquote>
-</p>
+
+<img src="/images/exploratory_categories.gif" width="100%" />
+
 </blockquote></details>
 
 <details><summary> <h3>  Fields </h3> </summary><blockquote>
-</p>
+
+<img src="/images/fields.gif" width="100%" />
+
 </blockquote></details>
 </blockquote></details>
 
 ##  Visual Tools
 <details><summary> <h3> Violin by Partition </h3>  </summary><blockquote>
-</p>
+
+<img src="/images/fields.gif" width="100%" />
+
 </blockquote></details>
 
 <details><summary> <h3>  Multiplots </h3> </summary><blockquote>
-</p>
+
+<img src="/images/multiplots.gif" width="100%" />
+
 </blockquote></details>
 </blockquote></details>
 
