@@ -52,11 +52,13 @@ In the summary section, you can explore the relationship between the number of f
 
 ##  Markers
 
-In "Markers" section there are two types of analysis. On the one hand, in "Cluster markers" clicking on a cell displays a table with the marker genes of the cluster to which that cell belongs. On the other hand, in "Find new markers" you can select a set of cells in the embedding and scXplorer will calculate their marker genes.
+In "Markers" section there are two types of analysis. On the one hand, in "Cluster markers" clicking on a cell displays a table with the marker genes of the cluster to which that cell belongs. On the other hand, in "Find new markers" you can select a group of cells in the embedding and scXplorer will calculate their marker genes.
 
 <details><summary> <h3>  Clusters markers </h3>  </summary><blockquote>
- 
- Aca tenes el gif
+
+This section allows you to find the marker genes for the partition defined in the single-cell object, typically cell types or cell states. Clicking on one of the cells in the embedding will display a table of marker genes for the partition to which that cell belongs. For each of the markers different metrics such as boxcor, robustness and FDR are displayed. This table can be downloaded in various formats, such as .csv, .xlsx .pdf, or you can copy it to the clipboard. 
+
+By clicking on a marker in the table you can see its expression profile across the entire dataset in the embedding. In addition violin and spikeplots are displayed at the bottom.
  
 <img src="/images/cluster_markers.gif" width="100%" />
 
@@ -64,19 +66,32 @@ In "Markers" section there are two types of analysis. On the one hand, in "Clust
 
 <details><summary> <h3>  Find new markers </h3> </summary><blockquote>
 
+Here you can select with the box or lasso tool a set of cells in the embedding and scXplorer will calculate the marker genes. You can download not only the marker table but also the selected cell list.
+
+As in the previous section, if you click on one of the markers you can see its expression along the dataset with violin and spikeplots.
+
 <img src="/images/new_markers.gif" width="100%" />
 
 </blockquote></details>
 </blockquote></details>
 
 ##  Gene Expression
+
+In "Gene Expression" you can explore different aspects of the expression of one or more genes of interest. Determine how expression changes according to different categorical and continuous variables, as well as analyse co-detection between pairs of genes.
+
 <details><summary> <h3> Categories </h3>  </summary><blockquote>
+
+In Settings you can select one or more genes or upload a file with a list of genes. The average expression of the genes of interest can be viewed in the different embeddings available, with the possibility to colour according to the different SCE partitions to compare gene expression with different cell types or conditions present in the metadata. 
+
+A wide variety of plots are available to analyse the expression of the genes of interest in the different categories. Heatmaps allow normalisation of expression by gene, clustering by row and column and grouping of cells by condition. Similarly, dotplots allow normalisation of expression and clustering of genes. 
 
 <img src="/images/categories.gif" width="100%" />
 
 </blockquote></details>
 
 <details><summary> <h3>  Fields </h3> </summary><blockquote>
+
+**Fields** allows you to analyse the expression of a set of genes in relation to numeric variables present in your dataset, such as the number of counts or pseudotime value, if present in the metadata of the sce object. Below the embedding, a line plot of the average expression of the genes of interest as a function of the chosen variables and a spikeplot are displayed. Furthermore, you can find heatmaps sorted by the chosen numerical variable that can be divided according to some categorical variable, and multiline plots showing the comparison of the expression profile of the genes of interest along the field.
 
 <img src="/images/fields.gif" width="100%" />
 
@@ -85,12 +100,16 @@ In "Markers" section there are two types of analysis. On the one hand, in "Clust
 
 <details><summary> <h3>  Co-expression </h3> </summary><blockquote>
 
+In **Co-expression** section you can analyse the co-appearance of pairs of genes, determine the number and percentage of cells in which each gene is expressed separately and together. You can also view this information graphically in the embedding. In addition, the co-expression of these genes in the different conditions of any of the partitions in the dataset can be analysed by a co-detection matrix.
+
 <img src="/images/coexpression.gif" width="100%" />
 
 </blockquote></details>
 </blockquote></details>
 
 ## Differential expression
+
+Coming soon ...
 
 ##  Exploratory Data Analysis
 <details><summary> <h3> Categories </h3>  </summary><blockquote>
