@@ -88,12 +88,26 @@ In "Markers" section there are two types of analysis. On the one hand, in "Clust
 </blockquote></details>
 
 ## Differential expression
-## Exploratory Data Analysis
-### Categories
-### Fields
-## Visual Tools
-### Violin by Partition
-### Multiplots
+
+##  Exploratory Data Analysis
+<details><summary> <h3> Categories </h3>  </summary><blockquote>
+</p>
+</blockquote></details>
+
+<details><summary> <h3>  Fields </h3> </summary><blockquote>
+</p>
+</blockquote></details>
+</blockquote></details>
+
+##  Visual Tools
+<details><summary> <h3> Violin by Partition </h3>  </summary><blockquote>
+</p>
+</blockquote></details>
+
+<details><summary> <h3>  Multiplots </h3> </summary><blockquote>
+</p>
+</blockquote></details>
+</blockquote></details>
 
 ## FAQs
 
