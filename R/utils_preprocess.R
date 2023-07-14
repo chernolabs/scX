@@ -405,7 +405,8 @@ ldf_func <- function(sce, partition, paramFindMarkers, minSize=50){
                          log.FDR=lfmrk[[1]][[coi]][u,'FDR'],
                          boxcor=boxcor
                          )
-        df <- df[with(df, order(summary.stats, -log.FDR, boxcor, decreasing = T)),]
+        df   <- df[with(df, order(summary.stats, -log.FDR, boxcor, decreasing = T)),]
+        df[] <- apply(df, 2, function(x){as.numeric(formatC(x, digits = 3))})
       }
       else {
         df <- NULL
