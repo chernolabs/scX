@@ -14,13 +14,15 @@
 #' @param toFactors Optional metadata column names (or colData) to use as factors. If `NULL` (default),
 #'		a quick clusterization will be computed.
 #' @param toKeep Additional metadata column names (or colData) to use only for coloring in plots. If `NULL` (default),
-#'    all columns will be available for coloring plots in the app. 
+#'    only 'toFactors' columns will be available for coloring plots in the app. 
 #' @param chosen.hvg Optional list of Highly Variable Genes.
 #' @param nHVGs Number of Highly Variable Genes to use if `chosen.hvg=NULL`. Defaults to 3000.
 #' @param nPCs Number of Principal Components to use in PCA. Defaults to 50.
 #' @param verbose Step by step status while function is running. Defaults to `TRUE`.
 #' @param calcRedDim Whether to compute reduced dimensions (PCA, UMAP, TSNE, UMAP2D, TSNE2D) or not.
 #'		Defaults to `TRUE`.
+#' @param paramFindMarkers List of params to pass to scran::findMarkers function to compute marker genes for clusters. Deafult is `list(test.type="wilcox", pval.type="all", direction="any")` 
+#' @param calcAllToFactors Wheter to force the computation of markers and DEGs from the entire list of 'toFactors'
 #' @param descriptionText The short description of the object being analized. This can help when you are working with multiple tabs. 
 #' @returns List with a SingleCellExperiment object and additional data ready for use in scXplorer.
 #' @export
@@ -34,11 +36,12 @@ createSCEobject <- function(xx,
                             nHVGs=3000,
                             nPCs=50,
                             calcRedDim=TRUE,
+                            paramFindMarkers=list(test.type="wilcox", pval.type="all", direction="any"),
+                            calcAllToFactors=FALSE,
                             descriptionText=NULL,
                             verbose=TRUE){
   
   csceo <- list()
-  
   ##Check if there are colnames and rownames in the objects 
   if(is.null(rownames(xx)) | is.null(colnames(xx))){
     stop('Missing row names or column names.')
@@ -76,13 +79,20 @@ createSCEobject <- function(xx,
     }
     # matrix + metadata to sce ----
   } else if (class(xx)[1] %in% c("dgCMatrix", "Matrix", "matrix")){
+    if(is.null(rownames(xx)) | is.null(colnames(xx))){
+      stop('Matrix must have rownames "gene_id" and colnames "barcodes"')
+    }
     xx.sce <- SingleCellExperiment(list(counts=xx))
     if(!is.null(metadata)){
-      colData(xx.sce) <- c(colData(xx.sce), metadata)
-      if((!("scx.clust" %in% toFactors)) & (!all(toFactors %in% names(colData(xx.sce))))){
-        warning('at least one factor is not present in metadata')
-      }
-    } 
+      if(all(colnames(xx.sce) %in% rownames(metadata))){
+        colData(xx.sce) <- c(colData(xx.sce), metadata[colnames(xx.sce),])
+        if((!("scx.clust" %in% toFactors)) & (!all(toFactors %in% names(colData(xx.sce))))){
+          warning('at least one factor is not present in metadata')
+        }
+      } else {
+        stop('Some cells in metadata are not present in colnames matrix.\n')
+        }
+    }
     # else {
     #   stop('metadata not found')
     # }
@@ -110,27 +120,37 @@ createSCEobject <- function(xx,
   # QC ----
   if(verbose) cat('Computing QC metrics...')
   if(!assay.name.raw %in% names(assays(xx.sce))){
-    stop(paste0('Assay ',name.assay.raw,' not found in SCE object'))
+    if(assay.name.normalization %in% names(assays(xx.sce))){
+      warning(paste0('Assays ',name.assay.raw,' not found in SCE object'))
+      xx.sce$nCounts   <- NA
+      xx.sce$nFeatures <- NA
+    } else {
+      stop(paste0('Assay ',paste(name.assay.raw, name.assay.normalization, sep = ' & '),' not found in SCE object'))
+    }
+  } else {
+    xx.sce$nCounts <- apply(assay(xx.sce, assay.name.raw),2,sum)
+    xx.sce$nFeatures <- apply(assay(xx.sce, assay.name.raw),2,function(x){sum(x>0)})
   }
-  nCounts <- apply(assay(xx.sce, assay.name.raw),2,sum)
-  nFeatures <- apply(assay(xx.sce, assay.name.raw),2,function(x){sum(x>0)})
-  df.qc <- data.frame(row.names = colnames(xx.sce), nCounts = nCounts, nFeatures = nFeatures)
-  colData(xx.sce) <- c(colData(xx.sce),df.qc)
   if(verbose) cat(' Finished\n')
   
   
   # Normalization ----
-  clust <- scran::quickCluster(xx.sce, assay.type = assay.name.raw)
-  xx.sce$scx.clust <- clust
   if(!assay.name.normalization %in% names(assays(xx.sce))){
-    if(verbose) cat('Computing normalization...')
-    set.seed(123457)
-    clust <- scran::quickCluster(xx.sce, assay.type = assay.name.raw)
-    xx.sce$scx.clust <- clust
-    xx.sce <- scran::computeSumFactors(xx.sce,cluster=clust,min.mean=0.1, assay.type = assay.name.raw)
+    if(assay.name.raw %in% names(assays(xx.sce))){
+      if(verbose) cat('Computing normalization...')
+      set.seed(123457)
+      clust <- scran::quickCluster(xx.sce, assay.type = assay.name.raw)
+      xx.sce$scx.clust <- clust
+      xx.sce <- scran::computeSumFactors(xx.sce,cluster=clust,min.mean=0.1, assay.type = assay.name.raw)
+      xx.sce <- scater::logNormCounts(xx.sce, assay.type = assay.name.raw, name="logcounts")
+      if(verbose) cat(' Finished\n')
+    }
     # xx.sce <- scuttle::pooledSizeFactors(xx.sce,cluster=clust,min.mean=0.1, assay.type = assay.name.raw)
-    xx.sce <- scater::logNormCounts(xx.sce, assay.type = assay.name.raw, name="logcounts")
-    if(verbose) cat(' Finished\n')
+  } else if ( "scx.clust" %in% toFactors ) {
+      if(verbose) cat('Computing clusters...')
+      clust <- scran::quickCluster(xx.sce, assay.type = assay.name.normalization)
+      xx.sce$scx.clust <- clust
+      if(verbose) cat(' Finished\n')
   }
   
   
@@ -234,14 +254,29 @@ createSCEobject <- function(xx,
   
   
   if(verbose) cat('Computing differential expression markers...')
+  
+  # Checking number of levels of ttoFactors for calculations ----
+  if(!calcAllToFactors){
+    allToFactors <- sapply(ttoFactors, function(x){length(unique(colData(xx.sce)[,x]))})>30
+    if(all(allToFactors)){
+      stop(paste0(paste0(names(allToFactors)[allToFactors], collapse =  ' & ')," has more than 30 levels. If you want to compute it anyway set 'calcAllToFactors' as TRUE"))
+    } else {
+      warning(paste0(paste0(names(allToFactors)[allToFactors], collapse =  ' & ')," has more than 30 levels. They wont be used to compute markers and DEGs. If you want to compute it anyway set 'calcAllToFactors' as TRUE"))
+      ttoFactors <- ttoFactors[!allToFactors]
+    }
+  }
+  
   # sce markers ----
+  if(verbose) cat('Computing cluster markers:\n')
   sce.markers <- list()
   for(i in ttoFactors){
     sce.markers[[i]] <- scran::findMarkers(xx.sce, 
                                     assay.type = "logcounts",
                                     group = colData(xx.sce)[,i],
-                                    test.type="wilcox",
-                                    direction="any",pval.type="all",log.p=T,full.stats=T)
+                                    test.type=paramFindMarkers$test.type,
+                                    direction="any",
+                                    pval.type="all",
+                                    log.p=T,full.stats=T)
   }
   if(verbose) cat(' Finished\n')
 
@@ -249,11 +284,13 @@ createSCEobject <- function(xx,
   csceo[["sce.markers"]] <- sce.markers
   
   
-  if(verbose) cat('Computing cluster markers:\n')
   # ldf functions ----
+  numCores <- max(1, parallel::detectCores() - 2, na.rm = TRUE)
+  if(require("doParallel", quietly = T)) doParallel::registerDoParallel(numCores)
+
   ldf <- list()
   for(i in ttoFactors){
-    ldf[[i]] <- ldf_func(xx.sce, i)
+    ldf[[i]] <- ldf_func(xx.sce, i, paramFindMarkers)
   }
   if(verbose) cat('Finished\n')
   
@@ -313,31 +350,24 @@ applyReducedDim <- function(sce, reddimstocalculate, chosen.hvgs, nPCs, assaynam
 # returns: markers, robustness, correlation with a binary vector "turned on" in that cluster
 #' @keywords internal
 #' @noRd
-ldf_func <- function(sce, partition, minSize=50){
-  
+ldf_func <- function(sce, partition, paramFindMarkers, minSize=50){
+
   cat(partition, ":\n", sep = "")
-  # remove empty factors
-  # colData(sce)[,partition] <- droplevels(colData(sce)[,partition])
   
   # calculate lfmrk ----
-  type           <- c('all','any','some') # esto puede ir afuera de ldf
   lfmrk <- list()
-  for(itype in seq_along(type)){
-    lfmrk[[type[itype]]]    <- scran::findMarkers(sce,
-                                           assay.type = "logcounts",
-                                           groups=colData(sce)[,partition],
-                                           test.type="wilcox",
-                                           full.stats=TRUE,
-                                           direction='up',
-                                           pval.type=type[itype])
-  }
+  lfmrk[[paramFindMarkers$pval.type]]    <- scran::findMarkers(sce,
+                                                               assay.type = "logcounts",
+                                                               groups=colData(sce)[,partition],
+                                                               test.type=paramFindMarkers$test.type,
+                                                               direction=paramFindMarkers$direction,
+                                                               pval.type=paramFindMarkers$pval.type,
+                                                               full.stats=TRUE
+                                                               )
   
   
   # calculate ldf ----
   ldf_t <-list()
-  numCores <- max(1, parallel::detectCores() - 2, na.rm = TRUE) # esto puede ir afuera de ldf
-  if(require("doParallel", quietly = T)) doParallel::registerDoParallel(numCores)
-  # lfmrk <- lfmrk_t
   
   lab   <- colData(sce)[,partition]
   tt   <- table(lab)
@@ -350,22 +380,18 @@ ldf_func <- function(sce, partition, minSize=50){
     for(ic in seq_along(lfmrk[[1]])){ #acá se podría hacer una paralelizacion
       coi <- names(lfmrk[[1]])[ic]
       cat('\t', coi,'- ')
-      any  <- rownames(lfmrk[['any']][[coi]])[lfmrk[['any']][[coi]][,'FDR']<0.05 & 
-                                                lfmrk[['any']][[coi]][,'Top']<=10]
-      all  <-rownames(lfmrk[['all']][[coi]])[lfmrk[['all']][[coi]][,'FDR']<0.05]
-      some <-rownames(lfmrk[['some']][[coi]])[lfmrk[['some']][[coi]][,'FDR']<0.05]
-      u <- unique(c(any,all,some))
-      maux <- cbind(all=u%in%all,any=u%in%any,some=u%in%some)
-      rownames(maux)<-u
-      a     <- apply(maux,1,function(x){sum(x*c(4,2,1))})
-      mrkrs <- sort(a,decreasing=TRUE)
-      a4    <- names(mrkrs)[mrkrs>=1]
+      if(paramFindMarkers$pval.type=="any"){
+        u <- rownames(lfmrk[[1]][[coi]])[lfmrk[[1]][[coi]][,'FDR']<0.05 & 
+                                                lfmrk[[1]][[coi]][,'Top']<=10]
+      } else {
+        u <- rownames(lfmrk[[1]][[coi]])[lfmrk[[1]][[coi]][,'FDR']<0.05]
+      }
       
       # (6.1.1) Boxcor ----
       cat("Computing correlation\n")
       
-      if(length(a4) > 0){
-        Z   <- assay(sce, "logcounts")[a4,]  
+      if(length(u) > 0){
+        Z   <- assay(sce, "logcounts")[u,]  
         
         pattern <- rep(0,ncol(Z))
         pattern[colData(sce)[,partition]%in%coi] <- 1
@@ -373,11 +399,12 @@ ldf_func <- function(sce, partition, minSize=50){
                         function(x){
                           return(cor(x,pattern))
                         }
-        )
-        df <- data.frame(boxcor=boxcor,
-                         robustness=a[names(mrkrs)],
-                         fM_FDR=formatC(lfmrk[['all']][[coi]][names(mrkrs),'FDR'],digits = 3)
-        )
+                        )
+                        
+        df <- data.frame(fM.summary.stats=formatC(lfmrk[[1]][[coi]][u,'summary.stats'],digits = 3),
+                         fM.log.FDR=formatC(lfmrk[[1]][[coi]][u,'FDR'],digits = 3),
+                         boxcor=boxcor
+                         )
       }
       else {
         df <- NULL
