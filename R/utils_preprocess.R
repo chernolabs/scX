@@ -260,7 +260,7 @@ createSCEobject <- function(xx,
     allToFactors <- sapply(ttoFactors, function(x){length(unique(colData(xx.sce)[,x]))})>30
     if(all(allToFactors)){
       stop(paste0(paste0(names(allToFactors)[allToFactors], collapse =  ' & ')," has more than 30 levels. If you want to compute it anyway set 'calcAllToFactors' as TRUE"))
-    } else {
+    } else if(any(allToFactors)) {
       warning(paste0(paste0(names(allToFactors)[allToFactors], collapse =  ' & ')," has more than 30 levels. They wont be used to compute markers and DEGs. If you want to compute it anyway set 'calcAllToFactors' as TRUE"))
       ttoFactors <- ttoFactors[!allToFactors]
     }
@@ -399,12 +399,13 @@ ldf_func <- function(sce, partition, paramFindMarkers, minSize=50){
                         function(x){
                           return(cor(x,pattern))
                         }
-                        )
-                        
-        df <- data.frame(fM.summary.stats=formatC(lfmrk[[1]][[coi]][u,'summary.stats'],digits = 3),
-                         fM.log.FDR=formatC(lfmrk[[1]][[coi]][u,'FDR'],digits = 3),
+                       )
+
+        df <- data.frame(summary.stats=lfmrk[[1]][[coi]][u,'summary.stats'],
+                         log.FDR=lfmrk[[1]][[coi]][u,'FDR'],
                          boxcor=boxcor
                          )
+        df <- df[with(df, order(summary.stats, -log.FDR, boxcor, decreasing = T)),]
       }
       else {
         df <- NULL

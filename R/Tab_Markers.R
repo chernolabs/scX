@@ -196,8 +196,8 @@ markersServer <- function(id = "markers",sce,ldf,point.size = 20) {
       df <- ldf[[input$partitionType]][[cluster_selected()]]
       #Check if it is a cluster without any markers, if it is create a null data.frame
       if(is.null(df)){
-        df <- data.frame(matrix(ncol = 2, nrow = 0))
-        colnames(df) <- c('boxcor','robustness')
+        df <- data.frame(matrix(ncol = 3, nrow = 0))
+        colnames(df) <- c('summary.stats','log.FDR','boxcor')
       }
       df
       
@@ -214,7 +214,7 @@ markersServer <- function(id = "markers",sce,ldf,point.size = 20) {
     caption = htmltools::tags$caption(
       style = paste0('caption-side: top; text-align: center; font-weight: bold;color:white;background-color:',OrderPartReact()$colPart[[cluster_selected()]]),
       cluster_selected())
-    ) %>% formatRound(columns = c("boxcor"),digits = 3)
+    ) %>% formatRound(columns = c('boxcor'),digits = 3)
     )
     
     #Gene selected from the DT
