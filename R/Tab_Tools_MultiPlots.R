@@ -346,7 +346,7 @@ MultiPlotsServer <- function(id,sce) {
             width = input$pdf_width_bygene,
             height = input$pdf_height_bygene
         )
-        list_cluster_plot() %>% plot()
+        list_gene_plot() %>% plot()
         dev.off()
       })
     
