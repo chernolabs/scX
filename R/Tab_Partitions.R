@@ -86,7 +86,7 @@ Clusters_UI <- function(id) {
                      tooltip = tooltipOptions(title = "Press to Download")
                    ),
             plotOutput(NS(id,"plot_cluster"),
-                     height = "100vh") %>% withSpinner()
+                     height = "80vh") %>% withSpinner()
           ),
           tabPanel("Matrix",value = "matrix",
                    dropdownButton(
@@ -104,7 +104,7 @@ Clusters_UI <- function(id) {
                      tooltip = tooltipOptions(title = "Press to Download")
                    ),
             plotOutput(NS(id,"plot_matrix"),
-                       height = "100vh") %>% withSpinner()
+                       height = "80vh") %>% withSpinner()
           )
         )
       )
