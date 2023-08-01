@@ -23,6 +23,7 @@
 #'		Defaults to `TRUE`.
 #' @param paramFindMarkers List of params to pass to scran::findMarkers function to compute marker genes for clusters. Deafult is `list(test.type="wilcox", pval.type="all", direction="any")` 
 #' @param calcAllToFactors Wheter to force the computation of markers and DEGs from the entire list of 'toFactors'
+#' @param cells2keep List of the name of the cells you want to keep from subsampling data. This is only for visual purpose, it does not affect all the computations.
 #' @param descriptionText The short description of the object being analized. This can help when you are working with multiple tabs. 
 #' @returns List with a SingleCellExperiment object and additional data ready for use in scXplorer.
 #' @export
@@ -38,6 +39,7 @@ createSCEobject <- function(xx,
                             calcRedDim=TRUE,
                             paramFindMarkers=list(test.type="wilcox", pval.type="all", direction="any"),
                             calcAllToFactors=FALSE,
+                            cells2keep=NULL,
                             descriptionText=NULL,
                             verbose=TRUE){
   
@@ -128,8 +130,12 @@ createSCEobject <- function(xx,
       stop(paste0('Assay ',paste(name.assay.raw, name.assay.normalization, sep = ' & '),' not found in SCE object'))
     }
   } else {
-    xx.sce$nCounts <- apply(assay(xx.sce, assay.name.raw),2,sum)
-    xx.sce$nFeatures <- apply(assay(xx.sce, assay.name.raw),2,function(x){sum(x>0)})
+      xx.sce$nCounts <- colSums(assay(xx.sce, assay.name.raw))
+      if(class(assay(xx.sce, assay.name.raw))[1]%in%c("dgCMatrix")){
+          xx.sce$nFeatures <- diff(assay(xx.sce, assay.name.raw)@p)#apply(assay(xx.sce, assay.name.raw),2,function(x){sum(x>0)})
+      } else {
+          xx.sce$nFeatures <- apply(assay(xx.sce, assay.name.raw),2,function(x){sum(x>0)})
+      }
   }
   if(verbose) cat(' Finished\n')
   
@@ -301,6 +307,14 @@ createSCEobject <- function(xx,
   # Adding description text to output ----
   csceo[["text"]] <- descriptionText
   
+  # Subsampling require? ----
+  nmaxcell = 50000
+  if(ncol(xx.sce)>nmaxcell){
+      csceo$CELLS2KEEP <- subsampling_func(xx.sce, cellsToKeep = cells2keep, nmaxcell = nmaxcell)
+  }
+
+
+
   gc() # free memory
   return(csceo)
 }
@@ -415,3 +429,18 @@ ldf_func <- function(sce, partition, paramFindMarkers, minSize=50){
   }
   return(ldf_t)
 }
+
+subsampling_func = function(sce, cells2keep=NULL, nmaxcell=50000){
+
+  if(is.null(cells2keep)){
+      ccells2keep <- sample(colnames(sce), nmaxcell, replace=FALSE)
+  }else{
+      ccells2keep <- cells2keep[cells2keep%in%colnames(sce)]
+      if(length(ccells2keep)<nmaxcell){
+        naddcells <- nmaxcell-length(cells2keep)
+        ccells2keep <- c(ccells2keep, sample(colnames(sce)[!colnames(sce)%in%ccells2keep],naddcells,replace=FALSE))
+      }
+  }
+  return(ccells2keep)
+}
+

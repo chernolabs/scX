@@ -16,7 +16,7 @@ launch_scXplorer <- function(cseo, dataset_name='scXplorer', point.size=20, laun
   ui <- server <- NULL # avoid NOTE about undefined globals
   source(file_path, local = TRUE)
   
-  #cseo$SCE = cseo$SCE[,cseo$CELLS2KEEP]
+  cseo$SCE = cseo$SCE[,cseo$CELLS2KEEP]
 
   server_env <- environment(server)
   server_env$cseo <- cseo
