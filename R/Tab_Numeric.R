@@ -146,7 +146,7 @@ Fields_UI <- function(id) {
                                    up = F,
                                    tooltip = tooltipOptions(title = "Press to Download")
                                  ),
-                                 plotlyOutput(NS(id,"plot_numeric"),height = "100vh") %>% withSpinner()
+                                 plotlyOutput(NS(id,"plot_numeric"),height = "80vh") %>% withSpinner()
                              )
                     ),
                     tabPanel("Heatmap", value= "heatmap",
@@ -166,7 +166,7 @@ Fields_UI <- function(id) {
                                    up = F,
                                    tooltip = tooltipOptions(title = "Press to Download")
                                  ),
-                                 plotOutput(NS(id,"plot_heatmap"),height = "100vh") %>% withSpinner()
+                                 plotOutput(NS(id,"plot_heatmap"),height = "80vh") %>% withSpinner()
                              )
                     ),
                     tabPanel("DotPlot", value= "dotplot",
@@ -186,7 +186,7 @@ Fields_UI <- function(id) {
                                    up = F,
                                    tooltip = tooltipOptions(title = "Press to Download")
                                  ),
-                                 plotlyOutput(NS(id,"plot_DotPlot"),height = "100vh") %>% withSpinner()
+                                 plotlyOutput(NS(id,"plot_DotPlot"),height = "80vh") %>% withSpinner()
                              )
                     ),
                     tabPanel("StackedViolin", value= "stackVln",
@@ -206,7 +206,7 @@ Fields_UI <- function(id) {
                                    up = F,
                                    tooltip = tooltipOptions(title = "Press to Download")
                                  ),
-                                 plotOutput(NS(id,"plot_stackVln"),height = "100vh") %>% withSpinner()
+                                 plotOutput(NS(id,"plot_stackVln"),height = "80vh") %>% withSpinner()
                              )
                     ),
                     tabPanel("Matrix", value= "matrix",
@@ -594,7 +594,7 @@ Fields_Server <- function(id,sce) {
                 up = F,
                 tooltip = tooltipOptions(title = "Press to Download")
               ),
-        plotOutput(NS(id,"plot_Matrix"),height = "100vh") %>% withSpinner()
+        plotOutput(NS(id,"plot_Matrix"),height = "80vh") %>% withSpinner()
           )
         )
       }

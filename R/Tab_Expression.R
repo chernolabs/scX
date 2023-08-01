@@ -155,10 +155,10 @@ ExpressionUI <- function(id) {
                             type = "hidden",
                             selected = "expression_panel",
                 tabPanelBody("cluster_panel",
-                  plotlyOutput(NS(id,"plot_cluster"),height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
+                  plotlyOutput(NS(id,"plot_cluster"),height = "80vh") %>% withLoader(type='html',loader = 'dnaspin')
                 ),
                 tabPanelBody("expression_panel",
-                             plotlyOutput(NS(id,"plot_expression"),height = "100vh") %>% withLoader(type='html',loader = 'dnaspin'),
+                             plotlyOutput(NS(id,"plot_expression"),height = "80vh") %>% withLoader(type='html',loader = 'dnaspin'),
                              uiOutput(NS(id,"Violin.Bar_Input")),
                              conditionalPanel("typeof output.plot_expression !== 'undefined'", ns = NS(id),
                                  tabsetPanel(id = NS(id,"switcher2"),
@@ -221,7 +221,7 @@ ExpressionUI <- function(id) {
                   up = F,
                   tooltip = tooltipOptions(title = "Press to Download")
                 ),
-              plotOutput(NS(id,"plot_heatmap"),height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
+              plotOutput(NS(id,"plot_heatmap"),height = "80vh") %>% withLoader(type='html',loader = 'dnaspin')
             )
           ),
           tabPanel("DotPlot", value= "dotplot",
@@ -241,7 +241,7 @@ ExpressionUI <- function(id) {
                   up = F,
                   tooltip = tooltipOptions(title = "Press to Download")
                 ),
-              plotlyOutput(NS(id,"plot_DotPlot"),height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
+              plotlyOutput(NS(id,"plot_DotPlot"),height = "80vh") %>% withLoader(type='html',loader = 'dnaspin')
             )
           ),
           tabPanel("StackedViolin", value= "stackVln",
@@ -261,7 +261,7 @@ ExpressionUI <- function(id) {
                   up = F,
                   tooltip = tooltipOptions(title = "Press to Download")
                 ),
-              plotOutput(NS(id,"plot_stackVln"),height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
+              plotOutput(NS(id,"plot_stackVln"),height = "80vh") %>% withLoader(type='html',loader = 'dnaspin')
             )
           )
         )

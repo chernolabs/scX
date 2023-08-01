@@ -142,10 +142,10 @@ Numeric_ExpressionUI <- function(id) {
                             type = "hidden",
                             selected = "expression_panel",
                             tabPanelBody("cluster_panel",
-                                         plotlyOutput(NS(id,"plot_cluster"),height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
+                                         plotlyOutput(NS(id,"plot_cluster"),height = "80vh") %>% withLoader(type='html',loader = 'dnaspin')
                             ),
                             tabPanelBody("expression_panel",
-                                         plotlyOutput(NS(id,"plot_expression"),height = "100vh") %>% withLoader(type='html',loader = 'dnaspin'),
+                                         plotlyOutput(NS(id,"plot_expression"),height = "80vh") %>% withLoader(type='html',loader = 'dnaspin'),
                                          uiOutput(NS(id,"Lines.Bar_Input")),
                                          conditionalPanel("typeof output.plot_expression !== 'undefined'", ns = NS(id),
                                          tabsetPanel(id = NS(id,"switcher2"),
@@ -208,7 +208,7 @@ Numeric_ExpressionUI <- function(id) {
                   up = F,
                   tooltip = tooltipOptions(title = "Press to Download")
                 ),
-              plotOutput(NS(id,"plot_heatmap"),height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
+              plotOutput(NS(id,"plot_heatmap"),height = "80vh") %>% withLoader(type='html',loader = 'dnaspin')
             )
           ),
           tabPanel("MultiLines", value= "MultiLines",
@@ -228,7 +228,7 @@ Numeric_ExpressionUI <- function(id) {
                   up = F,
                   tooltip = tooltipOptions(title = "Press to Download")
                 ),
-              plotlyOutput(NS(id,"plot_MultiLines"),height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
+              plotlyOutput(NS(id,"plot_MultiLines"),height = "80vh") %>% withLoader(type='html',loader = 'dnaspin')
             )
           )
         )

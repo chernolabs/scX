@@ -57,7 +57,7 @@ QC_UI <- function(id) {
                                         tooltip = tooltipOptions(title = "Press to Download")
                                       ),
                                       plotlyOutput(NS(id,"plot_scatter"),
-                                                   height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
+                                                   height = "80vh") %>% withLoader(type='html',loader = 'dnaspin')
                          ),
                          tabPanelBody("boxPlot_panel",
                                       dropdownButton(
@@ -75,7 +75,7 @@ QC_UI <- function(id) {
                                         tooltip = tooltipOptions(title = "Press to Download")
                                       ),
                                       plotlyOutput(NS(id,"plot_boxPlot"),
-                                                   height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
+                                                   height = "80vh") %>% withLoader(type='html',loader = 'dnaspin')
                          )
              )
         )

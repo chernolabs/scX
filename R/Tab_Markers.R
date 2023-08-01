@@ -33,7 +33,7 @@ markersUI <- function(id = "markers") {
             box(title = "Scatter Plot",
                 width = NULL,solidHeader = T,collapsible = F,
                 footer = tagList(shiny::icon("cat"), "Nya"),
-              plotlyOutput(NS(id,"plot"),height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
+              plotlyOutput(NS(id,"plot"),height = "80vh") %>% withLoader(type='html',loader = 'dnaspin')
             )
           ),
           tabPanelBody("panel2",
@@ -47,7 +47,7 @@ markersUI <- function(id = "markers") {
                                            placement= "right"),
                   right = F
               ),
-              plotlyOutput(NS(id,"plot2"),height = "100vh") %>% withLoader(type='html',loader = 'dnaspin'),
+              plotlyOutput(NS(id,"plot2"),height = "80vh") %>% withLoader(type='html',loader = 'dnaspin'),
               uiOutput(NS(id,"Violin.Bar_Input")),
               conditionalPanel("typeof output.plot2 !== 'undefined'", ns = NS(id),
                                tabsetPanel(id = NS(id,"switcher2"),

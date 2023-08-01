@@ -68,10 +68,10 @@ COExpUI <- function(id) {
                       type = "hidden",
                       selected = "expression_panel",
                       tabPanelBody("cluster_panel",
-                                   plotlyOutput(NS(id,"plot_cluster"),height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
+                                   plotlyOutput(NS(id,"plot_cluster"),height = "80vh") %>% withLoader(type='html',loader = 'dnaspin')
                       ),
                       tabPanelBody("expression_panel",
-                                   plotlyOutput(NS(id,"plot_expression"),height = "100vh") %>% withLoader(type='html',loader = 'dnaspin'),
+                                   plotlyOutput(NS(id,"plot_expression"),height = "80vh") %>% withLoader(type='html',loader = 'dnaspin'),
                                    conditionalPanel("typeof output.plot_expression !== 'undefined'", ns = NS(id),
                                    box(title="Co-detection Matrix",width = NULL,
                                        solidHeader = T, collapsible=T,
