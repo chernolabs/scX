@@ -431,9 +431,9 @@ ldf_func <- function(sce, partition, paramFindMarkers, minSize=50){
   return(ldf_t)
 }
 
-subsampling_func = function(sce, cells2keep=NULL, nmaxcell=50000){
+subsampling_func = function(sce, cellsToKeep=NULL, nmaxcell=50000){
 
-  if(is.null(cells2keep)){
+  if(is.null(cellsToKeep)){
       ccells2keep <- sample(colnames(sce), nmaxcell, replace=FALSE)
   }else{
       ccells2keep <- cells2keep[cells2keep%in%colnames(sce)]
