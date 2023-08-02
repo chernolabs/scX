@@ -253,7 +253,7 @@ createSCEobject <- function(xx,
   csceo[["SCE"]] <- xx.sce
   
   
-  if(verbose) cat('Computing differential expression markers...')
+  if(verbose) cat('Computing differential expression markers:\n')
   
   # Checking number of levels of ttoFactors for calculations ----
   if(!calcAllToFactors){
@@ -267,17 +267,49 @@ createSCEobject <- function(xx,
   }
   
   # sce markers ----
-  if(verbose) cat('Computing cluster markers:\n')
-  sce.markers <- list()
-  for(i in ttoFactors){
-    sce.markers[[i]] <- scran::findMarkers(xx.sce, 
-                                    assay.type = "logcounts",
-                                    group = colData(xx.sce)[,i],
-                                    test.type=paramFindMarkers$test.type,
-                                    direction="any",
-                                    pval.type="all",
-                                    log.p=T,full.stats=T)
+  if(verbose) cat('Computing cluster markers...')
+  # If test.type = wilcox, calculate FDR with that test and extract logFC values from t test.
+  if (paramFindMarkers$test.type == "wilcox"){
+    sce.markers <- list()
+    for(i in ttoFactors){
+      tout <- scran::findMarkers(xx.sce, 
+                                  assay.type = "logcounts",
+                                  group = colData(xx.sce)[,i],
+                                  test.type="t",
+                                  direction="any",
+                                  pval.type="all",
+                                  log.p=T,full.stats=T)
+      wout <- scran::findMarkers(xx.sce, 
+                                  assay.type = "logcounts",
+                                  group = colData(xx.sce)[,i],
+                                  test.type="wilcox",
+                                  direction="any",
+                                  pval.type="all",
+                                  log.p=T,full.stats=T)
+      l = length(wout)
+      for (ii in 1:l){
+        wout[[ii]][rownames(tout[[ii]]),"summary.stats"] = tout[[ii]][,"summary.stats"]
+        it = grep("stats.", names(tout[[ii]]))
+        for (jj in it){
+          wout[[ii]][[jj]][rownames(tout[[ii]]),"AUC"] = tout[[ii]][[jj]][,"logFC"]
+          names(wout[[ii]][[jj]]) = names(tout[[ii]][[jj]]) 
+        }
+      }
+      sce.markers[[i]] = wout
+    }
+  }else{
+    sce.markers <- list()
+    for(i in ttoFactors){
+      sce.markers[[i]] <- scran::findMarkers(xx.sce, 
+                                      assay.type = "logcounts",
+                                      group = colData(xx.sce)[,i],
+                                      test.type=paramFindMarkers$test.type,
+                                      direction="any",
+                                      pval.type="all",
+                                      log.p=T,full.stats=T)
+    }
   }
+  
   if(verbose) cat(' Finished\n')
 
   # Attaching sce.markers to output
