@@ -344,7 +344,7 @@ createSCEobject <- function(xx,
   if(ncol(xx.sce)>nmaxcell){
       csceo$CELLS2KEEP <- subsampling_func(xx.sce, cellsToKeep = cells2keep, nmaxcell = nmaxcell)
   } else {
-    cseo$CELLS2KEEP <- colnames(xx.sce)
+    csceo$CELLS2KEEP <- colnames(xx.sce)
   }
 
 
