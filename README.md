@@ -26,17 +26,17 @@ To show the different features that scXplorer has we will use single cell data r
 ```R
 setwd("/working/directory")
 library(devtools)
-library(scRNAseq)
-load_all()
-sce <- MarquesBrainData()
+load_all(quiet=TRUE)
+sce <- readRDS("./data/ssce.RDS")
 ```
 scXplorer app can be created and launched with only two functions. createSCEobject() creates the single cell experiment object that will be used inside the app. With this function we can configure the main features of our dataset, such as what is the main partition and what metadata information we want to analyze with scXplorer.  On the other hand, different aspects of the data preprocessing are also defined. Finally with launch_scXplorer() we can initiate the app.
 
 ```R
 # Creating SCE object
 cseo <- createSCEobject(xx = sce, 
-                        toFactors = "inferred cell type", 
-                        toKeep = c("source_name", "age", "Sex", "strain", "treatment"))
+                        toFactors = "inferred_cell_type", 
+                        toKeep = c("source_name", "age", "sex", "strain", "treatment"),
+                        descriptionText = "Quick Start Guide")
 
 launch_scXplorer(cseo)
 ```
@@ -93,7 +93,7 @@ A wide variety of plots are available to analyse the expression of the genes of 
 
 **Fields** allows you to analyse the expression of a set of genes in relation to numeric variables present in your dataset, such as the number of counts or pseudotime value, if present in the metadata of the sce object. Below the embedding, a line plot of the average expression of the genes of interest as a function of the chosen variables and a spikeplot are displayed. Furthermore, you can find heatmaps sorted by the chosen numerical variable that can be divided according to some categorical variable, and multiline plots showing the comparison of the expression profile of the genes of interest along the field.
 
-<img src="/images/fields.gif" width="100%" />
+<img src="/images/ge_fields.gif" width="100%" />
 
 </blockquote></details>
 </blockquote></details>
@@ -110,6 +110,7 @@ In **Co-expression** section you can analyse the co-appearance of pairs of genes
 ## Differential expression
 
 Coming soon ...
+<img src="/images/differential_expression.gif.gif" width="100%" />
 
 ##  Exploratory Data Analysis
 <details><summary> <h3> Categories </h3>  </summary><blockquote>
@@ -128,7 +129,7 @@ Coming soon ...
 ##  Visual Tools
 <details><summary> <h3> Violin by Partition </h3>  </summary><blockquote>
 
-<img src="/images/fields.gif" width="100%" />
+<img src="/images/violins.gif" width="100%" />
 
 </blockquote></details>
 
