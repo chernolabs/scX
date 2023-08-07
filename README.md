@@ -21,15 +21,14 @@ devtools::install_github("tvegawaichman/scXplorer")
 ```
 ## Quick Start Guide
 ### Loading Datasets
-To show the different features that scXplorer has we will use single cell data related to the oligodendrocyte developmental lineage ([Marques et al. 2016](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5221728/)). In this dataset we have cells from 12 regions of the central nervous system of juvenile and adult mice, and 10 distinct cell populations were identified. The data can be obtained using the "scRNAseq" package as follows:
+To show the different features that scXplorer has we will use single cell data related to the oligodendrocyte developmental lineage ([Marques et al. 2016](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5221728/)). In this dataset we have cells from 12 regions of the central nervous system of juvenile and adult mice, and 10 distinct cell populations were identified. This package includes a modified version of this dataset in which the original cells have been subsampled and a pseudotime has been calculated to show how scXplorer can represent numerical attributes.
 
 ```R
 setwd("/working/directory")
-library(devtools)
 load_all(quiet=TRUE)
-sce <- readRDS("./data/ssce.RDS")
+sce <- readRDS("scXplorer/data/ssce.RDS")
 ```
-scXplorer app can be created and launched with only two functions. createSCEobject() creates the single cell experiment object that will be used inside the app. With this function we can configure the main features of our dataset, such as what is the main partition and what metadata information we want to analyze with scXplorer.  On the other hand, different aspects of the data preprocessing are also defined. Finally with launch_scXplorer() we can initiate the app.
+The scXplorer app can be created and launched with only two functions. createSCEobject() creates the single cell experiment object that will be used within the application. With this function we can configure the main features of our dataset, such as which is the main partition and which metadata information we want to analyse with scXplorer.  On the other hand, various aspects of data pre-processing are also defined. Finally we can launch the application with launch_scXplorer().
 
 ```R
 # Creating SCE object
@@ -159,12 +158,15 @@ By selecting a set of genes of interest, a set of ViolinPlots can be obtained fo
 
 ## FAQs
 
-0 - cómo está estructurado un objeto SCE y qué cosas usa el shiny
+<details><summary> <h3> 1 -   What type of input does scXplorer accept? </h3> </summary><blockquote>
 
-1 - cómo levantar un objeto 10x, convertirlo en SCE y meterlo en la función
+</blockquote></details>
 
-2 - cómo calcular particiones (tipo louvain) y agregarlas al SCE
+<details><summary> <h3> 2 -  Is there a maximum input size that scXplorer can receive? </h3> </summary><blockquote>
 
-3 - agregar funcion aparte para el subsampleo (que entre cseo y salga cseo).. y que pongamos que recomendamos hacerlo en el caso de > tantas (100k) células
+</blockquote></details>
 
-4 - si tengo un objeto Seurat con un assay específico distinto a los típicos, cómo convertir el objeto Seurat a SCE por fuera de la fución
+<details><summary> <h3> 3 -  How can I deploy my scXplorer app online? </h3> </summary><blockquote>
+
+</blockquote></details>
+
