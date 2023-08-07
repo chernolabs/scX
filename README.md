@@ -109,11 +109,19 @@ In **Co-expression** section you can analyse the co-appearance of pairs of genes
 
 ## Differential expression
 
-Coming soon ...
-<img src="/images/differential_expression.gif.gif" width="100%" />
+In this section, the differentially expressed genes between two clusters can be obtained. The algorithm used is `findMarkers()` from the scran package and the test type can be defined in the `createSCEobject()` function (see "Summary" section). Different significance levels can be chosen interactively for both the logFC and the FDR. Once the clusters have been chosen, a table will be displayed with the list of differentially expressed genes accompanied by the logFC and the FDR obtained for each of them. This table can be downloaded in different formats: csv, pdf, xlsx. 
+
+The main figure in this section is a VolcanoPlot in which genes that are down and up expressed are coloured in blue and red, respectively. On the other hand, you can also display ViolinPlots, Spikeplots, Heatmaps and Dotplots of the differentially expressed genes.
+
+<img src="/images/differential_expression.gif" width="100%" />
 
 ##  Exploratory Data Analysis
+
+In **Exploratory Data Analysis** section you will be able to understand the relationship between different features contained as metadata in your SCE object.
+
 <details><summary> <h3> Categories </h3>  </summary><blockquote>
+
+Here you can observe the proportion of cells belonging to the different levels of a categorical variable presented in the metadata and disaggregate these proportions according to the levels of another categorical variable. All this information is displayed in the form of a barplot. In the subsection "Matrix" a confusion matrix between the two selected features can be plotted with the option to display the Jaccard index for each of the grid cells. In addition, the Rand index is displayed, which is a global measure of the similarity between the two clusterings.
 
 <img src="/images/exploratory_categories.gif" width="100%" />
 
@@ -121,13 +129,20 @@ Coming soon ...
 
 <details><summary> <h3>  Fields </h3> </summary><blockquote>
 
+In a similar way to the previous subsection, in "Field" you can explore how the value of one or more numerical variables changes as a function of another variable, either numerical or categorical. You can make different types of plots such as: Distribution Plots, Heatmaps, Dotplots and StackedViolins.
+
 <img src="/images/fields.gif" width="100%" />
 
 </blockquote></details>
 </blockquote></details>
 
 ##  Visual Tools
+
+In the "Visual Tools" section, different plots can be obtained to explore in more depth different aspects of the single-cell experiment data, such as how the expression of a given set of genes varies at different levels of a feature or to recognise a set of cells of interest within an embedding.
+
 <details><summary> <h3> Violin by Partition </h3>  </summary><blockquote>
+
+By selecting a set of genes of interest, a set of ViolinPlots can be obtained for each gene showing its expression at different levels of a feature. These plots can be divided according to the levels of another categorical feature.
 
 <img src="/images/violins.gif" width="100%" />
 
@@ -135,6 +150,8 @@ Coming soon ...
 
 <details><summary> <h3>  Multiplots </h3> </summary><blockquote>
 
+ Multiplots allows you to explore how different variables change across cells in an embedding of your choice, such as the expression of a given set of genes, the partitions of a categorical variable or the value of a continuous variable.
+ 
 <img src="/images/multiplots.gif" width="100%" />
 
 </blockquote></details>
