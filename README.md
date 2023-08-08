@@ -5,11 +5,10 @@
 <img align="left" width="25%" src="inst/www/scXplorer-03.png"> scXplorer is an R package that enables interactive visualization and analysis of single-cell experiment data by creating a Shiny-based application. With scXplorer all aspects of single-cell data can be explored using a large number of different types of plots, such as scatter plots, heatmaps, boxplots, dot and violins plots, etc. All the information associated with cells can be displayed in a customized way: both numerical variables such as logcounts or pseudotime values, and categorical variables such as cell types or sample. One of the main hallmarks of scXplorer is the possibility to plot the main embeddings used for single cell - UMAP, tSNE and PCA - both in 2D and 3D in an interactive way. Thus, embeddings can be rotated, translated and zoomed. But scXplorer is not only a visualization tool, it also allows you to perform different types of analysis on single cell data, such as finding the markers of a cell type or determining the differential genes between two different conditions.
 </div>
 
-
 <h1 align="center">   </h1>
 
-<table border="0">
-<tr ><td>     
+<table>
+<tr ><td>
 <h3 align="left">  Table of Contents </h3>
 
 - [Install](#install)
@@ -18,7 +17,7 @@
   * [Markers](#markers)
   * [Gene expression](#gene-expression)
   * [Differential expression](#differential-expression)
-  * [Exploratory Data Analysis](#exploratory-data-analysis)
+  * <nobr> [Exploratory Data Analysis](#exploratory-data-analysis) </nobr>
   * [Visual Tools](#visual-tools)
 - [FAQs](#faqs)
 </td>
@@ -67,7 +66,7 @@ scXplorer displays a summary of the main descriptive information of the dataset:
 In the summary section, you can explore the relationship between the number of features and the count numbers through graphical visualization.
 </p>
 
-<details><summary> View more </summary><blockquote>
+<details><summary> ... </summary><blockquote>
 <img src="/images/summary.gif" width="100%" />
 </blockquote></details>
 
@@ -77,7 +76,7 @@ In the summary section, you can explore the relationship between the number of f
 In "Markers" section there are two types of analysis. On the one hand, in "Cluster markers" clicking on a cell displays a table with the marker genes of the cluster to which that cell belongs. On the other hand, in "Find new markers" you can select a group of cells in the embedding and scXplorer will calculate their marker genes.
 </p>
 
-<details><summary> View more </summary><blockquote>
+<details><summary> ... </summary><blockquote>
  
 ###  Clusters markers 
 
@@ -110,7 +109,7 @@ As in the previous section, if you click on one of the markers you can see its e
 In "Gene Expression" you can explore different aspects of the expression of one or more genes of interest. Determine how expression changes according to different categorical and continuous variables, as well as analyse co-detection between pairs of genes.
 </p>
 
-<details><summary> View more </summary><blockquote>
+<details><summary> ... </summary><blockquote>
  
 ### Categories
 
@@ -153,7 +152,7 @@ In this section, the differentially expressed genes between two clusters can be 
 The main figure in this section is a VolcanoPlot in which genes that are down and up expressed are coloured in blue and red, respectively. On the other hand, you can also display ViolinPlots, Spikeplots, Heatmaps and Dotplots of the differentially expressed genes.
 </p>
 
-<details><summary> View more </summary><blockquote>
+<details><summary> ... </summary><blockquote>
 <img src="/images/differential_expression.gif" width="100%" />
 </blockquote></details>
 
@@ -186,7 +185,7 @@ In a similar way to the previous subsection, in "Field" you can explore how the 
 
 In the "Visual Tools" section, different plots can be obtained to explore in more depth different aspects of the single-cell experiment data, such as how the expression of a given set of genes varies at different levels of a feature or to recognise a set of cells of interest within an embedding.
 
-<details><summary> View more </summary><blockquote>
+<details><summary> ... </summary><blockquote>
 
 ### Violin by Partition 
 
