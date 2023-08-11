@@ -35,9 +35,7 @@ devtools::install_github("tvegawaichman/scXplorer")
 ## Quick Start Guide
 ### Loading Datasets
 
-
-To show the different features that scXplorer has we will use single cell data related to the oligodendrocyte developmental lineage ([Marques et al. 2016](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5221728/)). In this dataset we have cells from 12 regions of the central nervous system of juvenile and adult mice, and 10 distinct cell populations were identified. This package includes a modified version of this dataset in which the original cells have been subsampled and a pseudotime has been calculated to show how scXplorer can represent numerical attributes.
-
+To show the different capabilities of scXplorer, we will use single cell data related to the oligodendrocyte developmental lineage ([Marques et al. 2016](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5221728/)). In this dataset we have cells from 12 regions of the central nervous system of juvenile and adult mice and 10 distinct cell populations have been identified. This package includes a modified version of this dataset in which the original cells have been subsampled and a pseudotime has been calculated to demonstrate how scXplorer can represent numerical attributes.
 
 ```R
 setwd("/working/directory")
@@ -46,7 +44,24 @@ sce <- readRDS("scXplorer/data/ssce.RDS")
 ```
 
 <p align="justify">  
-The scXplorer app can be created and launched with only two functions. createSCEobject() creates the single cell experiment object that will be used within the application. With this function we can configure the main features of our dataset, such as which is the main partition and which metadata information we want to analyse with scXplorer.  On the other hand, various aspects of data pre-processing are also defined. Finally we can launch the application with launch_scXplorer().
+The scXplorer app can be created and launched with only two functions. createSCEobject() creates the single cell experiment object that will be used within the application. This function performs a set of preprocessing steps required for the various scXplorer functions. Among these steps we can mention:
+ 
+1. Calculation of quality control metrics. 
+
+2. If no partition was declared in the "toFactor" parameter, a preliminary clustering will be calculated with the scran package function _quickCluster()_.
+
+3. Normalization of the gene expression matrix.
+
+4. Determination of the most variable genes (HVG).
+
+5. Calculation of different dimensionality reductions: PCA, tSNE, and UMAP.
+
+If the input dataset already has these characteristics, some of these steps can be avoided.  For example, if the dataset already has a precomputed PCA, scXplorer will not recalculate it but will calculate the dimensionality reductions that are not already calculated in the dataset.
+
+On the other hand, different options for the calculation of the marker genes of the different clusters can be determined. This can be done within the parameter "paramFindMarkers" which expects a list of parameters taken by scran's _FindMarkers()_ function. 
+
+Finally with the launch_scXplorer() function the application is deployed.
+
 </p>
 
 ```R
@@ -61,22 +76,22 @@ launch_scXplorer(cseo)
 ## Summary
 
 <p align="justify">  
-scXplorer displays a summary of the main descriptive information of the dataset: number of cells and genes, mean number of genes detected per cell, average library size, etc.
+scXplorer displays a summary of the main descriptive information of the dataset: number of cells and genes, mean number of genes detected per cell, partions, experiments and average library size.
 
-In the summary section, you can explore the relationship between the number of features and the count numbers through graphical visualization.
+In the summary section, you can explore through graphical visualization the coventional quality control metrics: this is the relationship between the number of features and the count numbers. In this plot you can distinguish the cells coming from the different partitions of the dataset.
 </p>
 
-<details><summary> ... </summary><blockquote>
+<details><summary> <h5> View more </h5> </summary><blockquote>
 <img src="/images/summary.gif" width="100%" />
 </blockquote></details>
 
 ##  Markers
 
 <p align="justify">  
-In "Markers" section there are two types of analysis. On the one hand, in "Cluster markers" clicking on a cell displays a table with the marker genes of the cluster to which that cell belongs. On the other hand, in "Find new markers" you can select a group of cells in the embedding and scXplorer will calculate their marker genes.
+This section allows to find and interact with the markers of each different clusterization. In "Markers" section there are two types of analysis. On the one hand, in "Cluster markers" clicking on a cell displays a table with the marker genes of the cluster to which that cell belongs. On the other hand, in "Find new markers" you can select a group of cells in the embedding and scXplorer will calculate their marker genes.
 </p>
 
-<details><summary> ... </summary><blockquote>
+<details><summary> <h5> View more </h5> </summary><blockquote>
  
 ###  Clusters markers 
 
@@ -109,14 +124,14 @@ As in the previous section, if you click on one of the markers you can see its e
 In "Gene Expression" you can explore different aspects of the expression of one or more genes of interest. Determine how expression changes according to different categorical and continuous variables, as well as analyse co-detection between pairs of genes.
 </p>
 
-<details><summary> ... </summary><blockquote>
+<details><summary> <h5> View more </h5> </summary><blockquote>
  
 ### Categories
 
 <p align="justify"> 
 In Settings you can select one or more genes or upload a file with a list of genes. The average expression of the genes of interest can be viewed in the different embeddings available, with the possibility to colour according to the different SCE partitions to compare gene expression with different cell types or conditions present in the metadata. 
 
-A wide variety of plots are available to analyse the expression of the genes of interest in the different categories. Heatmaps allow normalisation of expression by gene, clustering by row and column and grouping of cells by condition. Similarly, dotplots allow normalisation of expression and clustering of genes. 
+A wide variety of plots are available to analyse the expression of the genes of interest in the different categories. Heatmaps allow normalisation of expression by gene, clustering by row and column and grouping of cells by condition. Similarly, dotplots allow normalisation of expression and group genes with similar expression pattern.
 </p>
 
 
@@ -152,15 +167,16 @@ In this section, the differentially expressed genes between two clusters can be 
 The main figure in this section is a VolcanoPlot in which genes that are down and up expressed are coloured in blue and red, respectively. On the other hand, you can also display ViolinPlots, Spikeplots, Heatmaps and Dotplots of the differentially expressed genes.
 </p>
 
-<details><summary> ... </summary><blockquote>
-<img src="/images/differential_expression.gif" width="100%" />
+<details><summary> <h5> View more </h5> </summary><blockquote>
+
+ <img src="/images/differential_expression.gif" width="100%" />
 </blockquote></details>
 
 ##  Exploratory Data Analysis
 
 In **Exploratory Data Analysis** section you will be able to understand the relationship between different features contained as metadata in your SCE object.
 
-<details><summary> View more </summary><blockquote>
+<details><summary> <h5> View more </h5> </summary><blockquote>
  
 ### Categories
 
@@ -185,11 +201,11 @@ In a similar way to the previous subsection, in "Field" you can explore how the 
 
 In the "Visual Tools" section, different plots can be obtained to explore in more depth different aspects of the single-cell experiment data, such as how the expression of a given set of genes varies at different levels of a feature or to recognise a set of cells of interest within an embedding.
 
-<details><summary> ... </summary><blockquote>
+<details><summary> <h5> View more </h5> </summary><blockquote>
 
 ### Violin by Partition 
 
-By selecting a set of genes of interest, a set of ViolinPlots can be obtained for each gene showing its expression at different levels of a feature. These plots can be divided according to the levels of another categorical feature.
+By selecting or uploading a set of genes of interest, a set of Violin plots can be obtained and download in .pdf format, allowing to facet the plots by differents categorical co-variables.
 
 <img src="/images/violins.gif" width="100%" />
 
