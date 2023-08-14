@@ -152,7 +152,7 @@ MultiPlotsUI <- function(id) {
                      tooltip = tooltipOptions(title = "Press to Download")
                    ),
             plotOutput(NS(id,"plot_gene"),
-                       height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
+                       height = "80vh") %>% withLoader(type='html',loader = 'dnaspin')
           ),
           tabPanel("by Cluster",value = "cluster",
                    dropdownButton(
@@ -170,7 +170,7 @@ MultiPlotsUI <- function(id) {
                      tooltip = tooltipOptions(title = "Press to Download")
                    ),
             plotOutput(NS(id,"plot_cluster"),
-                      height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
+                      height = "80vh") %>% withLoader(type='html',loader = 'dnaspin')
           ),
           tabPanel("by Field",value = "field",
                    dropdownButton(
@@ -346,7 +346,7 @@ MultiPlotsServer <- function(id,sce) {
             width = input$pdf_width_bygene,
             height = input$pdf_height_bygene
         )
-        list_cluster_plot() %>% plot()
+        list_gene_plot() %>% plot()
         dev.off()
       })
     
