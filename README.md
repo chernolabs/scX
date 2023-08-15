@@ -24,7 +24,7 @@
 
 <td width="66.66%" style="border:0px; width:66.66%">
  
-<img src="/images/presentation_t.gif" width="100%" />
+<img src="/images/presentation_t2.gif" width="100%" />
 
 </td>
 </tr>
