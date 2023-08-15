@@ -22,7 +22,7 @@
 - [FAQs](#faqs)
 </td>
 <td>
-<img src="/images/summary.gif" width="100%" />
+<img src="/images/presentation.gif" width="100%" />
 </td>
 </tr>
 </table>
