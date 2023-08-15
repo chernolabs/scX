@@ -65,6 +65,7 @@ Finally with the launch_scXplorer() function the application is deployed.
 </p>
 
 ```R
+library(scXplorer)
 # Creating SCE object
 cseo <- createSCEobject(xx = sce, 
                         toFactors = "inferred_cell_type", 
