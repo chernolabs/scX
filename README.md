@@ -1,24 +1,5 @@
 <h1 align="center">  scXplorer package </h1>
 
-
-<table width="100%"  style="border:0px solid black; width:100%;" >
-<tr style="border: 0px;" >
-<td width="33%" style="border:0px; width:33.33%" >
-
-<figure>
-    <img src="inst/www/scXplorer-03.png" />
-    <figcaption> <em> @irimiodo </em>  </figcaption>
-</figure>
-
-</td>
-<td width="66%" style="border:0px; width:66.66%">
-
-scXplorer is an R package that enables interactive visualization and analysis of single-cell experiment data by creating a Shiny-based application. With scXplorer all aspects of single-cell data can be explored using a large number of different types of plots, such as scatter plots, heatmaps, boxplots, dot and violins plots, etc. All the information associated with cells can be displayed in a customized way: both numerical variables such as logcounts or pseudotime values, and categorical variables such as cell types or sample. One of the main hallmarks of scXplorer is the possibility to plot the main embeddings used for single cell - UMAP, tSNE and PCA - both in 2D and 3D in an interactive way. Thus, embeddings can be rotated, translated and zoomed. But scXplorer is not only a visualization tool, it also allows you to perform different types of analysis on single cell data, such as finding the markers of a cell type or determining the differential genes between two different conditions.
-
-</td>
-</tr>
-</table>
-
 <div align="justify" >
 <img align="left" width="25%" src="inst/www/scXplorer-03.png" title="@irimiodo"> scXplorer is an R package that enables interactive visualization and analysis of single-cell experiment data by creating a Shiny-based application. With scXplorer all aspects of single-cell data can be explored using a large number of different types of plots, such as scatter plots, heatmaps, boxplots, dot and violins plots, etc. All the information associated with cells can be displayed in a customized way: both numerical variables such as logcounts or pseudotime values, and categorical variables such as cell types or sample. One of the main hallmarks of scXplorer is the possibility to plot the main embeddings used for single cell - UMAP, tSNE and PCA - both in 2D and 3D in an interactive way. Thus, embeddings can be rotated, translated and zoomed. But scXplorer is not only a visualization tool, it also allows you to perform different types of analysis on single cell data, such as finding the markers of a cell type or determining the differential genes between two different conditions.
 </div>
@@ -43,7 +24,7 @@ scXplorer is an R package that enables interactive visualization and analysis of
 
 <td width="66.66%" style="border:0px; width:66.66%">
  
-<img src="/images/presentation.gif" width="100%" />
+<img src="/images/presentation_t.gif" width="100%" />
 
 </td>
 </tr>
