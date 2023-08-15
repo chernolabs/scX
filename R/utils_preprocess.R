@@ -114,6 +114,45 @@ createSCEobject <- function(xx,
   }
   if(verbose) cat(' Finished\n')
   
+  #to factors ----
+  if(verbose) cat('Changing factors from toFactors...')
+  #Check the factors that are in the colData.
+  tfs <- setNames(nm=toFactors,object = toFactors %in% names(colData(xx.sce)))
+  #Check if columns have more than one level.
+  if(sum(tfs) > 0){
+    vld <- sapply(colData(xx.sce)[,toFactors[tfs],drop=F],function(x){length(unique(x))>1})   
+    tfs[names(vld)] <-  tfs[names(vld)] & vld
+  }
+  
+  ttoFactors <- names(tfs)[tfs]
+  if(sum(!tfs)>0) warning("Can't find ",paste0(names(tfs)[!tfs],collapse = ' & ')," in metadata or they have only one level")
+  if(length(ttoFactors) == 0){
+    warning("Any factor passed the controls, add the quick cluster as toFactors")
+    ttoFactors <- "scx.clust"
+  }
+  
+  #Transform all the character columns to factor to be able to be selected in the shinyApp. 
+  cols <- sapply(colData(xx.sce), function(x){(is.character(x) | is.factor(x)) & length(unique(x)) < 30})
+  if(any(cols)){
+    colData(xx.sce)[,cols] <- lapply(colData(xx.sce)[,cols,drop=F], function(x){
+        x <- as.factor(x)
+        x <- droplevels(x)
+        x
+      })
+	}
+  if(verbose) cat(' Finished\n')
+    
+  # Checking number of levels of ttoFactors for calculations ----
+  if(!calcAllToFactors){
+    allToFactors <- sapply(ttoFactors, function(x){length(unique(colData(xx.sce)[,x]))})>30
+    if(all(allToFactors)){
+      stop(paste0(paste0(names(allToFactors)[allToFactors], collapse =  ' & ')," has more than 30 levels. If you want to compute it anyway set 'calcAllToFactors' as TRUE"))
+    } else if(any(allToFactors)) {
+      warning(paste0(paste0(names(allToFactors)[allToFactors], collapse =  ' & ')," has more than 30 levels. They wont be used to compute markers and DEGs. If you want to compute it anyway set 'calcAllToFactors' as TRUE"))
+      ttoFactors <- ttoFactors[!allToFactors]
+    }
+  }
+  
   #If there are not an assay called counts, get the first assay from the list and rename it as counts (to be consistent after on the code)
   # if(!('counts' %in% names(assays(xx.sce)))){
   #   names(assays(xx.sce))[1] <- 'counts'
@@ -210,40 +249,12 @@ createSCEobject <- function(xx,
   if(verbose) cat('Computing logcounts normalized...')
   #logcounts normalized ----
   if(!"logcounts.norm" %in% names(assays(xx.sce))){
-    assays(xx.sce)$logcounts.norm <- t(apply(assay(xx.sce, "logcounts"), 1, function(x){x/max(x)}))
+    assays(xx.sce)$logcounts.norm <- t(apply(assay(xx.sce, "logcounts"), 1, function(x){(x-min(x))/max(x-min(x))}))
     assays(xx.sce)$logcounts.norm <- Matrix::Matrix(assays(xx.sce)$logcounts.norm, sparse = TRUE)
   }
   if(verbose) cat(' Finished\n')
   
-  
-  #to factors ----
-  if(verbose) cat('Changing factors from toFactors...')
-  #Check the factors that are in the colData.
-  tfs <- setNames(nm=toFactors,object = toFactors %in% names(colData(xx.sce)))
-  #Check if columns have more than one level.
-  if(sum(tfs) > 0){
-    vld <- sapply(colData(xx.sce)[,toFactors[tfs],drop=F],function(x){length(unique(x))>1})   
-    tfs[names(vld)] <-  tfs[names(vld)] & vld
-  }
-  
-  ttoFactors <- names(tfs)[tfs]
-  if(sum(!tfs)>0) warning("Can't find ",paste0(names(tfs)[!tfs],collapse = ' & ')," in metadata or they have only one level")
-  if(length(ttoFactors) == 0){
-    warning("Any factor passed the controls, add the quick cluster as toFactors")
-    ttoFactors <- "scx.clust"
-  }
-  
-  #Transform all the character columns to factor to be able to be selected in the shinyApp. 
-  cols <- sapply(colData(xx.sce), function(x){(is.character(x) | is.factor(x)) & length(unique(x)) < 30})
-  if(any(cols)){
-    colData(xx.sce)[,cols] <- lapply(colData(xx.sce)[,cols,drop=F], function(x){
-        x <- as.factor(x)
-        x <- droplevels(x)
-        x
-      })
-	}
-  if(verbose) cat(' Finished\n')
-  
+
   # Subsetting SCE object ----
   # Keep only colData names that will be use for coloring plots
   if(!is.null(toKeep)){
@@ -252,25 +263,21 @@ createSCEobject <- function(xx,
     if(all(!toKeep%in%coldatanames)) warning(" Can't find 'toKeep' in coldata.\n Only 'toFactors' will be available for coloring plots in the app.")
     coldatanames <- coldatanames[coldatanames%in%c("nCounts", "nFeatures", toFactors, toKeep)]
     colData(xx.sce) <- colData(xx.sce)[,coldatanames]
+    # transform to character to factors to be able to plot in shiny app
+    colsK <- sapply(colData(xx.sce), function(x){(is.character(x))})
+    if(any(colsK)){
+      colData(xx.sce)[,colsK] <- lapply(colData(xx.sce)[,colsK,drop=F], function(x){
+      x <- as.factor(x)
+      x <- droplevels(x)
+      x})
+	  }
   }
-  
 
   # Attaching SCE to output ----
   csceo[["SCE"]] <- xx.sce
   
   
   if(verbose) cat('Computing differential expression markers:\n')
-  
-  # Checking number of levels of ttoFactors for calculations ----
-  if(!calcAllToFactors){
-    allToFactors <- sapply(ttoFactors, function(x){length(unique(colData(xx.sce)[,x]))})>30
-    if(all(allToFactors)){
-      stop(paste0(paste0(names(allToFactors)[allToFactors], collapse =  ' & ')," has more than 30 levels. If you want to compute it anyway set 'calcAllToFactors' as TRUE"))
-    } else if(any(allToFactors)) {
-      warning(paste0(paste0(names(allToFactors)[allToFactors], collapse =  ' & ')," has more than 30 levels. They wont be used to compute markers and DEGs. If you want to compute it anyway set 'calcAllToFactors' as TRUE"))
-      ttoFactors <- ttoFactors[!allToFactors]
-    }
-  }
   
   # sce markers ----
   if(verbose) cat('Computing cluster markers...')
