@@ -87,7 +87,7 @@ createSCEobject <- function(xx,
     xx.sce <- SingleCellExperiment(list(counts=xx))
     if(!is.null(metadata)){
       if(all(colnames(xx.sce) %in% rownames(metadata))){
-        colData(xx.sce) <- c(colData(xx.sce), metadata[colnames(xx.sce),])
+        colData(xx.sce) <- cbind(colData(xx.sce), metadata[colnames(xx.sce),,drop=F])
         if((!("scx.clust" %in% toFactors)) & (!all(toFactors %in% names(colData(xx.sce))))){
           warning('at least one factor is not present in metadata')
         }
@@ -101,7 +101,7 @@ createSCEobject <- function(xx,
   } else if (class(xx)[1]=="SingleCellExperiment"){
     xx.sce <- xx
     if(!is.null(metadata)){
-      colData(xx.sce) <- c(colData(xx.sce),metadata)
+      colData(xx.sce) <- cbind(colData(xx.sce),metadata)
       if((toFactors!="scx.clust") & (!all(toFactors %in% names(colData(xx.sce))))){
         warning('at least one factor is not present in metadata')
       }
