@@ -45,7 +45,9 @@ To show the different capabilities of scXplorer, we will use single cell data re
 library(scXplorer)
 
 setwd("/working/directory")
-data(sce)
+
+#SCE example data
+sce
 ```
 
 <p align="justify">  
