@@ -44,8 +44,6 @@ To show the different capabilities of scXplorer, we will use single cell data re
 ```R
 library(scXplorer)
 
-setwd("/working/directory")
-
 #SCE example data
 sce
 ```
