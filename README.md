@@ -32,6 +32,7 @@
 
 ## Install
 scXplorer can be installed from Github as follows:
+
 ```R
 devtools::install_github("tvegawaichman/scXplorer")
 ```
@@ -41,9 +42,10 @@ devtools::install_github("tvegawaichman/scXplorer")
 To show the different capabilities of scXplorer, we will use single cell data related to the oligodendrocyte developmental lineage ([Marques et al. 2016](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5221728/)). In this dataset we have cells from 12 regions of the central nervous system of juvenile and adult mice and 10 distinct cell populations have been identified. This package includes a modified version of this dataset in which the original cells have been subsampled and a pseudotime has been calculated to demonstrate how scXplorer can represent numerical attributes.
 
 ```R
+library(scXplorer)
+
 setwd("/working/directory")
-load_all(quiet=TRUE)
-sce <- readRDS("scXplorer/data/ssce.RDS")
+data(sce)
 ```
 
 <p align="justify">  
