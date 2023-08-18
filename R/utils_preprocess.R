@@ -249,16 +249,12 @@ createSCEobject <- function(xx,
   if(verbose) cat('Computing logcounts normalized...')
   #logcounts normalized ----
   if(!"logcounts.norm" %in% names(assays(xx.sce))){
-	sparse_mat <- assay(xx.sce, "logcounts") #logcounts should be sparse before this step
-	# Calculate min and max values for each row
-	row_mins <- qlcMatrix::rowMin(sparse_mat, ignore.zero = F)
-	row_maxs <- qlcMatrix::rowMax(sparse_mat)
+		sparse_mat <- as(assay(xx.sce, "logcounts"), "sparseMatrix")
+		row_maxs <- qlcMatrix::rowMax(sparse_mat)
+		maxdiag <- Diagonal(x = 1/as.vector(row_maxs))
+		scaled_sparse <- maxdiag %*% sparse_mat
 
-	# Min-Max scaling
-	scaled_sparse <- sparse_mat
-	scaled_sparse@x <- (sparse_mat@x - row_mins[sparse_mat@i]) / (row_maxs[sparse_mat@i] - row_mins[sparse_mat@i])
-
-	assays(xx.sce)$logcounts.norm <- scaled_sparse
+		assays(xx.sce)$logcounts.norm <- scaled_sparse
   }
   if(verbose) cat(' Finished\n')
   
