@@ -249,8 +249,16 @@ createSCEobject <- function(xx,
   if(verbose) cat('Computing logcounts normalized...')
   #logcounts normalized ----
   if(!"logcounts.norm" %in% names(assays(xx.sce))){
-    assays(xx.sce)$logcounts.norm <- t(apply(assay(xx.sce, "logcounts"), 1, function(x){(x-min(x))/max(x-min(x))}))
-    assays(xx.sce)$logcounts.norm <- Matrix::Matrix(assays(xx.sce)$logcounts.norm, sparse = TRUE)
+	sparse_mat <- assay(xx.sce, "logcounts") #logcounts should be sparse before this step
+	# Calculate min and max values for each row
+	row_mins <- apply(sparse_mat, 1, min)
+	row_maxs <- apply(sparse_mat, 1, max)
+
+	# Min-Max scaling
+	scaled_sparse <- sparse_mat
+	scaled_sparse@x <- (sparse_mat@x - row_mins[sparse_mat@i]) / (row_maxs[sparse_mat@i] - row_mins[sparse_mat@i])
+
+	assays(xx.sce)$logcounts.norm <- scaled_sparse
   }
   if(verbose) cat(' Finished\n')
   
