@@ -251,8 +251,8 @@ createSCEobject <- function(xx,
   if(!"logcounts.norm" %in% names(assays(xx.sce))){
 	sparse_mat <- assay(xx.sce, "logcounts") #logcounts should be sparse before this step
 	# Calculate min and max values for each row
-	row_mins <- apply(sparse_mat, 1, min)
-	row_maxs <- apply(sparse_mat, 1, max)
+	row_mins <- qlcMatrix::rowMin(sparse_mat, ignore.zero = F)
+	row_maxs <- qlcMatrix::rowMax(sparse_mat)
 
 	# Min-Max scaling
 	scaled_sparse <- sparse_mat
