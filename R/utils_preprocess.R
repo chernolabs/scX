@@ -253,6 +253,7 @@ createSCEobject <- function(xx,
 		row_maxs <- qlcMatrix::rowMax(sparse_mat)
 		maxdiag <- Diagonal(x = 1/as.vector(row_maxs))
 		scaled_sparse <- maxdiag %*% sparse_mat
+		rownames(scaled_sparse) <- rownames(sparse_mat)
 
 		assays(xx.sce)$logcounts.norm <- scaled_sparse
   }
