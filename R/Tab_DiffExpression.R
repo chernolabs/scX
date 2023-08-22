@@ -631,8 +631,16 @@ VolcanoServer <- function(id, sce, sce.markers) {
 
     output$plot_DotPlot <- renderPlotly({
       req(!is.null(DotPlot()))
-      DotPlot() %>%
-        ggplotly() %>%
+      g <- DotPlot()
+      
+      if(length(levels(g$data$Feature))>=50){
+        g + theme(axis.title.y = element_blank(),
+                  axis.text.y = element_blank(),
+                  axis.ticks.y = element_blank()
+        )
+      }
+      g %>% 
+        ggplotly() %>% 
         config(modeBarButtonsToRemove = c("select2d", "lasso2d", "hoverCompareCartesian"))
     })
     ### Downloads -----

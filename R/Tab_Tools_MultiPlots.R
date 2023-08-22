@@ -136,7 +136,7 @@ MultiPlotsUI <- function(id) {
         tabBox(id = NS(id,"gene_cluster"),
                selected = "gene",
                width = NULL,
-          tabPanel("by Gene Expression",value = "gene",
+          tabPanel("Gene Expression",value = "gene",
                    dropdownButton(
 					fluidRow(
 						column(4, style='padding-left:12px; padding-right:3px;', numericInput(NS(id,"pdf_width_bygene"),"Width",value = 7)),
@@ -154,7 +154,7 @@ MultiPlotsUI <- function(id) {
             plotOutput(NS(id,"plot_gene"),
                        height = "80vh") %>% withLoader(type='html',loader = 'dnaspin')
           ),
-          tabPanel("by Cluster",value = "cluster",
+          tabPanel("Partition",value = "cluster",
                    dropdownButton(
 					fluidRow(
 						column(4, style='padding-left:12px; padding-right:3px;', numericInput(NS(id,"pdf_width_bycluster"),"Width",value = 7)),
@@ -172,7 +172,7 @@ MultiPlotsUI <- function(id) {
             plotOutput(NS(id,"plot_cluster"),
                       height = "80vh") %>% withLoader(type='html',loader = 'dnaspin')
           ),
-          tabPanel("by Field",value = "field",
+          tabPanel("Field",value = "field",
                    dropdownButton(
 					fluidRow(
 						column(4, style='padding-left:12px; padding-right:3px;', numericInput(NS(id,"pdf_width_byfield"),"Width",value = 7)),
