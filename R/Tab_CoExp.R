@@ -83,7 +83,7 @@ COExpUI <- function(id) {
 										),
                                          circle = FALSE,
                                          status = "primary",
-                                         icon = icon("fa-thin fa-download"),
+                                         icon = icon("download"),
                                          width = "300px",
                                          size= "sm",
                                          up = T,

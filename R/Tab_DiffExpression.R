@@ -89,7 +89,7 @@ VolcanoUI <- function(id) {
                   ),
                   circle = FALSE,
                   status = "primary",
-                  icon = icon("fa-thin fa-download"),
+                  icon = icon("download"),
                   width = "300px",
                   size = "sm",
                   up = T,
@@ -109,7 +109,7 @@ VolcanoUI <- function(id) {
                   ),
                   circle = FALSE,
                   status = "primary",
-                  icon = icon("fa-thin fa-download"),
+                  icon = icon("download"),
                   width = "300px",
                   size = "sm",
                   up = T,
@@ -146,7 +146,7 @@ VolcanoUI <- function(id) {
                     column(4, style = "padding-left:3px; padding-right:3px;", numericInput(NS(id, "pdf_height_heatmap"), "Height", value = 7)),
                     column(4, style = "padding-left:3px; padding-right:12px; padding:16px", downloadButton(NS(id, "export_heatmap")))
                   ),
-                  circle = FALSE, status = "primary", icon = icon("fa-thin fa-download"), width = "300px", size = "sm", up = T,
+                  circle = FALSE, status = "primary", icon = icon("download"), width = "300px", size = "sm", up = T,
                   tooltip = tooltipOptions(title = "Press to see Heatmap settings & Download")
                 ),
                 plotOutput(NS(id, "plot_heatmap"),
@@ -176,7 +176,7 @@ VolcanoUI <- function(id) {
                     column(4, style = "padding-left:3px; padding-right:3px;", numericInput(NS(id, "pdf_height_dotplot"), "Height", value = 7)),
                     column(4, style = "padding-left:3px; padding-right:12px; padding:16px", downloadButton(NS(id, "export_dotplot")))
                   ),
-                  circle = FALSE, status = "primary", icon = icon("fa-thin fa-download"), width = "300px",
+                  circle = FALSE, status = "primary", icon = icon("download"), width = "300px",
                   size = "sm", up = T,
                   tooltip = tooltipOptions(title = "Press to see DotPlot settings & Download")
                 ),
