@@ -9,13 +9,6 @@ Fields_UI <- function(id) {
       column(3,
              box(title = htmltools::span(icon("gears"), " Settings"),
                  width = NULL, status = "primary",solidHeader = T,collapsible = F,
-                 column(12,
-                        style='padding-left:20px; padding-right:20px;',
-                        align="center",
-                        pickerInput(NS(id,"partitionColor"),
-                                    "Partition Color",
-                                    choices = NULL)
-                 ),
                  conditionalPanel("input.scatter_heatmap == 'scatter'",ns=NS(id),
                    fluidRow(
                      column(6, 
@@ -121,6 +114,14 @@ Fields_UI <- function(id) {
                                                status = "primary",
                                                fill = TRUE)
                                   
+                 ),
+				 hr(style = "border-top: 1px solid #0073b7;"),
+				 column(12,
+                        style='padding-left:20px; padding-right:20px;',
+                        align="center",
+                        pickerInput(NS(id,"partitionColor"),
+                                    "Partition Color",
+                                    choices = NULL)
                  )
              )
       ),

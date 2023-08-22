@@ -8,7 +8,57 @@ ExpressionUI <- function(id) {
     fluidRow(
       column(3,
         box(title = htmltools::span(icon("gears"), " Settings"),
-            width = NULL, status = "primary",solidHeader = T,collapsible = F,
+			width = NULL, status = "primary",solidHeader = T,collapsible = F,
+			fluidRow( # gene list upload off/on
+				column(12,style='padding-left:12px; padding-right:12px;',align="center",
+					switchInput(NS(id,"GL_T"), 
+						label = "Upload Gene List",
+						size = "small",
+						width = NULL,
+						labelWidth = "100px"),
+				)
+			),
+			# gene selection or list
+			tabsetPanel(id = NS(id,"switcher"),
+				type = "hidden",
+				selected = "panel1",
+				tabPanelBody("panel1",
+					fluidRow(
+						column(11,style='padding-left:0px; padding-right:2px;',
+							selectizeInput(NS(id,"gen_exp"),
+							label=NULL,
+							choices = NULL, 
+							options = list(maxItems = 10,
+								maxOptions = 20,
+								placeholder = 'Please select genes to plot'),
+							width = NULL,
+							multiple=T)
+						),
+						column(1,style='padding-left:2px; padding-right:2px; padding-top:4px',
+							actionBttn((NS(id,"action")),
+								label = NULL,
+								style = "unite",
+								color = "primary",
+								size = "xs",
+								icon = icon("play"))
+						)
+					)
+				),
+				tabPanelBody("panel2",
+					fluidRow(
+						column(12,style='padding-left:0px; padding-right:0px;',
+							fileInput(NS(id,'listGenes'),
+							label = NULL,
+							multiple = T, 
+							accept = c("txt/csv", "text/comma-separated-values,
+								text/plain", ".csv", ".xlsx"),
+							buttonLabel = "Search",
+							placeholder = "Select Gene list"),
+							htmlOutput(NS(id,"missingGenes"))
+						)
+					)
+				)
+			),
           conditionalPanel("input.scatter_heatmap == 'scatter'",ns=NS(id),
             fluidRow(
               column(6,style='padding-left:12px; padding-right:3px;', align="center",
@@ -25,7 +75,7 @@ ExpressionUI <- function(id) {
               )
             )  
           ),
-          conditionalPanel("typeof output.plot_expression !== 'undefined' || input.scatter_heatmap == 'heatmap' || input.scatter_heatmap == 'dotplot' || input.scatter_heatmap == 'stackVln'", ns = NS(id),
+          #conditionalPanel("typeof output.plot_expression !== 'undefined' || input.scatter_heatmap == 'heatmap' || input.scatter_heatmap == 'dotplot' || input.scatter_heatmap == 'stackVln'", ns = NS(id),
             fluidRow(
               column(8,style='padding-left:12px; padding-right:3px;',
                 pickerInput(inputId = NS(id,"partitionType"), 
@@ -36,15 +86,15 @@ ExpressionUI <- function(id) {
                 column(4,style='padding-left:3px; padding-right:1px;padding-top:12px',
                   br(),
                   prettyCheckbox(NS(id,"button"),
-                                 label="Colorize",
+                                 label="Show",
                                  value = F,
                                  status = "primary",
                                  shape = "curve",
                                  outline = TRUE)
                 )
               )
-            )
-          ),
+            ),
+          #),
           conditionalPanel("input.scatter_heatmap == 'heatmap'",ns=NS(id),
             prettySwitch(NS(id,"cluster_row"),
                          "Cluster Row",
@@ -91,57 +141,8 @@ ExpressionUI <- function(id) {
                          value = F,
                          status = "primary",
                          fill = TRUE)
-          ),
-          fluidRow(
-            column(12,style='padding-left:12px; padding-right:12px;',align="center",
-              switchInput(NS(id,"GL_T"), 
-                          label = "Upload GeneList",
-                          size = "small",
-                          width = NULL,
-                          labelWidth = "100px"),
-            )
-          ),
-          tabsetPanel(id = NS(id,"switcher"),
-                      type = "hidden",
-                      selected = "panel1",
-            tabPanelBody("panel1",
-              fluidRow(
-                column(11,style='padding-left:0px; padding-right:2px;',
-                  selectizeInput(NS(id,"gen_exp"),
-                                 label=NULL,
-                                 choices = NULL, 
-                                 options = list(maxItems = 10,
-                                                maxOptions = 20,
-                                                placeholder = 'Please select genes to plot'),
-                                 width = NULL,
-                                 multiple=T)
-                ),
-                column(1,style='padding-left:2px; padding-right:2px; padding-top:4px',
-                  actionBttn((NS(id,"action")),
-                             label = NULL,
-                             style = "unite",
-                             color = "primary",
-                             size = "xs",
-                             icon = icon("play"))
-                )
-              )
-            ),
-            tabPanelBody("panel2",
-              fluidRow(
-                column(12,style='padding-left:0px; padding-right:0px;',
-                  fileInput(NS(id,'listGenes'),
-                            label = NULL,
-                            multiple = T, 
-                            accept = c("txt/csv", "text/comma-separated-values,
-                                        text/plain", ".csv", ".xlsx"),
-                            buttonLabel = "Search",
-                            placeholder = "Select Gene list"),
-                  htmlOutput(NS(id,"missingGenes"))
-                )
-              )
-            )
           )
-        )
+		)
       ),
       column(9,
         tabBox(id = NS(id,"scatter_heatmap"),

@@ -8,7 +8,14 @@ COExpUI <- function(id) {
     fluidRow(
       column(3,
         box(title = htmltools::span(icon("gears"), " Settings"),
-            width = NULL, status = "primary",solidHeader = T,collapsible = F,
+			width = NULL, status = "primary",solidHeader = T,collapsible = F,
+			selectizeInput(NS(id,"gen_coexp"),
+				"Genes",
+				choices = NULL, 
+				options = list(maxItems = 2,
+					maxOptions = 20,
+					placeholder = 'Select two genes for co-expression'),
+				multiple=T),
           fluidRow(
             column(6,style='padding-left:12px; padding-right:3px;', align="center",
               pickerInput(NS(id,"DimType"), "  # dims", choices = NULL,width = NULL)
@@ -17,7 +24,7 @@ COExpUI <- function(id) {
               pickerInput(NS(id,"plotType"), "  Plot Type", choices = NULL,width = NULL)
             )
           ),
-          conditionalPanel("typeof output.plot_expression !== 'undefined'", ns = NS(id), 
+          #conditionalPanel("typeof output.plot_expression !== 'undefined'", ns = NS(id), 
             fluidRow(
               column(8,style='padding-left:12px; padding-right:3px;',
                 pickerInput(inputId = NS(id,"partitionType"), 
@@ -27,21 +34,14 @@ COExpUI <- function(id) {
               column(4,style='padding-left:3px; padding-right:1px;padding-top:12px',
                 br(),
                 prettyCheckbox(NS(id,"button"),
-                               label="Colorize",
+                               label="Show",
                                value = F,
                                status = "primary",
                                shape = "curve",
                                outline = TRUE)
               )
             )
-          ),
-          selectizeInput(NS(id,"gen_coexp"),
-                         "Genes",
-                         choices = NULL, 
-                         options = list(maxItems = 2,
-                                        maxOptions = 20,
-                                        placeholder = 'Select two genes for co-expression'),
-                         multiple=T)
+          #)
         ),
         conditionalPanel("typeof output.plot_expression !== 'undefined'", ns = NS(id), 
           box(title = " Co-detection Summary",
