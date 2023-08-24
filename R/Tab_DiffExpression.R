@@ -83,9 +83,10 @@ VolcanoUI <- function(id) {
                 "Violin_panel",
                 dropdownButton(
                   fluidRow(
-                    column(4, style = "padding-left:12px; padding-right:3px;", numericInput(NS(id, "pdf_width_violin"), "Width", value = 7)),
-                    column(4, style = "padding-left:3px; padding-right:3px;", numericInput(NS(id, "pdf_height_violin"), "Height", value = 7)),
-                    column(4, style = "padding-left:3px; padding-right:12px; padding:16px", downloadButton(NS(id, "export_violin")))
+                    column(7, style='padding-left:6px; padding-right:3px;',
+						column(6, style='padding-left:2px; padding-right:1px;', numericInput(NS(id, "pdf_width_violin"), "Width", value = 7)),
+						column(6, style = "padding-left:1px; padding-right:2px;", numericInput(NS(id, "pdf_height_violin"), "Height", value = 7))),
+                    column(5, style = "padding-left:0px; padding-right:6px; padding:16px", downloadButton(NS(id, "export_violin")))
                   ),
                   circle = FALSE,
                   status = "primary",
@@ -103,9 +104,10 @@ VolcanoUI <- function(id) {
                 "SpikePlot_panel",
                 dropdownButton(
                   fluidRow(
-                    column(4, style = "padding-left:12px; padding-right:3px;", numericInput(NS(id, "pdf_width_SpikePlot"), "Width", value = 7)),
-                    column(4, style = "padding-left:3px; padding-right:3px;", numericInput(NS(id, "pdf_height_SpikePlot"), "Height", value = 7)),
-                    column(4, style = "padding-left:3px; padding-right:12px; padding:16px", downloadButton(NS(id, "export_SpikePlot")))
+                    column(7, style='padding-left:6px; padding-right:3px;',
+						column(6, style='padding-left:2px; padding-right:1px;', numericInput(NS(id, "pdf_width_SpikePlot"), "Width", value = 7)),
+						column(6, style = "padding-left:1px; padding-right:2px;", numericInput(NS(id, "pdf_height_SpikePlot"), "Height", value = 7))),
+                    column(5, style = "padding-left:0px; padding-right:6px; padding:16px", downloadButton(NS(id, "export_SpikePlot")))
                   ),
                   circle = FALSE,
                   status = "primary",
@@ -122,7 +124,7 @@ VolcanoUI <- function(id) {
               tabPanelBody(
                 "heatmap_panel",
                 dropdownButton(
-                  h5("Settings"),
+                  #h5("Settings"),
                   prettySwitch(NS(id, "cluster_row"), "Cluster Row",
                     value = F, status = "primary",
                     fill = TRUE
@@ -140,11 +142,12 @@ VolcanoUI <- function(id) {
                     fill = TRUE
                   ),
                   hr(style = "border-top: 1px solid #0073b7;"),
-                  h5("Download"),
+                  #h5("Download"),
                   fluidRow(
-                    column(4, style = "padding-left:12px; padding-right:3px;", numericInput(NS(id, "pdf_width_heatmap"), "Width", value = 7)),
-                    column(4, style = "padding-left:3px; padding-right:3px;", numericInput(NS(id, "pdf_height_heatmap"), "Height", value = 7)),
-                    column(4, style = "padding-left:3px; padding-right:12px; padding:16px", downloadButton(NS(id, "export_heatmap")))
+                    column(7, style='padding-left:6px; padding-right:3px;',
+						column(6, style='padding-left:2px; padding-right:1px;', numericInput(NS(id, "pdf_width_heatmap"), "Width", value = 7)),
+						column(6, style = "padding-left:1px; padding-right:2px;", numericInput(NS(id, "pdf_height_heatmap"), "Height", value = 7))),
+                    column(5, style = "padding-left:0px; padding-right:6px; padding:16px", downloadButton(NS(id, "export_heatmap")))
                   ),
                   circle = FALSE, status = "primary", icon = icon("download"), width = "300px", size = "sm", up = T,
                   tooltip = tooltipOptions(title = "Settings and Download")
@@ -156,7 +159,7 @@ VolcanoUI <- function(id) {
               tabPanelBody(
                 "DotPlot_panel",
                 dropdownButton(
-                  h5("Settings"),
+                  #h5("Settings"),
                   prettySwitch(NS(id, "ord_dotplot"), "Cluster Row",
                     value = F, status = "primary",
                     fill = TRUE
@@ -170,11 +173,12 @@ VolcanoUI <- function(id) {
                     fill = TRUE
                   ),
                   hr(style = "border-top: 1px solid #0073b7;"),
-                  h5("Download"),
+                  #h5("Download"),
                   fluidRow(
-                    column(4, style = "padding-left:12px; padding-right:3px;", numericInput(NS(id, "pdf_width_dotplot"), "Width", value = 7)),
-                    column(4, style = "padding-left:3px; padding-right:3px;", numericInput(NS(id, "pdf_height_dotplot"), "Height", value = 7)),
-                    column(4, style = "padding-left:3px; padding-right:12px; padding:16px", downloadButton(NS(id, "export_dotplot")))
+                    column(7, style='padding-left:6px; padding-right:3px;',
+						column(6, style='padding-left:2px; padding-right:1px;', numericInput(NS(id, "pdf_width_dotplot"), "Width", value = 7)),
+						column(6, style = "padding-left:1px; padding-right:2px;", numericInput(NS(id, "pdf_height_dotplot"), "Height", value = 7))),
+                    column(5, style = "padding-left:0px; padding-right:6px; padding:16px", downloadButton(NS(id, "export_dotplot")))
                   ),
                   circle = FALSE, status = "primary", icon = icon("download"), width = "300px",
                   size = "sm", up = T,

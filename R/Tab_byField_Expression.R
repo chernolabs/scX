@@ -155,9 +155,10 @@ Numeric_ExpressionUI <- function(id) {
                                                      tabPanelBody("Lines_panel",
                                                                   dropdownButton(
 																	fluidRow(
-																		column(4, style='padding-left:12px; padding-right:3px;', numericInput(NS(id,"pdf_width_linesplot"),"Width",value = 7)),
-																		column(4, style='padding-left:3px; padding-right:3px;', numericInput(NS(id,"pdf_height_linesplot"),"Height",value = 7)),
-																		column(4, style='padding-left:3px; padding-right:12px; padding:16px', downloadButton(NS(id,'export_linesplot')))
+																		column(7, style='padding-left:6px; padding-right:3px;',
+																			column(6, style='padding-left:2px; padding-right:1px;', numericInput(NS(id,"pdf_width_linesplot"),"Width",value = 7)),
+																			column(6, style='padding-left:1px; padding-right:2px;', numericInput(NS(id,"pdf_height_linesplot"),"Height",value = 7))),
+																		column(5, style='padding-left:0px; padding-right:6px; padding:16px', downloadButton(NS(id,'export_linesplot')))
 																	),
                                                                     circle = FALSE,
                                                                     status = "primary",
@@ -172,9 +173,10 @@ Numeric_ExpressionUI <- function(id) {
                                                      tabPanelBody("SpikePlot_panel",
                                                                   dropdownButton(
 																	fluidRow(
-																		column(4, style='padding-left:12px; padding-right:3px;', numericInput(NS(id,"pdf_width_SpikePlot"),"Width",value = 7)),
-																		column(4, style='padding-left:3px; padding-right:3px;', numericInput(NS(id,"pdf_height_SpikePlot"),"Height",value = 7)),
-																		column(4, style='padding-left:3px; padding-right:12px; padding:16px', downloadButton(NS(id,'export_SpikePlot')))
+																		column(7, style='padding-left:6px; padding-right:3px;',
+																			column(6, style='padding-left:2px; padding-right:1px;', numericInput(NS(id,"pdf_width_SpikePlot"),"Width",value = 7)),
+																			column(6, style='padding-left:1px; padding-right:2px;', numericInput(NS(id,"pdf_height_SpikePlot"),"Height",value = 7))),
+																		column(5, style='padding-left:0px; padding-right:6px; padding:16px', downloadButton(NS(id,'export_SpikePlot')))
 																	),
                                                                     circle = FALSE,
                                                                     status = "primary",
@@ -197,9 +199,10 @@ Numeric_ExpressionUI <- function(id) {
                 footer = tagList(shiny::icon("cat"), "Nya"),
                 dropdownButton(
 					fluidRow(
-						column(4, style='padding-left:12px; padding-right:3px;', numericInput(NS(id,"pdf_width_heatmap"),"Width",value = 7)),
-						column(4, style='padding-left:3px; padding-right:3px;', numericInput(NS(id,"pdf_height_heatmap"),"Height",value = 7)),
-						column(4, style='padding-left:3px; padding-right:12px; padding:16px', downloadButton(NS(id,'export_heatmap')))
+						column(7, style='padding-left:6px; padding-right:3px;',
+							column(6, style='padding-left:2px; padding-right:1px;', numericInput(NS(id,"pdf_width_heatmap"),"Width",value = 7)),
+							column(6, style='padding-left:1px; padding-right:2px;', numericInput(NS(id,"pdf_height_heatmap"),"Height",value = 7))),
+						column(5, style='padding-left:0px; padding-right:6px; padding:16px', downloadButton(NS(id,'export_heatmap')))
 					),
                   circle = FALSE,
                   status = "primary",
@@ -217,9 +220,10 @@ Numeric_ExpressionUI <- function(id) {
                 footer = tagList(shiny::icon("cat"), "Nya"),
                 dropdownButton(
 					fluidRow(
-						column(4, style='padding-left:12px; padding-right:3px;', numericInput(NS(id,"pdf_width_multilines"),"Width",value = 7)),
-						column(4, style='padding-left:3px; padding-right:3px;', numericInput(NS(id,"pdf_height_multilines"),"Height",value = 7)),
-						column(4, style='padding-left:3px; padding-right:12px; padding:16px', downloadButton(NS(id,'export_multilines')))
+						column(7, style='padding-left:6px; padding-right:3px;',
+							column(6, style='padding-left:2px; padding-right:1px;', numericInput(NS(id,"pdf_width_multilines"),"Width",value = 7)),
+							column(6, style='padding-left:1px; padding-right:2px;', numericInput(NS(id,"pdf_height_multilines"),"Height",value = 7))),
+						column(5, style='padding-left:0px; padding-right:6px; padding:16px', downloadButton(NS(id,'export_multilines')))
 					),
                   circle = FALSE,
                   status = "primary",

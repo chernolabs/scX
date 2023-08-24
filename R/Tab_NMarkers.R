@@ -82,9 +82,10 @@ N_markersUI <- function(id) {
                                            tabPanelBody("Violin_panel",
                                                         dropdownButton(
 															fluidRow(
-																column(4, style='padding-left:12px; padding-right:3px;', numericInput(NS(id,"pdf_width_violin"),"Width",value = 7)),
-																column(4, style='padding-left:3px; padding-right:3px;', numericInput(NS(id,"pdf_height_violin"),"Height",value = 7)),
-																column(4, style='padding-left:3px; padding-right:12px; padding:16px', downloadButton(NS(id,'export_violin')))
+																column(7, style='padding-left:6px; padding-right:3px;',
+																	column(6, style='padding-left:2px; padding-right:1px;', numericInput(NS(id,"pdf_width_violin"),"Width",value = 7)),
+																	column(6, style='padding-left:1px; padding-right:2px;', numericInput(NS(id,"pdf_height_violin"),"Height",value = 7))),
+																column(5, style='padding-left:0px; padding-right:6px; padding:16px', downloadButton(NS(id,'export_violin')))
 															),
                                                           circle = FALSE,
                                                           status = "primary",
@@ -99,9 +100,10 @@ N_markersUI <- function(id) {
                                            tabPanelBody("SpikePlot_panel",
                                                         dropdownButton(
 															fluidRow(
-																column(4, style='padding-left:12px; padding-right:3px;', numericInput(NS(id,"pdf_width_SpikePlot"),"Width",value = 7)),
-																column(4, style='padding-left:3px; padding-right:3px;', numericInput(NS(id,"pdf_height_SpikePlot"),"Height",value = 7)),
-																column(4, style='padding-left:3px; padding-right:12px; padding:16px', downloadButton(NS(id,'export_SpikePlot')))
+																column(7, style='padding-left:6px; padding-right:3px;',
+																	column(6, style='padding-left:2px; padding-right:1px;', numericInput(NS(id,"pdf_width_SpikePlot"),"Width",value = 7)),
+																	column(6, style='padding-left:1px; padding-right:2px;', numericInput(NS(id,"pdf_height_SpikePlot"),"Height",value = 7))),
+																column(5, style='padding-left:0px; padding-right:6px; padding:16px', downloadButton(NS(id,'export_SpikePlot')))
 															),
                                                           circle = FALSE,
                                                           status = "primary",

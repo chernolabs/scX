@@ -139,9 +139,10 @@ MultiPlotsUI <- function(id) {
           tabPanel("Gene Expression",value = "gene",
                    dropdownButton(
 					fluidRow(
-						column(4, style='padding-left:12px; padding-right:3px;', numericInput(NS(id,"pdf_width_bygene"),"Width",value = 7)),
-						column(4, style='padding-left:3px; padding-right:3px;', numericInput(NS(id,"pdf_height_bygene"),"Height",value = 7)),
-						column(4, style='padding-left:3px; padding-right:12px; padding:16px', downloadButton(NS(id,'export_bygene')))
+						column(7, style='padding-left:6px; padding-right:3px;',
+							column(6, style='padding-left:2px; padding-right:1px;', numericInput(NS(id,"pdf_width_bygene"),"Width",value = 7)),
+							column(6, style='padding-left:1px; padding-right:2px;', numericInput(NS(id,"pdf_height_bygene"),"Height",value = 7))),
+						column(5, style='padding-left:0px; padding-right:6px; padding:16px', downloadButton(NS(id,'export_bygene')))
 					),
                      circle = FALSE,
                      status = "primary",
@@ -157,9 +158,10 @@ MultiPlotsUI <- function(id) {
           tabPanel("Partition",value = "cluster",
                    dropdownButton(
 					fluidRow(
-						column(4, style='padding-left:12px; padding-right:3px;', numericInput(NS(id,"pdf_width_bycluster"),"Width",value = 7)),
-						column(4, style='padding-left:3px; padding-right:3px;', numericInput(NS(id,"pdf_height_bycluster"),"Height",value = 7)),
-						column(4, style='padding-left:3px; padding-right:12px; padding:16px', downloadButton(NS(id,'export_bycluster')))
+						column(7, style='padding-left:6px; padding-right:3px;',
+							column(6, style='padding-left:2px; padding-right:1px;', numericInput(NS(id,"pdf_width_bycluster"),"Width",value = 7)),
+							column(6, style='padding-left:1px; padding-right:2px;', numericInput(NS(id,"pdf_height_bycluster"),"Height",value = 7))),
+						column(5, style='padding-left:0px; padding-right:6px; padding:16px', downloadButton(NS(id,'export_bycluster')))
 					),
                      circle = FALSE,
                      status = "primary",
@@ -175,9 +177,10 @@ MultiPlotsUI <- function(id) {
           tabPanel("Field",value = "field",
                    dropdownButton(
 					fluidRow(
-						column(4, style='padding-left:12px; padding-right:3px;', numericInput(NS(id,"pdf_width_byfield"),"Width",value = 7)),
-						column(4, style='padding-left:3px; padding-right:3px;', numericInput(NS(id,"pdf_height_byfield"),"Height",value = 7)),
-						column(4, style='padding-left:3px; padding-right:12px; padding:16px', downloadButton(NS(id,'export_byfield')))
+						column(7, style='padding-left:6px; padding-right:3px;',
+							column(6, style='padding-left:2px; padding-right:1px;', numericInput(NS(id,"pdf_width_byfield"),"Width",value = 7)),
+							column(6, style='padding-left:1px; padding-right:2px;', numericInput(NS(id,"pdf_height_byfield"),"Height",value = 7))),
+						column(5, style='padding-left:0px; padding-right:6px; padding:16px', downloadButton(NS(id,'export_byfield')))
 					),
                      circle = FALSE,
                      status = "primary",
