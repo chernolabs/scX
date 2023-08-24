@@ -1,5 +1,5 @@
 # Object to sce ----
-#' Returns a list with a SingleCellExperiment object
+#' SingleCellExperiment object ready for use in scXplorer
 #'
 #' `createSCEobject()` returns a list which includes a SingleCellExperiment object with counts, at
 #'		least one clusterization, gene markers for each clusterization, reduced dimensions for
@@ -9,23 +9,27 @@
 #' @param xx Either a matrix with counts, or a SCE or Seurat object.
 #' @param assay.name.raw Assay name for raw counts matrix if object is a SCE. Defaults to `counts`.
 #' @param assay.name.normalization Assay name for normalized matrix if present in SCE. If not present,
-#' 		it calculates `logcounts` (default).
+#' 		it computes `logcounts` (default).
 #' @param metadata Optional dataframe with cell metadata.
-#' @param toFactors Optional metadata column names (or colData) to use as factors. If `NULL` (default),
+#' @param toFactors Optional metadata column names (or `colData`) to use as factors. If `NULL` (default),
 #'		a quick clusterization will be computed.
-#' @param toKeep Additional metadata column names (or colData) to use only for coloring in plots. If `NULL` (default),
-#'    only 'toFactors' columns will be available for coloring plots in the app. 
+#' @param toKeep Additional metadata column names (or `colData`) to use only for coloring in plots.
+#'    If `NULL` (default), only `toFactors` columns will be available for coloring plots.
 #' @param chosen.hvg Optional list of Highly Variable Genes.
 #' @param nHVGs Number of Highly Variable Genes to use if `chosen.hvg=NULL`. Defaults to 3000.
 #' @param nPCs Number of Principal Components to use in PCA. Defaults to 50.
-#' @param verbose Step by step status while function is running. Defaults to `TRUE`.
-#' @param calcRedDim Whether to compute reduced dimensions (PCA, UMAP, TSNE, UMAP2D, TSNE2D) or not.
-#'		Defaults to `TRUE`.
-#' @param paramFindMarkers List of params to pass to scran::findMarkers function to compute marker genes for clusters. Deafult is `list(test.type="wilcox", pval.type="all", direction="any")` 
-#' @param calcAllToFactors Wheter to force the computation of markers and DEGs from the entire list of 'toFactors'
-#' @param cells2keep List of the name of the cells you want to keep from subsampling data. This is only for visual purpose, it does not affect all the computations.
-#' @param descriptionText The short description of the object being analized. This can help when you are working with multiple tabs. 
-#' @returns List with a SingleCellExperiment object and additional data ready for use in scXplorer.
+#' @param verbose Logical for step by step status while function is running. Defaults to `TRUE`.
+#' @param calcRedDim Logical indicating whether to compute reduced dimensions (PCA, UMAP, TSNE, UMAP2D, 
+#'		TSNE2D). Defaults to `TRUE`.
+#' @param paramFindMarkers List of parameters to pass to `scran::findMarkers(...)` to compute marker 
+#'		genes for clusters. Defaults to `list(test.type="wilcox", pval.type="all", direction="any")`.
+#' @param calcAllToFactors Logical indicating whether to force the computation of markers and DEGs from
+#'		the entire list of `toFactors`.
+#' @param cells2keep List of names for cells to keep when subsampling data. NOTE: Subsampling is only 
+#'		used in large datasets for visual purposes, and it does not affect computations.
+#' @param descriptionText Optional short description of the object being analized. This can help when 
+#'		working with multiple tabs. 
+#' @returns List with a SingleCellExperiment object and additional data ready for use in `scXplorer`.
 #' @export
 createSCEobject <- function(xx,
                             assay.name.raw="counts",
@@ -477,6 +481,9 @@ ldf_func <- function(sce, partition, paramFindMarkers, minSize=50){
   return(ldf_t)
 }
 
+# subsampling cells for visual purposes
+#' @keywords internal
+#' @noRd
 subsampling_func = function(sce, cellsToKeep=NULL, nmaxcell=50000){
 
   if(is.null(cellsToKeep)){
