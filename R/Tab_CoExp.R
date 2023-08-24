@@ -77,9 +77,10 @@ COExpUI <- function(id) {
                                        solidHeader = T, collapsible=T,
                                        dropdownButton(
 										fluidRow(
-											column(4, style='padding-left:12px; padding-right:3px;', numericInput(NS(id,"pdf_width_corrplot"),"Width",value = 7)),
-											column(4, style='padding-left:3px; padding-right:3px;', numericInput(NS(id,"pdf_height_corrplot"),"Height",value = 7)),
-											column(4, style='padding-left:3px; padding-right:12px; padding:16px', downloadButton(NS(id,'export_corrplot')))
+											column(7, style='padding-left:6px; padding-right:3px;',
+												column(6, style='padding-left:2px; padding-right:1px;', numericInput(NS(id,"pdf_width_corrplot"),"Width",value = 7)),
+												column(6, style='padding-left:1px; padding-right:2px;', numericInput(NS(id,"pdf_height_corrplot"),"Height",value = 7))),
+											column(5, style='padding-left:0px; padding-right:6px; padding:16px', downloadButton(NS(id,'export_corrplot')))
 										),
                                          circle = FALSE,
                                          status = "primary",
@@ -87,7 +88,7 @@ COExpUI <- function(id) {
                                          width = "300px",
                                          size= "sm",
                                          up = T,
-                                         tooltip = tooltipOptions(title = "Press to Download")
+                                         tooltip = tooltipOptions(title = "Download")
                                        ),
                                        plotOutput(NS(id,"CorrPlot")) %>% withSpinner()
                                    )

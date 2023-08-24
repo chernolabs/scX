@@ -135,9 +135,10 @@ Fields_UI <- function(id) {
                                  footer = tagList(shiny::icon("cat"), "Nya"),
                                  dropdownButton(
 									fluidRow(
-										column(4, style='padding-left:12px; padding-right:3px;', numericInput(NS(id,"pdf_width_scatter"),"Width",value = 7)),
-										column(4, style='padding-left:3px; padding-right:3px;', numericInput(NS(id,"pdf_height_scatter"),"Height",value = 7)),
-										column(4, style='padding-left:3px; padding-right:12px; padding:16px', downloadButton(NS(id,'export_scatter')))
+										column(7, style='padding-left:6px; padding-right:3px;',
+											column(6, style='padding-left:2px; padding-right:1px;', numericInput(NS(id,"pdf_width_scatter"),"Width",value = 7)),
+											column(6, style='padding-left:1px; padding-right:2px;', numericInput(NS(id,"pdf_height_scatter"),"Height",value = 7))),
+										column(5, style='padding-left:0px; padding-right:6px; padding:16px', downloadButton(NS(id,'export_scatter')))
 									),
                                    circle = FALSE,
                                    status = "primary",
@@ -145,7 +146,7 @@ Fields_UI <- function(id) {
                                    width = "300px",
                                    size= "sm",
                                    up = F,
-                                   tooltip = tooltipOptions(title = "Press to Download")
+                                   tooltip = tooltipOptions(title = "Download")
                                  ),
                                  plotlyOutput(NS(id,"plot_numeric"),height = "80vh") %>% withSpinner()
                              )
@@ -155,9 +156,10 @@ Fields_UI <- function(id) {
                                  footer = tagList(shiny::icon("cat"), "Nya"),
                                  dropdownButton(
 									fluidRow(
-										column(4, style='padding-left:12px; padding-right:3px;', numericInput(NS(id,"pdf_width_heatmap"),"Width",value = 7)),
-										column(4, style='padding-left:3px; padding-right:3px;', numericInput(NS(id,"pdf_height_heatmap"),"Height",value = 7)),
-										column(4, style='padding-left:3px; padding-right:12px; padding:16px', downloadButton(NS(id,'export_heatmap')))
+										column(7, style='padding-left:6px; padding-right:3px;',
+											column(6, style='padding-left:2px; padding-right:1px;', numericInput(NS(id,"pdf_width_heatmap"),"Width",value = 7)),
+											column(6, style='padding-left:1px; padding-right:2px;', numericInput(NS(id,"pdf_height_heatmap"),"Height",value = 7))),
+										column(5, style='padding-left:0px; padding-right:6px; padding:16px', downloadButton(NS(id,'export_heatmap')))
 									),
                                    circle = FALSE,
                                    status = "primary",
@@ -165,7 +167,7 @@ Fields_UI <- function(id) {
                                    width = "300px",
                                    size= "sm",
                                    up = F,
-                                   tooltip = tooltipOptions(title = "Press to Download")
+                                   tooltip = tooltipOptions(title = "Download")
                                  ),
                                  plotOutput(NS(id,"plot_heatmap"),height = "80vh") %>% withSpinner()
                              )
@@ -175,9 +177,10 @@ Fields_UI <- function(id) {
                                  footer = tagList(shiny::icon("cat"), "Nya"),
                                  dropdownButton(
 									fluidRow(
-										column(4, style='padding-left:12px; padding-right:3px;', numericInput(NS(id,"pdf_width_dotplot"),"Width",value = 7)),
-										column(4, style='padding-left:3px; padding-right:3px;', numericInput(NS(id,"pdf_height_dotplot"),"Height",value = 7)),
-										column(4, style='padding-left:3px; padding-right:12px; padding:16px', downloadButton(NS(id,'export_dotplot')))
+										column(7, style='padding-left:6px; padding-right:3px;',
+											column(6, style='padding-left:2px; padding-right:1px;', numericInput(NS(id,"pdf_width_dotplot"),"Width",value = 7)),
+											column(6, style='padding-left:1px; padding-right:2px;', numericInput(NS(id,"pdf_height_dotplot"),"Height",value = 7))),
+										column(5, style='padding-left:0px; padding-right:6px; padding:16px', downloadButton(NS(id,'export_dotplot')))
 									),
                                    circle = FALSE,
                                    status = "primary",
@@ -185,7 +188,7 @@ Fields_UI <- function(id) {
                                    width = "300px",
                                    size= "sm",
                                    up = F,
-                                   tooltip = tooltipOptions(title = "Press to Download")
+                                   tooltip = tooltipOptions(title = "Download")
                                  ),
                                  plotlyOutput(NS(id,"plot_DotPlot"),height = "80vh") %>% withSpinner()
                              )
@@ -195,9 +198,10 @@ Fields_UI <- function(id) {
                                  footer = tagList(shiny::icon("cat"), "Nya"),
                                  dropdownButton(
 									fluidRow(
-										column(4, style='padding-left:12px; padding-right:3px;', numericInput(NS(id,"pdf_width_StackedViolin"),"Width",value = 7)),
-										column(4, style='padding-left:3px; padding-right:3px;', numericInput(NS(id,"pdf_height_StackedViolin"),"Height",value = 7)),
-										column(4, style='padding-left:3px; padding-right:12px; padding:16px', downloadButton(NS(id,'export_StackedViolin')))
+										column(7, style='padding-left:6px; padding-right:3px;',
+											column(6, style='padding-left:2px; padding-right:1px;', numericInput(NS(id,"pdf_width_StackedViolin"),"Width",value = 7)),
+											column(6, style='padding-left:1px; padding-right:2px;', numericInput(NS(id,"pdf_height_StackedViolin"),"Height",value = 7))),
+										column(5, style='padding-left:0px; padding-right:6px; padding:16px', downloadButton(NS(id,'export_StackedViolin')))
 									),
                                    circle = FALSE,
                                    status = "primary",
@@ -205,7 +209,7 @@ Fields_UI <- function(id) {
                                    width = "300px",
                                    size= "sm",
                                    up = F,
-                                   tooltip = tooltipOptions(title = "Press to Download")
+                                   tooltip = tooltipOptions(title = "Download")
                                  ),
                                  plotOutput(NS(id,"plot_stackVln"),height = "80vh") %>% withSpinner()
                              )
@@ -593,7 +597,7 @@ Fields_Server <- function(id,sce) {
                 width = "300px",
                 size= "sm",
                 up = F,
-                tooltip = tooltipOptions(title = "Press to Download")
+                tooltip = tooltipOptions(title = "Download")
               ),
         plotOutput(NS(id,"plot_Matrix"),height = "80vh") %>% withSpinner()
           )

@@ -30,11 +30,11 @@ VolcanoUI <- function(id) {
           fluidRow(
             column(5,
               style = "padding-left:12px; padding-right:5px;", align = "center",
-              numericInput(NS(id, "fc_thr"), "Fold Change", value = 2, step = 0.01)
+              numericInput(NS(id, "fc_thr"), "Fold Change", value = 2, step = 0.01, min = 1)
             ),
             column(5,
               style = "padding-left:5px; padding-right:5px;", align = "center",
-              numericInput(NS(id, "fdr_thr"), "False Discovery Rate", value = 0.05, step = 0.01)
+              numericInput(NS(id, "fdr_thr"), "False Discovery Rate", value = 0.05, step = 0.01, min = 0)
             ),
             column(2,
               style = "padding-left:5px; padding-right:12px;padding-top:25px;", align = "center",
@@ -83,9 +83,10 @@ VolcanoUI <- function(id) {
                 "Violin_panel",
                 dropdownButton(
                   fluidRow(
-                    column(4, style = "padding-left:12px; padding-right:3px;", numericInput(NS(id, "pdf_width_violin"), "Width", value = 7)),
-                    column(4, style = "padding-left:3px; padding-right:3px;", numericInput(NS(id, "pdf_height_violin"), "Height", value = 7)),
-                    column(4, style = "padding-left:3px; padding-right:12px; padding:16px", downloadButton(NS(id, "export_violin")))
+                    column(7, style='padding-left:6px; padding-right:3px;',
+						column(6, style='padding-left:2px; padding-right:1px;', numericInput(NS(id, "pdf_width_violin"), "Width", value = 7)),
+						column(6, style = "padding-left:1px; padding-right:2px;", numericInput(NS(id, "pdf_height_violin"), "Height", value = 7))),
+                    column(5, style = "padding-left:0px; padding-right:6px; padding:16px", downloadButton(NS(id, "export_violin")))
                   ),
                   circle = FALSE,
                   status = "primary",
@@ -93,7 +94,7 @@ VolcanoUI <- function(id) {
                   width = "300px",
                   size = "sm",
                   up = T,
-                  tooltip = tooltipOptions(title = "Press to Download")
+                  tooltip = tooltipOptions(title = "Download")
                 ),
                 plotOutput(NS(id, "plot_Violin"),
                   height = "80vh"
@@ -103,9 +104,10 @@ VolcanoUI <- function(id) {
                 "SpikePlot_panel",
                 dropdownButton(
                   fluidRow(
-                    column(4, style = "padding-left:12px; padding-right:3px;", numericInput(NS(id, "pdf_width_SpikePlot"), "Width", value = 7)),
-                    column(4, style = "padding-left:3px; padding-right:3px;", numericInput(NS(id, "pdf_height_SpikePlot"), "Height", value = 7)),
-                    column(4, style = "padding-left:3px; padding-right:12px; padding:16px", downloadButton(NS(id, "export_SpikePlot")))
+                    column(7, style='padding-left:6px; padding-right:3px;',
+						column(6, style='padding-left:2px; padding-right:1px;', numericInput(NS(id, "pdf_width_SpikePlot"), "Width", value = 7)),
+						column(6, style = "padding-left:1px; padding-right:2px;", numericInput(NS(id, "pdf_height_SpikePlot"), "Height", value = 7))),
+                    column(5, style = "padding-left:0px; padding-right:6px; padding:16px", downloadButton(NS(id, "export_SpikePlot")))
                   ),
                   circle = FALSE,
                   status = "primary",
@@ -113,7 +115,7 @@ VolcanoUI <- function(id) {
                   width = "300px",
                   size = "sm",
                   up = T,
-                  tooltip = tooltipOptions(title = "Press to Download")
+                  tooltip = tooltipOptions(title = "Download")
                 ),
                 plotOutput(NS(id, "plot_SpikePlot"),
                   height = "80vh"
@@ -122,7 +124,7 @@ VolcanoUI <- function(id) {
               tabPanelBody(
                 "heatmap_panel",
                 dropdownButton(
-                  h5("Settings"),
+                  #h5("Settings"),
                   prettySwitch(NS(id, "cluster_row"), "Cluster Row",
                     value = F, status = "primary",
                     fill = TRUE
@@ -140,14 +142,15 @@ VolcanoUI <- function(id) {
                     fill = TRUE
                   ),
                   hr(style = "border-top: 1px solid #0073b7;"),
-                  h5("Download"),
+                  #h5("Download"),
                   fluidRow(
-                    column(4, style = "padding-left:12px; padding-right:3px;", numericInput(NS(id, "pdf_width_heatmap"), "Width", value = 7)),
-                    column(4, style = "padding-left:3px; padding-right:3px;", numericInput(NS(id, "pdf_height_heatmap"), "Height", value = 7)),
-                    column(4, style = "padding-left:3px; padding-right:12px; padding:16px", downloadButton(NS(id, "export_heatmap")))
+                    column(7, style='padding-left:6px; padding-right:3px;',
+						column(6, style='padding-left:2px; padding-right:1px;', numericInput(NS(id, "pdf_width_heatmap"), "Width", value = 7)),
+						column(6, style = "padding-left:1px; padding-right:2px;", numericInput(NS(id, "pdf_height_heatmap"), "Height", value = 7))),
+                    column(5, style = "padding-left:0px; padding-right:6px; padding:16px", downloadButton(NS(id, "export_heatmap")))
                   ),
                   circle = FALSE, status = "primary", icon = icon("download"), width = "300px", size = "sm", up = T,
-                  tooltip = tooltipOptions(title = "Press to see Heatmap settings & Download")
+                  tooltip = tooltipOptions(title = "Settings and Download")
                 ),
                 plotOutput(NS(id, "plot_heatmap"),
                   height = "80vh"
@@ -156,7 +159,7 @@ VolcanoUI <- function(id) {
               tabPanelBody(
                 "DotPlot_panel",
                 dropdownButton(
-                  h5("Settings"),
+                  #h5("Settings"),
                   prettySwitch(NS(id, "ord_dotplot"), "Cluster Row",
                     value = F, status = "primary",
                     fill = TRUE
@@ -170,15 +173,16 @@ VolcanoUI <- function(id) {
                     fill = TRUE
                   ),
                   hr(style = "border-top: 1px solid #0073b7;"),
-                  h5("Download"),
+                  #h5("Download"),
                   fluidRow(
-                    column(4, style = "padding-left:12px; padding-right:3px;", numericInput(NS(id, "pdf_width_dotplot"), "Width", value = 7)),
-                    column(4, style = "padding-left:3px; padding-right:3px;", numericInput(NS(id, "pdf_height_dotplot"), "Height", value = 7)),
-                    column(4, style = "padding-left:3px; padding-right:12px; padding:16px", downloadButton(NS(id, "export_dotplot")))
+                    column(7, style='padding-left:6px; padding-right:3px;',
+						column(6, style='padding-left:2px; padding-right:1px;', numericInput(NS(id, "pdf_width_dotplot"), "Width", value = 7)),
+						column(6, style = "padding-left:1px; padding-right:2px;", numericInput(NS(id, "pdf_height_dotplot"), "Height", value = 7))),
+                    column(5, style = "padding-left:0px; padding-right:6px; padding:16px", downloadButton(NS(id, "export_dotplot")))
                   ),
                   circle = FALSE, status = "primary", icon = icon("download"), width = "300px",
                   size = "sm", up = T,
-                  tooltip = tooltipOptions(title = "Press to see DotPlot settings & Download")
+                  tooltip = tooltipOptions(title = "Settings and Download")
                 ),
                 plotlyOutput(NS(id, "plot_DotPlot"),
                   height = "80vh"
@@ -248,7 +252,7 @@ VolcanoServer <- function(id, sce, sce.markers) {
     output$VolcanoPlot <- renderPlotly({
       req(!is.null(VolcanoC()))
 
-      plot_ly(
+      plot_ly(type = "scatter", mode = "markers",
         source = "VolcanoPlot",
         data = VolcanoC()$Exp, x = ~logFC, y = ~ -log.FDR,
         color = ~diffexpressed, colors = c("UP" = "red", "NO" = "black", "DOWN" = "blue"),
@@ -634,7 +638,7 @@ VolcanoServer <- function(id, sce, sce.markers) {
       g <- DotPlot()
       
       if(length(levels(g$data$Feature))>=50){
-        g + theme(axis.title.y = element_blank(),
+        g <- g + theme(axis.title.y = element_blank(),
                   axis.text.y = element_blank(),
                   axis.ticks.y = element_blank()
         )
