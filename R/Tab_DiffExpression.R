@@ -252,7 +252,7 @@ VolcanoServer <- function(id, sce, sce.markers) {
     output$VolcanoPlot <- renderPlotly({
       req(!is.null(VolcanoC()))
 
-      plot_ly(
+      plot_ly(type = "scatter", mode = "markers",
         source = "VolcanoPlot",
         data = VolcanoC()$Exp, x = ~logFC, y = ~ -log.FDR,
         color = ~diffexpressed, colors = c("UP" = "red", "NO" = "black", "DOWN" = "blue"),
