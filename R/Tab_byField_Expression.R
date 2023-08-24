@@ -165,7 +165,7 @@ Numeric_ExpressionUI <- function(id) {
                                                                     width = "300px",
                                                                     size= "sm",
                                                                     up = T,
-                                                                    tooltip = tooltipOptions(title = "Press to Download")
+                                                                    tooltip = tooltipOptions(title = "Download")
                                                                   ),
                                                                   plotlyOutput(NS(id,"plot_Lines")) %>% withSpinner(),
                                                      ),
@@ -182,7 +182,7 @@ Numeric_ExpressionUI <- function(id) {
                                                                     width = "300px",
                                                                     size= "sm",
                                                                     up = T,
-                                                                    tooltip = tooltipOptions(title = "Press to Download")
+                                                                    tooltip = tooltipOptions(title = "Download")
                                                                   ),
                                                                   plotOutput(NS(id,"plot_SpikePlot")) %>% withSpinner()
                                                      )
@@ -207,7 +207,7 @@ Numeric_ExpressionUI <- function(id) {
                   width = "300px",
                   size= "sm",
                   up = F,
-                  tooltip = tooltipOptions(title = "Press to Download")
+                  tooltip = tooltipOptions(title = "Download")
                 ),
               plotOutput(NS(id,"plot_heatmap"),height = "80vh") %>% withLoader(type='html',loader = 'dnaspin')
             )
@@ -227,7 +227,7 @@ Numeric_ExpressionUI <- function(id) {
                   width = "300px",
                   size= "sm",
                   up = F,
-                  tooltip = tooltipOptions(title = "Press to Download")
+                  tooltip = tooltipOptions(title = "Download")
                 ),
               plotlyOutput(NS(id,"plot_MultiLines"),height = "80vh") %>% withLoader(type='html',loader = 'dnaspin')
             )

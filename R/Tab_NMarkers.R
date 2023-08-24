@@ -92,7 +92,7 @@ N_markersUI <- function(id) {
                                                           width = "300px",
                                                           size= "sm",
                                                           up = T,
-                                                          tooltip = tooltipOptions(title = "Press to Download")
+                                                          tooltip = tooltipOptions(title = "Download")
                                                         ),
                                                         plotOutput(NS(id,"plot_Violin")) %>% withSpinner()
                                            ),
@@ -109,7 +109,7 @@ N_markersUI <- function(id) {
                                                           width = "300px",
                                                           size= "sm",
                                                           up = T,
-                                                          tooltip = tooltipOptions(title = "Press to Download")
+                                                          tooltip = tooltipOptions(title = "Download")
                                                         ),
                                                         plotOutput(NS(id,"plot_SpikePlot")) %>% withSpinner()
                                            )

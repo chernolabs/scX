@@ -149,7 +149,7 @@ MultiPlotsUI <- function(id) {
                      width = "300px",
                      size= "sm",
                      up = F,
-                     tooltip = tooltipOptions(title = "Press to Download")
+                     tooltip = tooltipOptions(title = "Download")
                    ),
             plotOutput(NS(id,"plot_gene"),
                        height = "80vh") %>% withLoader(type='html',loader = 'dnaspin')
@@ -167,7 +167,7 @@ MultiPlotsUI <- function(id) {
                      width = "300px",
                      size= "sm",
                      up = F,
-                     tooltip = tooltipOptions(title = "Press to Download")
+                     tooltip = tooltipOptions(title = "Download")
                    ),
             plotOutput(NS(id,"plot_cluster"),
                       height = "80vh") %>% withLoader(type='html',loader = 'dnaspin')
@@ -185,7 +185,7 @@ MultiPlotsUI <- function(id) {
                      width = "300px",
                      size= "sm",
                      up = F,
-                     tooltip = tooltipOptions(title = "Press to Download")
+                     tooltip = tooltipOptions(title = "Download")
                    ),
                    plotOutput(NS(id,"plot_field"),
                               height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')

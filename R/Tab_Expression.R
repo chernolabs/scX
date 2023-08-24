@@ -178,7 +178,7 @@ ExpressionUI <- function(id) {
                                                             width = "300px",
                                                             size= "sm",
                                                             up = T,
-                                                            tooltip = tooltipOptions(title = "Press to Download")
+                                                            tooltip = tooltipOptions(title = "Download")
                                                           ),
                                                           plotOutput(NS(id,"plot_Violin")) %>% withSpinner()
                                              ),
@@ -195,7 +195,7 @@ ExpressionUI <- function(id) {
                                                             width = "300px",
                                                             size= "sm",
                                                             up = T,
-                                                            tooltip = tooltipOptions(title = "Press to Download")
+                                                            tooltip = tooltipOptions(title = "Download")
                                                           ),
                                                           plotOutput(NS(id,"plot_SpikePlot")) %>% withSpinner()
                                              )
@@ -220,7 +220,7 @@ ExpressionUI <- function(id) {
                   width = "300px",
                   size= "sm",
                   up = F,
-                  tooltip = tooltipOptions(title = "Press to Download")
+                  tooltip = tooltipOptions(title = "Download")
                 ),
               plotOutput(NS(id,"plot_heatmap"),height = "80vh") %>% withLoader(type='html',loader = 'dnaspin')
             )
@@ -240,7 +240,7 @@ ExpressionUI <- function(id) {
                   width = "300px",
                   size= "sm",
                   up = F,
-                  tooltip = tooltipOptions(title = "Press to Download")
+                  tooltip = tooltipOptions(title = "Download")
                 ),
               plotlyOutput(NS(id,"plot_DotPlot"),height = "80vh") %>% withLoader(type='html',loader = 'dnaspin')
             )
@@ -260,7 +260,7 @@ ExpressionUI <- function(id) {
                   width = "300px",
                   size= "sm",
                   up = F,
-                  tooltip = tooltipOptions(title = "Press to Download")
+                  tooltip = tooltipOptions(title = "Download")
                 ),
               plotOutput(NS(id,"plot_stackVln"),height = "80vh") %>% withLoader(type='html',loader = 'dnaspin')
             )

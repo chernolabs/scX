@@ -83,7 +83,7 @@ Clusters_UI <- function(id) {
                      width = "300px",
                      size= "sm",
                      up = F,
-                     tooltip = tooltipOptions(title = "Press to Download")
+                     tooltip = tooltipOptions(title = "Download")
                    ),
             plotOutput(NS(id,"plot_cluster"),
                      height = "80vh") %>% withSpinner()
@@ -101,7 +101,7 @@ Clusters_UI <- function(id) {
                      width = "300px",
                      size= "sm",
                      up = F,
-                     tooltip = tooltipOptions(title = "Press to Download")
+                     tooltip = tooltipOptions(title = "Download")
                    ),
             plotOutput(NS(id,"plot_matrix"),
                        height = "80vh") %>% withSpinner()

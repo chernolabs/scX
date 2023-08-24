@@ -145,7 +145,7 @@ Fields_UI <- function(id) {
                                    width = "300px",
                                    size= "sm",
                                    up = F,
-                                   tooltip = tooltipOptions(title = "Press to Download")
+                                   tooltip = tooltipOptions(title = "Download")
                                  ),
                                  plotlyOutput(NS(id,"plot_numeric"),height = "80vh") %>% withSpinner()
                              )
@@ -165,7 +165,7 @@ Fields_UI <- function(id) {
                                    width = "300px",
                                    size= "sm",
                                    up = F,
-                                   tooltip = tooltipOptions(title = "Press to Download")
+                                   tooltip = tooltipOptions(title = "Download")
                                  ),
                                  plotOutput(NS(id,"plot_heatmap"),height = "80vh") %>% withSpinner()
                              )
@@ -185,7 +185,7 @@ Fields_UI <- function(id) {
                                    width = "300px",
                                    size= "sm",
                                    up = F,
-                                   tooltip = tooltipOptions(title = "Press to Download")
+                                   tooltip = tooltipOptions(title = "Download")
                                  ),
                                  plotlyOutput(NS(id,"plot_DotPlot"),height = "80vh") %>% withSpinner()
                              )
@@ -205,7 +205,7 @@ Fields_UI <- function(id) {
                                    width = "300px",
                                    size= "sm",
                                    up = F,
-                                   tooltip = tooltipOptions(title = "Press to Download")
+                                   tooltip = tooltipOptions(title = "Download")
                                  ),
                                  plotOutput(NS(id,"plot_stackVln"),height = "80vh") %>% withSpinner()
                              )
@@ -593,7 +593,7 @@ Fields_Server <- function(id,sce) {
                 width = "300px",
                 size= "sm",
                 up = F,
-                tooltip = tooltipOptions(title = "Press to Download")
+                tooltip = tooltipOptions(title = "Download")
               ),
         plotOutput(NS(id,"plot_Matrix"),height = "80vh") %>% withSpinner()
           )

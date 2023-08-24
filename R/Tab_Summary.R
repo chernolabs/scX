@@ -54,7 +54,7 @@ QC_UI <- function(id) {
                                         width = "300px",
                                         size= "sm",
                                         up = F,
-                                        tooltip = tooltipOptions(title = "Press to Download")
+                                        tooltip = tooltipOptions(title = "Download")
                                       ),
                                       plotlyOutput(NS(id,"plot_scatter"),
                                                    height = "80vh") %>% withLoader(type='html',loader = 'dnaspin')
@@ -72,7 +72,7 @@ QC_UI <- function(id) {
                                         width = "300px",
                                         size= "sm",
                                         up = F,
-                                        tooltip = tooltipOptions(title = "Press to Download")
+                                        tooltip = tooltipOptions(title = "Download")
                                       ),
                                       plotlyOutput(NS(id,"plot_boxPlot"),
                                                    height = "80vh") %>% withLoader(type='html',loader = 'dnaspin')

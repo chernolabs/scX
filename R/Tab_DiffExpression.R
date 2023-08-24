@@ -30,11 +30,11 @@ VolcanoUI <- function(id) {
           fluidRow(
             column(5,
               style = "padding-left:12px; padding-right:5px;", align = "center",
-              numericInput(NS(id, "fc_thr"), "Fold Change", value = 2, step = 0.01)
+              numericInput(NS(id, "fc_thr"), "Fold Change", value = 2, step = 0.01, min = 1)
             ),
             column(5,
               style = "padding-left:5px; padding-right:5px;", align = "center",
-              numericInput(NS(id, "fdr_thr"), "False Discovery Rate", value = 0.05, step = 0.01)
+              numericInput(NS(id, "fdr_thr"), "False Discovery Rate", value = 0.05, step = 0.01, min = 0)
             ),
             column(2,
               style = "padding-left:5px; padding-right:12px;padding-top:25px;", align = "center",
@@ -93,7 +93,7 @@ VolcanoUI <- function(id) {
                   width = "300px",
                   size = "sm",
                   up = T,
-                  tooltip = tooltipOptions(title = "Press to Download")
+                  tooltip = tooltipOptions(title = "Download")
                 ),
                 plotOutput(NS(id, "plot_Violin"),
                   height = "80vh"
@@ -113,7 +113,7 @@ VolcanoUI <- function(id) {
                   width = "300px",
                   size = "sm",
                   up = T,
-                  tooltip = tooltipOptions(title = "Press to Download")
+                  tooltip = tooltipOptions(title = "Download")
                 ),
                 plotOutput(NS(id, "plot_SpikePlot"),
                   height = "80vh"
@@ -147,7 +147,7 @@ VolcanoUI <- function(id) {
                     column(4, style = "padding-left:3px; padding-right:12px; padding:16px", downloadButton(NS(id, "export_heatmap")))
                   ),
                   circle = FALSE, status = "primary", icon = icon("download"), width = "300px", size = "sm", up = T,
-                  tooltip = tooltipOptions(title = "Press to see Heatmap settings & Download")
+                  tooltip = tooltipOptions(title = "Settings and Download")
                 ),
                 plotOutput(NS(id, "plot_heatmap"),
                   height = "80vh"
@@ -178,7 +178,7 @@ VolcanoUI <- function(id) {
                   ),
                   circle = FALSE, status = "primary", icon = icon("download"), width = "300px",
                   size = "sm", up = T,
-                  tooltip = tooltipOptions(title = "Press to see DotPlot settings & Download")
+                  tooltip = tooltipOptions(title = "Settings and Download")
                 ),
                 plotlyOutput(NS(id, "plot_DotPlot"),
                   height = "80vh"
@@ -634,7 +634,7 @@ VolcanoServer <- function(id, sce, sce.markers) {
       g <- DotPlot()
       
       if(length(levels(g$data$Feature))>=50){
-        g + theme(axis.title.y = element_blank(),
+        g <- g + theme(axis.title.y = element_blank(),
                   axis.text.y = element_blank(),
                   axis.ticks.y = element_blank()
         )
