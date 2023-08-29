@@ -371,8 +371,9 @@ N_markersServer <- function(id,sce,point.size = 20) {
               col = OrderPartReact()$colPart[colData(sce)[,input$partitionType]][OrderPartReact()$ordPart],
               border = OrderPartReact()$colPart[colData(sce)[,input$partitionType]][OrderPartReact()$ordPart],
               ylab = "log(counts)", main = paste(gene_marker_selected(), 'expression'), names.arg = F) 
-      legend("bottom", legend = names(OrderPartReact()$colPart), col = OrderPartReact()$colPart,
-             pch=19, ncol=6, xpd=T, inset=c(0,-0.25))
+      colleg <- legend_col(names(OrderPartReact()$colPart), max(m))
+	  legend(max(m)/2, -0.05, legend = names(OrderPartReact()$colPart), col = OrderPartReact()$colPart,
+             pch=19, xpd=T, xjust = 0.5, cex = 0.9, ncol=colleg$ncol, text.width = colleg$colwidth)
       lines(x = m,
             tapply(assay(sce,"logcounts")[gene_marker_selected(),],
                    INDEX = colData(sce)[,input$partitionType],

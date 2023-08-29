@@ -27,6 +27,34 @@ Col.and.Order <- function(partition,sce){
               ordPart =ord))
 }
 
+# Legend columns number and width for SpikePlot horizontal legend ----
+#' @param names Vector of legend names
+#' @param L Numeric, width of plot (i.e. xlim or maximum x value)
+#' @keywords internal
+#' @noRd
+legend_col <- function(names, L){
+  # `legend` allows ncol parameter (not nrow) but fills spaces by rows (each row in col1, then col2, etc)
+  # hence, fixing ncol might result in empty columns. this function optimizes ncol to avoid this.
+  N <- length(names)
+  nameL <- strwidth(names)
+  
+  nrows <- 1
+  ncols <- N
+  rem <- 0
+  textwidth <- nameL
+  totalwidth <- sum(textwidth)
+  while(totalwidth>L && nrows<N){ #if the sum of column widths is larger than plot width
+    nrows <- nrows+1 # a rows is added
+    rem <- N%%nrows
+    ncols <- ifelse(rem==0, N%/%nrows, N%/%nrows+1) # no. of columns depends on whether there's a remainder
+    width_mat <- matrix(c(nameL, rep(0, ncols*nrows-N)), ncol=ncols, nrow=nrows) # complete matrix with 0s if necessary
+    textwidth <- apply(width_mat, 2, max) #width for each column
+    totalwidth <- sum(textwidth)
+  }
+  return(list(ncol=ncols, colwidth=textwidth))
+}
+
+
 # CoExpression Tab ----
 # CoExpression Palette
 #' @keywords internal

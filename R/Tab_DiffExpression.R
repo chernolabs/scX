@@ -468,10 +468,11 @@ VolcanoServer <- function(id, sce, sce.markers) {
           lty = 2, col = "black"
         )
       }
-      legend("bottom",
+	  colleg <- legend_col(names(OrderPartReact()$colPart), max(m))
+      legend(max(m)/2, -0.05,
         legend = names(OrderPartReact()$colPart), col = OrderPartReact()$colPart,
-        pch = 19, ncol = 6, xpd = T, inset = c(0, -0.10)
-      )
+        pch=19, xpd=T, xjust = 0.5, cex = 0.9, ncol=colleg$ncol, text.width = colleg$colwidth)
+      
       par(mfrow = c(1, 1))
       graph <- recordPlot()
       graph
