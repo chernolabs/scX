@@ -131,12 +131,14 @@ createSCEobject <- function(xx,
   ttoFactors <- names(tfs)[tfs]
   if(sum(!tfs)>0) warning("Can't find ",paste0(names(tfs)[!tfs],collapse = ' & ')," in metadata or they have only one level")
   if(length(ttoFactors) == 0){
-    warning("Any factor passed the controls, add the quick cluster as toFactors")
+    warning("No factor passed the controls, a quick clusterization will be computed.")
     ttoFactors <- "scx.clust"
+  }else{
+	colData(xx.sce)[ttoFactors] <- lapply(colData(xx.sce)[ttoFactors], as.factor) # in case a partition is numeric
   }
   
   #Transform all the character columns to factor to be able to be selected in the shinyApp. 
-  cols <- sapply(colData(xx.sce), function(x){(is.character(x) | is.factor(x)) & length(unique(x)) < 30})
+  cols <- sapply(colData(xx.sce), function(x){(is.character(x) | is.factor(x)) & length(unique(x)) <= 30})
   if(any(cols)){
     colData(xx.sce)[,cols] <- lapply(colData(xx.sce)[,cols,drop=F], function(x){
         x <- as.factor(x)
