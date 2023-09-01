@@ -11,10 +11,10 @@
 #' @param assay.name.normalization Assay name for normalized matrix if present in SCE. If not present,
 #' 		it computes `logcounts` (default).
 #' @param metadata Optional dataframe with cell metadata.
-#' @param toFactors Optional metadata column names (or `colData`) to use as factors. If `NULL` (default),
+#' @param partitionVars Optional metadata column names (or `colData`) to use as factors. If `NULL` (default),
 #'		a quick clusterization will be computed.
-#' @param toKeep Additional metadata column names (or `colData`) to use only for coloring in plots.
-#'    If `NULL` (default), only `toFactors` columns will be available for coloring plots.
+#' @param metadataVars Additional metadata column names (or `colData`) to use only for coloring in plots.
+#'    If `NULL` (default), only `partitionVars` columns will be available for coloring plots.
 #' @param chosen.hvg Optional list of Highly Variable Genes.
 #' @param nHVGs Number of Highly Variable Genes to use if `chosen.hvg=NULL`. Defaults to 3000.
 #' @param nPCs Number of Principal Components to use in PCA. Defaults to 50.
@@ -23,8 +23,8 @@
 #'		TSNE2D). Defaults to `TRUE`.
 #' @param paramFindMarkers List of parameters to pass to `scran::findMarkers(...)` to compute marker 
 #'		genes for clusters. Defaults to `list(test.type="wilcox", pval.type="all", direction="any")`.
-#' @param calcAllToFactors Logical indicating whether to force the computation of markers and DEGs from
-#'		the entire list of `toFactors`.
+#' @param calcAllPartitions Logical indicating whether to force the computation of markers and DEGs from
+#'		the entire list of `partitionVars`.
 #' @param cells2keep List of names for cells to keep when subsampling data. NOTE: Subsampling is only 
 #'		used in large datasets for visual purposes, and it does not affect computations.
 #' @param descriptionText Optional short description of the object being analized. This can help when 
@@ -35,14 +35,14 @@ createSCEobject <- function(xx,
                             assay.name.raw="counts",
                             assay.name.normalization="logcounts",
                             metadata=NULL,
-                            toFactors=NULL,
-                            toKeep=NULL,
+                            partitionVars=NULL,
+                            metadataVars=NULL,
                             chosen.hvg=NULL,
                             nHVGs=3000,
                             nPCs=50,
                             calcRedDim=TRUE,
                             paramFindMarkers=list(test.type="wilcox", pval.type="all", direction="any"),
-                            calcAllToFactors=FALSE,
+                            calcAllPartitions=FALSE,
                             cells2keep=NULL,
                             descriptionText=NULL,
                             verbose=TRUE){
@@ -53,17 +53,17 @@ createSCEobject <- function(xx,
     stop('Missing row names or column names.')
   }
   #Check for repeated partitions
-  toFactors <- unique(toFactors)
+  partitionVars <- unique(partitionVars)
   
-  if(is.null(toFactors)){
-    warning('No toFactors specified, a quick clusterization will be computed.')
-    toFactors <- "scx.clust"
+  if(is.null(partitionVars)){
+    warning('No partitionVars specified, a quick clusterization will be computed.')
+    partitionVars <- "scx.clust"
   }
   #If it isn't a Seurat or SCE object, and metadata is null (metadata could be inside the object)
-  #The toFactors become the default.
+  #The partitionVars become the default.
   if(is.null(metadata) & class(xx)[1]!="Seurat" & class(xx)[1]!="SingleCellExperiment"){
     warning('No metadata specified, a quick clusterization will be computed.')
-    toFactors <- "scx.clust"
+    partitionVars <- "scx.clust"
   }
   if(verbose) cat('Creating SCE object...')
   # Seurat to sce ----
@@ -74,8 +74,8 @@ createSCEobject <- function(xx,
     assay.name.normalization <- "logcounts"
     
     xx.sce <- Seurat::as.SingleCellExperiment(xx) 
-    if((all(toFactors!="scx.clust")) & (!all(toFactors %in% names(colData(xx.sce))))){
-      warning('at least one factor is not present in metadata')
+    if((all(partitionVars!="scx.clust")) & (!all(partitionVars %in% names(colData(xx.sce))))){
+      warning('at least one partition is not present in metadata')
     }
     if(nrow(xx@assays$RNA@meta.features)>0){
       rowData(xx.sce) <- xx@assays$RNA@meta.features
@@ -92,8 +92,8 @@ createSCEobject <- function(xx,
     if(!is.null(metadata)){
       if(all(colnames(xx.sce) %in% rownames(metadata))){
         colData(xx.sce) <- cbind(colData(xx.sce), metadata[colnames(xx.sce),,drop=F])
-        if((!("scx.clust" %in% toFactors)) & (!all(toFactors %in% names(colData(xx.sce))))){
-          warning('at least one factor is not present in metadata')
+        if((!("scx.clust" %in% partitionVars)) & (!all(partitionVars %in% names(colData(xx.sce))))){
+          warning('at least one partition is not present in metadata')
         }
       } else {
         stop('Some cells in metadata are not present in colnames matrix.\n')
@@ -106,11 +106,11 @@ createSCEobject <- function(xx,
     xx.sce <- xx
     if(!is.null(metadata)){
       colData(xx.sce) <- cbind(colData(xx.sce),metadata)
-      if((toFactors!="scx.clust") & (!all(toFactors %in% names(colData(xx.sce))))){
-        warning('at least one factor is not present in metadata')
+      if((partitionVars!="scx.clust") & (!all(partitionVars %in% names(colData(xx.sce))))){
+        warning('at least one partition is not present in metadata')
       }
     } 
-    # if(!sum(toFactors %in% names(colData(xx.sce)))==length(toFactors)){
+    # if(!sum(partitionVars %in% names(colData(xx.sce)))==length(partitionVars)){
     #   stop('at least one factor is not present in metadata')
     # }
   } else {
@@ -119,19 +119,19 @@ createSCEobject <- function(xx,
   if(verbose) cat(' Finished\n')
   
   #to factors ----
-  if(verbose) cat('Changing factors from toFactors...')
+  if(verbose) cat('Changing factors from partitionVars...')
   #Check the factors that are in the colData.
-  tfs <- setNames(nm=toFactors,object = toFactors %in% names(colData(xx.sce)))
+  tfs <- setNames(nm=partitionVars,object = partitionVars %in% names(colData(xx.sce)))
   #Check if columns have more than one level.
   if(sum(tfs) > 0){
-    vld <- sapply(colData(xx.sce)[,toFactors[tfs],drop=F],function(x){length(unique(x))>1})   
+    vld <- sapply(colData(xx.sce)[,partitionVars[tfs],drop=F],function(x){length(unique(x))>1})   
     tfs[names(vld)] <-  tfs[names(vld)] & vld
   }
   
   ttoFactors <- names(tfs)[tfs]
   if(sum(!tfs)>0) warning("Can't find ",paste0(names(tfs)[!tfs],collapse = ' & ')," in metadata or they have only one level")
   if(length(ttoFactors) == 0){
-    warning("No factor passed the controls, a quick clusterization will be computed.")
+    warning("No partition passed the controls, a quick clusterization will be computed.")
     ttoFactors <- "scx.clust"
   }else{
 	colData(xx.sce)[ttoFactors] <- lapply(colData(xx.sce)[ttoFactors], as.factor) # in case a partition is numeric
@@ -149,12 +149,12 @@ createSCEobject <- function(xx,
   if(verbose) cat(' Finished\n')
     
   # Checking number of levels of ttoFactors for calculations ----
-  if(!calcAllToFactors){
+  if(!calcAllPartitions){
     allToFactors <- sapply(ttoFactors, function(x){length(unique(colData(xx.sce)[,x]))})>30
     if(all(allToFactors)){
-      stop(paste0(paste0(names(allToFactors)[allToFactors], collapse =  ' & ')," has more than 30 levels. If you want to compute it anyway set 'calcAllToFactors' as TRUE"))
+      stop(paste0(paste0(names(allToFactors)[allToFactors], collapse =  ' & ')," has more than 30 levels. If you want to compute it anyway set 'calcAllPartitions' as TRUE"))
     } else if(any(allToFactors)) {
-      warning(paste0(paste0(names(allToFactors)[allToFactors], collapse =  ' & ')," has more than 30 levels. They wont be used to compute markers and DEGs. If you want to compute it anyway set 'calcAllToFactors' as TRUE"))
+      warning(paste0(paste0(names(allToFactors)[allToFactors], collapse =  ' & ')," has more than 30 levels. They wont be used to compute markers and DEGs. If you want to compute it anyway set 'calcAllPartitions' as TRUE"))
       ttoFactors <- ttoFactors[!allToFactors]
     }
   }
@@ -197,7 +197,7 @@ createSCEobject <- function(xx,
       if(verbose) cat(' Finished\n')
     }
     # xx.sce <- scuttle::pooledSizeFactors(xx.sce,cluster=clust,min.mean=0.1, assay.type = assay.name.raw)
-  } else if ( "scx.clust" %in% toFactors ) {
+  } else if ( "scx.clust" %in% partitionVars ) {
       if(verbose) cat('Computing clusters...')
       clust <- scran::quickCluster(xx.sce, assay.type = assay.name.normalization)
       xx.sce$scx.clust <- clust
@@ -268,11 +268,11 @@ createSCEobject <- function(xx,
 
   # Subsetting SCE object ----
   # Keep only colData names that will be use for coloring plots
-  if(!is.null(toKeep)){
+  if(!is.null(metadataVars)){
     coldatanames <- names(colData(xx.sce))
-    if(!all(toKeep%in%coldatanames)) warning(" Can't find '",paste0(toKeep[!toKeep%in%coldatanames],collapse = ' & '),"' in coldata.\n '",paste0(toKeep[toKeep%in%coldatanames],collapse = ' & '), "' will be available for coloring plots in the app.")
-    if(all(!toKeep%in%coldatanames)) warning(" Can't find 'toKeep' in coldata.\n Only 'toFactors' will be available for coloring plots in the app.")
-    coldatanames <- coldatanames[coldatanames%in%c("nCounts", "nFeatures", toFactors, toKeep)]
+    if(!all(metadataVars%in%coldatanames)) warning(" Can't find '",paste0(metadataVars[!metadataVars%in%coldatanames],collapse = ' & '),"' in coldata.\n '",paste0(metadataVars[metadataVars%in%coldatanames],collapse = ' & '), "' will be available for coloring plots in the app.")
+    if(all(!metadataVars%in%coldatanames)) warning(" Can't find 'metadataVars' in coldata.\n Only 'partitionVars' will be available for coloring plots in the app.")
+    coldatanames <- coldatanames[coldatanames%in%c("nCounts", "nFeatures", partitionVars, metadataVars)]
     colData(xx.sce) <- colData(xx.sce)[,coldatanames]
     # transform to character to factors to be able to plot in shiny app
     colsK <- sapply(colData(xx.sce), function(x){(is.character(x))})
