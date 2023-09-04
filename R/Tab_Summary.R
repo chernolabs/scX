@@ -25,7 +25,7 @@ QC_UI <- function(id) {
           pickerInput(
             inputId = NS(id,"partitionType"),
             label = "Partition", 
-            choices = NULL
+            choices = "None"
           ),
           radioGroupButtons(inputId = NS(id,"scatter_box"),
                             label = "",
