@@ -270,7 +270,7 @@ COExpServer <- function(id,sce,point.size=20) {
        apply(table(CoExpressionVtor(),colData(sce)[,input$partitionType]),2,function(x){(x/sum(x))}) %>% 
          .[nrow(.):1,] %>% #Reverse the matrix to make it similar to Table 
          t %>% 
-         ggcorrplot::ggcorrplot(lab=T, as.is=T) +
+         ggcorrplot::ggcorrplot(lab=T) +
          scale_fill_gradient2(midpoint = 0.5,low="white",high ="#E46726",mid="#ffa18c") + labs(fill="Proportion")
      })
      
