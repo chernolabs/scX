@@ -9,13 +9,15 @@ COExpUI <- function(id) {
       column(3,
         box(title = htmltools::span(icon("gears"), " Settings"),
 			width = NULL, status = "primary",solidHeader = T,collapsible = F,
-			selectizeInput(NS(id,"gen_coexp"),
-				"Genes",
-				choices = NULL, 
-				options = list(maxItems = 2,
-					maxOptions = 20,
-					placeholder = 'Select two genes for co-expression'),
-				multiple=T),
+			conditionalPanel("!input.button",ns=NS(id),
+			  selectizeInput(NS(id,"gen_coexp"),
+			  	"Genes",
+			  	choices = NULL, 
+			  	options = list(maxItems = 2,
+			  		maxOptions = 20,
+			  		placeholder = 'Select two genes for co-expression'),
+			  	multiple=T)
+			  ),
           fluidRow(
             column(6,style='padding-left:12px; padding-right:3px;', align="center",
               pickerInput(NS(id,"DimType"), "  # dims", choices = NULL,width = NULL)

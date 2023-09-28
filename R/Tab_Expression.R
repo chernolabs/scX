@@ -9,6 +9,7 @@ ExpressionUI <- function(id) {
       column(3,
         box(title = htmltools::span(icon("gears"), " Settings"),
 			width = NULL, status = "primary",solidHeader = T,collapsible = F,
+			conditionalPanel("!input.button || input.scatter_heatmap != 'scatter'",ns=NS(id),
 			fluidRow( # gene list upload off/on
 				column(12,style='padding-left:12px; padding-right:12px;',align="center",
 					switchInput(NS(id,"GL_T"), 
@@ -58,6 +59,7 @@ ExpressionUI <- function(id) {
 						)
 					)
 				)
+			)
 			),
           conditionalPanel("input.scatter_heatmap == 'scatter'",ns=NS(id),
             fluidRow(
