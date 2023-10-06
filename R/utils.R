@@ -127,3 +127,23 @@ COexp_Vtor <- function(sce,genes){
                          system.file('www',
                                      package = 'scXplorer'))
 }
+
+#' @keywords internal
+#' @noRd
+toWebGL <- function(p) {
+	# 06/10/2023 modified from:
+	# https://github.com/zeehio/plotly.R/commit/d9652a6f55d6969037a18983dd10d59a8b225886#diff-c0e4d1c45c2e1d458c837daac8876c3071b5c4794c29fcba01e3b250a8932df8
+	# check for plotly updates / merges
+    if (ggplot2::is.ggplot(p)) {
+        p <- plotly::plotly_build(p)
+	}
+	traces_without_hoveron <- plotly:::glTypes()
+	trace_idx <- vapply(
+		p$x$data,
+		function(trace) trace$type %in% traces_without_hoveron,
+		logical(1)
+	)
+	p <- style(p, hoveron = NULL, traces = which(trace_idx))
+    p$x$.plotlyWebGl <- TRUE
+    p
+}
