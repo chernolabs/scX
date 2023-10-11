@@ -31,6 +31,13 @@
 </table>
 
 ## Install
+
+scXplorer requires certain packages to be installed. If the user does not have these packages installed, they can execute the following code: 
+
+```R
+BiocManager::install(c("SingleCellExperiment","scran","scatter","ComplexHeatmap")
+```
+
 scXplorer can be installed from Github as follows:
 
 ```R
@@ -41,15 +48,25 @@ devtools::install_github("tvegawaichman/scXplorer")
 
 To show the different capabilities of scXplorer, we will use single cell data related to the oligodendrocyte developmental lineage ([Marques et al. 2016](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5221728/)). In this dataset we have cells from 12 regions of the central nervous system of juvenile and adult mice and 10 distinct cell populations have been identified. This package includes a modified version of this dataset in which the original cells have been subsampled and a pseudotime has been calculated to demonstrate how scXplorer can represent numerical attributes.
 
+In this example we will use the 'inferred_cell_type' covariate to explore differential expression patterns (partitionVars parameter). The rest of the metadata will be used for visualization purposes (metadataVars parameter). While partitionVars should be categorical variables, metadataVars can be discrete or continuous covariates
+
 ```R
 library(scXplorer)
 
 #SCE example data
 sce
+
+colData(sce)[1:3,]
+# DataFrame with 3 rows and 8 columns
+#                                   title     source_name         age inferred_cell_type                    sex      strain   treatment pseudotime
+#                             <character>     <character> <character>        <character>            <character> <character> <character>  <numeric>
+#   C1-1771017-030-C09 C1-1771017-030-C09       cortex S1         p22                OPC pooled male and female  PDGFRa-GFP          No    23.1662
+#   C1-1771017-028-G05 C1-1771017-028-G05 hippocampus CA1         p22                OPC                      F  PDGFRa-GFP          No    21.7566
+#   C1-1771052-132-B02 C1-1771052-132-B02 corpus callosum         p69                OPC                      M         CD1          No    23.3207
 ```
 
 <p align="justify">  
-The scXplorer app can be created and launched with only two functions. createSCEobject() creates the single cell experiment object that will be used within the application. This function performs a set of preprocessing steps required for the various scXplorer functions. Among these steps we can mention:
+The scXplorer app can be created and launched with only two functions. **_createSCEobject()_** creates the single cell experiment object that will be used within the application. This function performs a set of preprocessing steps required for the various scXplorer functions. Among these steps we can mention:
  
 1. Calculation of quality control metrics. 
 
@@ -65,7 +82,7 @@ If the input dataset already has these characteristics, some of these steps can 
 
 On the other hand, different options for the calculation of the marker genes of the different clusters can be determined. This can be done within the parameter "paramFindMarkers" which expects a list of parameters taken by scran's _FindMarkers()_ function. 
 
-Finally with the launch_scXplorer() function the application is deployed.
+Finally with the **_launch_scXplorer()_** function the application is deployed.
 
 </p>
 
