@@ -89,7 +89,7 @@ In the summary section, you can explore through graphical visualization the cove
 
 <details><summary> <h5> View more </h5> </summary><blockquote>
 
- <img src="/images/presentation_t2.gif" width="100%" />
+ <img src="/images/summary.gif" width="100%" />
 </blockquote></details>
 
 ##  Markers
