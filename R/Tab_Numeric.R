@@ -214,7 +214,7 @@ Fields_UI <- function(id) {
                                  plotOutput(NS(id,"plot_stackVln"),height = "80vh") %>% withSpinner()
                              )
                     ),
-                    tabPanel("Matrix", value= "matrix",
+                    tabPanel("Correlation", value= "matrix",
                                  uiOutput(NS(id,"CorheatMapOutput"))
                     )
              )

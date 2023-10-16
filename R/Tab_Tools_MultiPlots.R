@@ -104,12 +104,12 @@ MultiPlotsUI <- function(id) {
                                 size = "xs",
                                 icon = icon("play"))
               )
-            ),
-            hr(style = "border-top: 1px solid #0073b7;"),
-            fluidRow(align="center",
-                     div(style = "display:inline-block;color:#0073b7", icon("circle-info"),
-                         title = "To color all clusters simultaneously,\ngo to Cluster Markers tab. The plot toolbar\nincludes the option to download as a png.")
-            )
+            )#,
+            # hr(style = "border-top: 1px solid #0073b7;"),
+            # fluidRow(align="center",
+                     # div(style = "display:inline-block;color:#0073b7", icon("circle-info"),
+                         # title = "To color all clusters simultaneously,\ngo to Cluster Markers tab. The plot toolbar\nincludes the option to download as a png.")
+            # )
           ),
           conditionalPanel("input.gene_cluster == 'field'",ns=NS(id),
             fluidRow(
@@ -155,7 +155,7 @@ MultiPlotsUI <- function(id) {
             plotOutput(NS(id,"plot_gene"),
                        height = "80vh") %>% withLoader(type='html',loader = 'dnaspin')
           ),
-          tabPanel("Partition",value = "cluster",
+          tabPanel("Categories",value = "cluster",
                    dropdownButton(
 					fluidRow(
 						column(7, style='padding-left:6px; padding-right:3px;',
@@ -174,7 +174,7 @@ MultiPlotsUI <- function(id) {
             plotOutput(NS(id,"plot_cluster"),
                       height = "80vh") %>% withLoader(type='html',loader = 'dnaspin')
           ),
-          tabPanel("Field",value = "field",
+          tabPanel("Fields",value = "field",
                    dropdownButton(
 					fluidRow(
 						column(7, style='padding-left:6px; padding-right:3px;',
