@@ -184,9 +184,9 @@ VolcanoUI <- function(id) {
                   size = "sm", up = T,
                   tooltip = tooltipOptions(title = "Settings and Download")
                 ),
-                plotlyOutput(NS(id, "plot_DotPlot"),
-                  height = "80vh"
-                ) %>% withSpinner()
+                div(style='max-height:80vh; overflow-y: scroll; position: relative',plotlyOutput(NS(id, "plot_DotPlot")#,
+                  #height = "80vh"
+                ) %>% withSpinner())
               )
             )
             #
@@ -645,7 +645,7 @@ VolcanoServer <- function(id, sce, sce.markers) {
         )
       }
       g %>% 
-        ggplotly() %>% 
+        ggplotly(height = 500+20*length(Genes())) %>% 
         config(modeBarButtonsToRemove = c("select2d", "lasso2d", "hoverCompareCartesian"))
     })
     ### Downloads -----
