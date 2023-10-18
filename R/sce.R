@@ -6,7 +6,7 @@
 #' Pseudotime was calculated with \href{https://www.bioconductor.org/packages/release/bioc/html/slingshot.html}{slingshot}. 
 #'
 #' @format ## `sce`
-#' A Single Cell Experiment object with 4,681 cells and 23,556 genes:
+#' A Single Cell Experiment object with 2618 cells and 8691 genes:
 #' \describe{
 #'   \item{assays}{counts}
 #'   \item{colData}{title source_name age inferred_cell_type sex strain treatment pseudotime}
