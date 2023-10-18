@@ -104,11 +104,11 @@ scXplorer displays a summary of the main descriptive information of the dataset:
 In the summary section, you can explore through graphical visualization the coventional quality control metrics: this is the relationship between the number of features and the count numbers. In this plot you can distinguish the cells coming from the different partitions of the dataset.
 </p>
 
-<details><summary> <h5> View more </h5> </summary><blockquote>
+<details><summary> <h5> View more </h5> </summary>
 
  <img src="/images/summary.gif" width="100%" />
-
-</blockquote></details>
+ 
+</details>
 
 ##  Markers
 
@@ -116,7 +116,7 @@ In the summary section, you can explore through graphical visualization the cove
 This section allows to find and interact with the markers of each different clusterization. In "Markers" section there are two types of analysis. On the one hand, in "Cluster markers" clicking on a cell displays a table with the marker genes of the cluster to which that cell belongs. On the other hand, in "Find new markers" you can select a group of cells in the embedding and scXplorer will calculate their marker genes.
 </p>
 
-<details><summary> <h5> View more </h5> </summary><blockquote>
+<details><summary> <h5> View more </h5> </summary>
  
 ###  Clusters markers 
 
@@ -140,7 +140,7 @@ As in the previous section, if you click on one of the markers you can see its e
 
 
 <img src="/images/new_markers.gif" width="100%" />
-</blockquote></details>
+</details>
 
 
 ##  Gene Expression
@@ -149,7 +149,7 @@ As in the previous section, if you click on one of the markers you can see its e
 In "Gene Expression" you can explore different aspects of the expression of one or more genes of interest. Determine how expression changes according to different categorical and continuous variables, as well as analyse co-detection between pairs of genes.
 </p>
 
-<details><summary> <h5> View more </h5> </summary><blockquote>
+<details><summary> <h5> View more </h5> </summary>
  
 ### Categories
 
@@ -183,7 +183,7 @@ In Co-expression section you can analyse the co-appearance of pairs of genes, de
 
 <img src="/images/coexpression.gif" width="100%" />
 
-</blockquote></details>
+</details>
 
 ## Differential expression
 <p align="justify"> 
@@ -192,16 +192,17 @@ In this section, the differentially expressed genes between two clusters can be 
 The main figure in this section is a VolcanoPlot in which genes that are down and up expressed are coloured in blue and red, respectively. On the other hand, you can also display ViolinPlots, Spikeplots, Heatmaps and Dotplots of the differentially expressed genes.
 </p>
 
-<details><summary> <h5> View more </h5> </summary><blockquote>
+<details><summary> <h5> View more </h5> </summary>
 
  <img src="/images/differential_expression.gif" width="100%" />
-</blockquote></details>
+
+</details>
 
 ##  Exploratory Data Analysis
 
 In **Exploratory Data Analysis** section you will be able to understand the relationship between different features contained as metadata in your SCE object.
 
-<details><summary> <h5> View more </h5> </summary><blockquote>
+<details><summary> <h5> View more </h5> </summary>
  
 ### Categories
 
@@ -220,13 +221,13 @@ In a similar way to the previous subsection, in "Field" you can explore how the 
 <img src="/images/fields.gif" width="100%" />
 
 
-</blockquote></details>
+</details>
 
 ##  Visual Tools
 
 In the "Visual Tools" section, different plots can be obtained to explore in more depth different aspects of the single-cell experiment data, such as how the expression of a given set of genes varies at different levels of a feature or to recognise a set of cells of interest within an embedding.
 
-<details><summary> <h5> View more </h5> </summary><blockquote>
+<details><summary> <h5> View more </h5> </summary>
 
 ### Violin by Partition 
 
@@ -241,7 +242,7 @@ By selecting or uploading a set of genes of interest, a set of Violin plots can 
 <img src="/images/multiplots.gif" width="100%" />
 
 
-</blockquote></details>
+</details>
 
 ## FAQs
 
