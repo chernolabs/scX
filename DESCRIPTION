@@ -48,5 +48,8 @@ Imports:
     viridis
 Suggests: 
     doParallel,
-	Seurat
+    knitr,
+    rmarkdown,
+    Seurat
 LazyData: true
+VignetteBuilder: knitr

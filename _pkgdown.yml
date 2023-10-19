@@ -1,0 +1,28 @@
+url: https://tvegawaichman.github.io/scXplorer/
+
+ development:
+   mode: auto
+
+template:
+  bootstrap: 5
+  params:
+    bootswatch: superhero
+  # includes:
+  #   in-header: |
+  #     <script defer data-domain="indrajeetpatil.github.io/ggstatsplot" src="https://plausible.io/js/plausible.js"></script>
+  bslib:
+    base_font: { google: "Roboto" }
+    heading_font: { google: "Roboto" }
+    code_font: { google: "JetBrains Mono" }
+
+articles:
+  - title: Sections
+    navbar: Sections
+    desc: Details about sections
+    contents:
+      - articles/Summary
+      - articles/Markers
+      - articles/Gene_Expression
+      - articles/Differential_Expression
+      - articles/Exploratory_Data_Analysis
+      - articles/Visual_Tools

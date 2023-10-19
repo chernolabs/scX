@@ -1,0 +1,59 @@
+---
+title: "Gene Expression"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE,
+  fig.path = "man/figures/",
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+<p align="justify">  
+In "Gene Expression" you can explore different aspects of the expression of one or more genes of interest. Determine how expression changes according to different categorical and continuous variables, as well as analyse co-detection between pairs of genes.
+</p>
+ 
+### Categories
+
+<p align="justify"> 
+In Settings you can select one or more genes or upload a file with a list of genes. The average expression of the genes of interest can be viewed in the different embeddings available, with the possibility to colour according to the different SCE partitions to compare gene expression with different cell types or conditions present in the metadata. 
+
+A wide variety of plots are available to analyse the expression of the genes of interest in the different categories. Heatmaps allow normalisation of expression by gene, clustering by row and column and grouping of cells by condition. Similarly, dotplots allow normalisation of expression and group genes with similar expression pattern.
+</p>
+
+
+```{r}
+knitr::include_graphics("figures/categories.gif")
+
+```
+
+
+## Fields
+
+<p align="justify"> 
+Fields allows you to analyse the expression of a set of genes in relation to numeric variables present in your dataset, such as the number of counts or pseudotime value, if present in the metadata of the sce object. Below the embedding, a line plot of the average expression of the genes of interest as a function of the chosen variables and a spikeplot are displayed. Furthermore, you can find heatmaps sorted by the chosen numerical variable that can be divided according to some categorical variable, and multiline plots showing the comparison of the expression profile of the genes of interest along the field.
+</p>
+
+
+```{r}
+knitr::include_graphics("figures/ge_fields.gif")
+
+```
+
+
+## Co-expression
+
+<p align="justify"> 
+In Co-expression section you can analyse the co-appearance of pairs of genes, determine the number and percentage of cells in which each gene is expressed separately and together. You can also view this information graphically in the embedding. In addition, the co-expression of these genes in the different conditions of any of the partitions in the dataset can be analysed by a co-detection matrix.
+</p>
+
+```{r}
+knitr::include_graphics("figures/coexpression.gif")
+
+```
+
+
+
+

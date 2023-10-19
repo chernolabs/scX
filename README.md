@@ -1,7 +1,7 @@
 <h1 align="center">  scXplorer package </h1>
 
 <div align="justify" >
-<img align="left" width="25%" src="inst/www/scXplorer-03.png" title="@irimiodo"> scXplorer is an R package that enables interactive visualization and analysis of single-cell experiment data by creating a Shiny-based application. With scXplorer all aspects of single-cell data can be explored using a large number of different types of plots, such as scatter plots, heatmaps, boxplots, dot and violins plots, etc. All the information associated with cells can be displayed in a customized way: both numerical variables such as logcounts or pseudotime values, and categorical variables such as cell types or sample. One of the main hallmarks of scXplorer is the possibility to plot the main embeddings used for single cell - UMAP, tSNE and PCA - both in 2D and 3D in an interactive way. Thus, embeddings can be rotated, translated and zoomed. But scXplorer is not only a visualization tool, it also allows you to perform different types of analysis on single cell data, such as finding the markers of a cell type or determining the differential genes between two different conditions.
+<img align="left" width="25%" src="man/figures/scXplorer-03.png" title="@irimiodo"> scXplorer is an R package that enables interactive visualization and analysis of single-cell experiment data by creating a Shiny-based application. With scXplorer all aspects of single-cell data can be explored using a large number of different types of plots, such as scatter plots, heatmaps, boxplots, dot and violins plots, etc. All the information associated with cells can be displayed in a customized way: both numerical variables such as logcounts or pseudotime values, and categorical variables such as cell types or sample. One of the main hallmarks of scXplorer is the possibility to plot the main embeddings used for single cell - UMAP, tSNE and PCA - both in 2D and 3D in an interactive way. Thus, embeddings can be rotated, translated and zoomed. But scXplorer is not only a visualization tool, it also allows you to perform different types of analysis on single cell data, such as finding the markers of a cell type or determining the differential genes between two different conditions.
 </div>
 
 ---
@@ -24,7 +24,7 @@
 
 <td width="66.66%" style="border:0px; width:66.66%">
  
-<img src="/images/presentation_t2.gif" width="100%" />
+<img src="man/figures/presentation_t2.gif" width="100%" />
 
 </td>
 </tr>
@@ -106,7 +106,7 @@ In the summary section, you can explore through graphical visualization the cove
 
 <details><summary> <h5> View more </h5> </summary>
 
- <img src="/images/summary.gif" width="100%" />
+ <img src="man/figures/summary.gif" width="100%" />
  
 </details>
 
@@ -127,7 +127,7 @@ By clicking on a marker in the table you can see its expression profile across t
 </p>
 
 
-<img src="/images/cluster_markers.gif" width="100%" />
+<img src="man/figures/cluster_markers.gif" width="100%" />
 
 
 ### Find new markers 
@@ -139,7 +139,7 @@ As in the previous section, if you click on one of the markers you can see its e
 </p>
 
 
-<img src="/images/new_markers.gif" width="100%" />
+<img src="man/figures/new_markers.gif" width="100%" />
 </details>
 
 
@@ -160,7 +160,7 @@ A wide variety of plots are available to analyse the expression of the genes of 
 </p>
 
 
-<img src="/images/categories.gif" width="100%" />
+<img src="man/figures/categories.gif" width="100%" />
 
 
 ### Fields
@@ -170,7 +170,7 @@ Fields allows you to analyse the expression of a set of genes in relation to num
 </p>
 
 
-<img src="/images/ge_fields.gif" width="100%" />
+<img src="man/figures/ge_fields.gif" width="100%" />
 
 
 
@@ -181,7 +181,7 @@ In Co-expression section you can analyse the co-appearance of pairs of genes, de
 </p>
 
 
-<img src="/images/coexpression.gif" width="100%" />
+<img src="man/figures/coexpression.gif" width="100%" />
 
 </details>
 
@@ -194,7 +194,7 @@ The main figure in this section is a VolcanoPlot in which genes that are down an
 
 <details><summary> <h5> View more </h5> </summary>
 
- <img src="/images/differential_expression.gif" width="100%" />
+ <img src="man/figures/differential_expression.gif" width="100%" />
 
 </details>
 
@@ -210,7 +210,7 @@ In **Exploratory Data Analysis** section you will be able to understand the rela
 Here you can observe the proportion of cells belonging to the different levels of a categorical variable presented in the metadata and disaggregate these proportions according to the levels of another categorical variable. All this information is displayed in the form of a barplot. In the subsection "Matrix" a confusion matrix between the two selected features can be plotted with the option to display the Jaccard index for each of the grid cells. In addition, the Rand index is displayed, which is a global measure of the similarity between the two clusterings.
 </p>
 
-<img src="/images/exploratory_categories.gif" width="100%" />
+<img src="man/figures/exploratory_categories.gif" width="100%" />
 
 
 
@@ -218,7 +218,7 @@ Here you can observe the proportion of cells belonging to the different levels o
 
 In a similar way to the previous subsection, in "Field" you can explore how the value of one or more numerical variables changes as a function of another variable, either numerical or categorical. You can make different types of plots such as: Distribution Plots, Heatmaps, Dotplots and StackedViolins.
 
-<img src="/images/fields.gif" width="100%" />
+<img src="man/figures/fields.gif" width="100%" />
 
 
 </details>
@@ -233,13 +233,13 @@ In the "Visual Tools" section, different plots can be obtained to explore in mor
 
 By selecting or uploading a set of genes of interest, a set of Violin plots can be obtained and download in .pdf format, allowing to facet the plots by differents categorical co-variables.
 
-<img src="/images/violins.gif" width="100%" />
+<img src="man/figures/violins.gif" width="100%" />
 
 ###  Multiplots
 
  Multiplots allows you to explore how different variables change across cells in an embedding of your choice, such as the expression of a given set of genes, the partitions of a categorical variable or the value of a continuous variable.
  
-<img src="/images/multiplots.gif" width="100%" />
+<img src="man/figures/multiplots.gif" width="100%" />
 
 
 </details>
