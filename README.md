@@ -70,7 +70,7 @@ The scXplorer app can be created and launched with only two functions. **_create
  
 1. Calculation of quality control metrics. 
 
-2. If no partition was declared in the "toFactor" parameter, a preliminary clustering will be calculated with the scran package function _quickCluster()_.
+2. If no partition was declared in the "partitionVars" parameter, a preliminary clustering will be calculated with the scran package function _quickCluster()_.
 
 3. Normalization of the gene expression matrix.
 
@@ -90,8 +90,8 @@ Finally with the **_launch_scXplorer()_** function the application is deployed.
 library(scXplorer)
 # Creating SCE object
 cseo <- createSCEobject(xx = sce, 
-                        toFactors = "inferred_cell_type", 
-                        toKeep = c("source_name", "age", "sex", "strain", "treatment", "pseudotime"),
+                        partitionVars = "inferred_cell_type", 
+                        metadataVars = c("source_name", "age", "sex", "strain", "treatment", "pseudotime"),
                         descriptionText = "Quick Start Guide")
 
 launch_scXplorer(cseo)
