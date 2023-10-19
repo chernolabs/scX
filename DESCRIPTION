@@ -53,3 +53,4 @@ Suggests:
     Seurat
 LazyData: true
 VignetteBuilder: knitr
+URL: https://tvegawaichman.github.io/scXplorer/
