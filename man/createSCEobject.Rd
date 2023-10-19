@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils_preprocess.R
 \name{createSCEobject}
 \alias{createSCEobject}
-\title{Returns a list with a SingleCellExperiment object}
+\title{SingleCellExperiment object ready for use in scXplorer}
 \usage{
 createSCEobject(
   xx,
@@ -10,10 +10,15 @@ createSCEobject(
   assay.name.normalization = "logcounts",
   metadata = NULL,
   toFactors = NULL,
+  toKeep = NULL,
   chosen.hvg = NULL,
   nHVGs = 3000,
   nPCs = 50,
   calcRedDim = TRUE,
+  paramFindMarkers = list(test.type = "wilcox", pval.type = "all", direction = "any"),
+  calcAllToFactors = FALSE,
+  cells2keep = NULL,
+  descriptionText = NULL,
   verbose = TRUE
 )
 }
@@ -23,12 +28,15 @@ createSCEobject(
 \item{assay.name.raw}{Assay name for raw counts matrix if object is a SCE. Defaults to \code{counts}.}
 
 \item{assay.name.normalization}{Assay name for normalized matrix if present in SCE. If not present,
-it calculates \code{logcounts} (default).}
+it computes \code{logcounts} (default).}
 
 \item{metadata}{Optional dataframe with cell metadata.}
 
-\item{toFactors}{Optional metadata column names (or colData) to use as factors. If \code{NULL} (default),
+\item{toFactors}{Optional metadata column names (or \code{colData}) to use as factors. If \code{NULL} (default),
 a quick clusterization will be computed.}
+
+\item{toKeep}{Additional metadata column names (or \code{colData}) to use only for coloring in plots.
+If \code{NULL} (default), only \code{toFactors} columns will be available for coloring plots.}
 
 \item{chosen.hvg}{Optional list of Highly Variable Genes.}
 
@@ -36,13 +44,25 @@ a quick clusterization will be computed.}
 
 \item{nPCs}{Number of Principal Components to use in PCA. Defaults to 50.}
 
-\item{calcRedDim}{Whether to compute reduced dimensions (PCA, UMAP, TSNE, UMAP2D, TSNE2D) or not.
-Defaults to \code{TRUE}.}
+\item{calcRedDim}{Logical indicating whether to compute reduced dimensions (PCA, UMAP, TSNE, UMAP2D,
+TSNE2D). Defaults to \code{TRUE}.}
 
-\item{verbose}{Step by step status while function is running. Defaults to \code{TRUE}.}
+\item{paramFindMarkers}{List of parameters to pass to \code{scran::findMarkers(...)} to compute marker
+genes for clusters. Defaults to \code{list(test.type="wilcox", pval.type="all", direction="any")}.}
+
+\item{calcAllToFactors}{Logical indicating whether to force the computation of markers and DEGs from
+the entire list of \code{toFactors}.}
+
+\item{cells2keep}{List of names for cells to keep when subsampling data. NOTE: Subsampling is only
+used in large datasets for visual purposes, and it does not affect computations.}
+
+\item{descriptionText}{Optional short description of the object being analized. This can help when
+working with multiple tabs.}
+
+\item{verbose}{Logical for step by step status while function is running. Defaults to \code{TRUE}.}
 }
 \value{
-List with a SingleCellExperiment object and additional data ready for use in scXplorer.
+List with a SingleCellExperiment object and additional data ready for use in \code{scXplorer}.
 }
 \description{
 \code{createSCEobject()} returns a list which includes a SingleCellExperiment object with counts, at

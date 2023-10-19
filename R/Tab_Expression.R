@@ -8,7 +8,59 @@ ExpressionUI <- function(id) {
     fluidRow(
       column(3,
         box(title = htmltools::span(icon("gears"), " Settings"),
-            width = NULL, status = "primary",solidHeader = T,collapsible = F,
+			width = NULL, status = "primary",solidHeader = T,collapsible = F,
+			conditionalPanel("!input.button || input.scatter_heatmap != 'scatter'",ns=NS(id),
+			fluidRow( # gene list upload off/on
+				column(12,style='padding-left:12px; padding-right:12px;',align="center",
+					switchInput(NS(id,"GL_T"), 
+						label = "Upload Gene List",
+						size = "small",
+						width = NULL,
+						labelWidth = "100px"),
+				)
+			),
+			# gene selection or list
+			tabsetPanel(id = NS(id,"switcher"),
+				type = "hidden",
+				selected = "panel1",
+				tabPanelBody("panel1",
+					fluidRow(
+						column(11,style='padding-left:0px; padding-right:2px;',
+							selectizeInput(NS(id,"gen_exp"),
+							label=NULL,
+							choices = NULL, 
+							options = list(maxItems = 10,
+								maxOptions = 20,
+								placeholder = 'Please select genes to plot'),
+							width = NULL,
+							multiple=T)
+						),
+						column(1,style='padding-left:2px; padding-right:2px; padding-top:4px',
+							actionBttn((NS(id,"action")),
+								label = NULL,
+								style = "unite",
+								color = "primary",
+								size = "xs",
+								icon = icon("play"))
+						)
+					)
+				),
+				tabPanelBody("panel2",
+					fluidRow(
+						column(12,style='padding-left:0px; padding-right:0px;',
+							fileInput(NS(id,'listGenes'),
+							label = NULL,
+							multiple = T, 
+							accept = c("txt/csv", "text/comma-separated-values,
+								text/plain", ".csv", ".xlsx"),
+							buttonLabel = "Search",
+							placeholder = "Select Gene list"),
+							htmlOutput(NS(id,"missingGenes"))
+						)
+					)
+				)
+			)
+			),
           conditionalPanel("input.scatter_heatmap == 'scatter'",ns=NS(id),
             fluidRow(
               column(6,style='padding-left:12px; padding-right:3px;', align="center",
@@ -25,7 +77,7 @@ ExpressionUI <- function(id) {
               )
             )  
           ),
-          conditionalPanel("typeof output.plot !== 'undefined' || input.scatter_heatmap == 'heatmap' || input.scatter_heatmap == 'dotplot' || input.scatter_heatmap == 'stackVln'", ns = NS(id),
+          #conditionalPanel("typeof output.plot_expression !== 'undefined' || input.scatter_heatmap == 'heatmap' || input.scatter_heatmap == 'dotplot' || input.scatter_heatmap == 'stackVln'", ns = NS(id),
             fluidRow(
               column(8,style='padding-left:12px; padding-right:3px;',
                 pickerInput(inputId = NS(id,"partitionType"), 
@@ -36,15 +88,15 @@ ExpressionUI <- function(id) {
                 column(4,style='padding-left:3px; padding-right:1px;padding-top:12px',
                   br(),
                   prettyCheckbox(NS(id,"button"),
-                                 label="Colorize",
+                                 label="Show",
                                  value = F,
                                  status = "primary",
                                  shape = "curve",
                                  outline = TRUE)
                 )
               )
-            )
-          ),
+            ),
+          #),
           conditionalPanel("input.scatter_heatmap == 'heatmap'",ns=NS(id),
             prettySwitch(NS(id,"cluster_row"),
                          "Cluster Row",
@@ -91,57 +143,8 @@ ExpressionUI <- function(id) {
                          value = F,
                          status = "primary",
                          fill = TRUE)
-          ),
-          fluidRow(
-            column(12,style='padding-left:12px; padding-right:12px;',align="center",
-              switchInput(NS(id,"GL_T"), 
-                          label = "Upload GeneList",
-                          size = "small",
-                          width = NULL,
-                          labelWidth = "100px"),
-            )
-          ),
-          tabsetPanel(id = NS(id,"switcher"),
-                      type = "hidden",
-                      selected = "panel1",
-            tabPanelBody("panel1",
-              fluidRow(
-                column(11,style='padding-left:0px; padding-right:2px;',
-                  selectizeInput(NS(id,"gen_exp"),
-                                 label=NULL,
-                                 choices = NULL, 
-                                 options = list(maxItems = 10,
-                                                maxOptions = 20,
-                                                placeholder = 'Please select genes to plot'),
-                                 width = NULL,
-                                 multiple=T)
-                ),
-                column(1,style='padding-left:2px; padding-right:2px; padding-top:4px',
-                  actionBttn((NS(id,"action")),
-                             label = NULL,
-                             style = "unite",
-                             color = "primary",
-                             size = "xs",
-                             icon = icon("play"))
-                )
-              )
-            ),
-            tabPanelBody("panel2",
-              fluidRow(
-                column(12,style='padding-left:0px; padding-right:0px;',
-                  fileInput(NS(id,'listGenes'),
-                            label = NULL,
-                            multiple = T, 
-                            accept = c("txt/csv", "text/comma-separated-values,
-                                        text/plain", ".csv", ".xlsx"),
-                            buttonLabel = "Search",
-                            placeholder = "Select Gene list"),
-                  htmlOutput(NS(id,"missingGenes"))
-                )
-              )
-            )
           )
-        )
+		)
       ),
       column(9,
         tabBox(id = NS(id,"scatter_heatmap"),
@@ -151,31 +154,119 @@ ExpressionUI <- function(id) {
             box(title = "Scatter Plot",
                 width = NULL, solidHeader = T, collapsible = T,
                 footer = tagList(shiny::icon("cat"), "Nya"),
-              plotlyOutput(NS(id,"plot"),height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
-            ),
-            box(title = "Expression Plots",
-                width = NULL, solidHeader = T,collapsible = T,
-                footer = tagList(shiny::icon("cat"), "Nya"),
-              uiOutput(NS(id,"Violin.Bar_Input")),
-              plotOutput(NS(id,"Violin.Bar_Plot")) %>% withSpinner()
+                tabsetPanel(id = NS(id,"switcher3"),
+                            type = "hidden",
+                            selected = "expression_panel",
+                tabPanelBody("cluster_panel",
+                  plotlyOutput(NS(id,"plot_cluster"),height = "80vh") %>% withLoader(type='html',loader = 'dnaspin')
+                ),
+                tabPanelBody("expression_panel",
+                             plotlyOutput(NS(id,"plot_expression"),height = "80vh") %>% withLoader(type='html',loader = 'dnaspin'),
+                             uiOutput(NS(id,"Violin.Bar_Input")),
+                             conditionalPanel("typeof output.plot_expression !== 'undefined'", ns = NS(id),
+                                 tabsetPanel(id = NS(id,"switcher2"),
+                                             type = "hidden",
+                                             selected = "Violin_panel",
+                                             tabPanelBody("Violin_panel",
+                                                          dropdownButton(
+                                                            fluidRow(
+																column(7, style='padding-left:6px; padding-right:3px;',
+																	column(6, style='padding-left:2px; padding-right:1px;', numericInput(NS(id,"pdf_width_violin"),"Width",value = 7)),
+																	column(6, style='padding-left:1px; padding-right:2px;', numericInput(NS(id,"pdf_height_violin"),"Height",value = 7))),
+																column(5, style='padding-left:0px; padding-right:6px; padding:16px', downloadButton(NS(id,'export_violin')))
+															),
+                                                            circle = FALSE,
+                                                            status = "primary",
+                                                            icon = icon("download"),
+                                                            width = "300px",
+                                                            size= "sm",
+                                                            up = T,
+                                                            tooltip = tooltipOptions(title = "Download")
+                                                          ),
+                                                          plotOutput(NS(id,"plot_Violin")) %>% withSpinner()
+                                             ),
+                                             tabPanelBody("SpikePlot_panel",
+                                                          dropdownButton(
+                                                            fluidRow(
+																column(7, style='padding-left:6px; padding-right:3px;',
+																	column(6, style='padding-left:2px; padding-right:1px;', numericInput(NS(id,"pdf_width_SpikePlot"),"Width",value = 7)),
+																	column(6, style='padding-left:1px; padding-right:2px;', numericInput(NS(id,"pdf_height_SpikePlot"),"Height",value = 7))),
+																column(5, style='padding-left:0px; padding-right:6px; padding:16px', downloadButton(NS(id,'export_SpikePlot')))
+															),
+                                                            circle = FALSE,
+                                                            status = "primary",
+                                                            icon = icon("download"),
+                                                            width = "300px",
+                                                            size= "sm",
+                                                            up = T,
+                                                            tooltip = tooltipOptions(title = "Download")
+                                                          ),
+                                                          plotOutput(NS(id,"plot_SpikePlot")) %>% withSpinner()
+                                             )
+                                 )
+                             )
+                )
+              )
             )
           ),
           tabPanel("Heatmap", value= "heatmap",
             box(width = NULL, solidHeader = T, collapsible = F,
                 footer = tagList(shiny::icon("cat"), "Nya"),
-              plotOutput(NS(id,"plot_heatmap"),height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
+                dropdownButton(
+                  fluidRow(
+						column(4, style='padding-left:12px; padding-right:3px;', numericInput(NS(id,"pdf_width_heatmap"),"Width",value = 7)),
+						column(4, style='padding-left:3px; padding-right:3px;', numericInput(NS(id,"pdf_height_heatmap"),"Height",value = 7)),
+						column(4, style='padding-left:3px; padding-right:12px; padding:16px', downloadButton(NS(id,'export_heatmap')))
+					),
+                  circle = FALSE,
+                  status = "primary",
+                  icon = icon("download"),
+                  width = "300px",
+                  size= "sm",
+                  up = F,
+                  tooltip = tooltipOptions(title = "Download")
+                ),
+              plotOutput(NS(id,"plot_heatmap"),height = "80vh") %>% withLoader(type='html',loader = 'dnaspin')
             )
           ),
           tabPanel("DotPlot", value= "dotplot",
             box(width = NULL,solidHeader = T,collapsible = F,
                 footer = tagList(shiny::icon("cat"), "Nya"),
-              plotlyOutput(NS(id,"plot_DotPlot"),height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
+                dropdownButton(
+                  fluidRow(
+						column(4, style='padding-left:12px; padding-right:3px;', numericInput(NS(id,"pdf_width_dotplot"),"Width",value = 7)),
+						column(4, style='padding-left:3px; padding-right:3px;', numericInput(NS(id,"pdf_height_dotplot"),"Height",value = 7)),
+						column(4, style='padding-left:3px; padding-right:12px; padding:16px', downloadButton(NS(id,'export_dotplot')))
+					),
+                  circle = FALSE,
+                  status = "primary",
+                  icon = icon("download"),
+                  width = "300px",
+                  size= "sm",
+                  up = F,
+                  tooltip = tooltipOptions(title = "Download")
+                ),
+              plotlyOutput(NS(id,"plot_DotPlot"),height = "80vh") %>% withLoader(type='html',loader = 'dnaspin')
             )
           ),
           tabPanel("StackedViolin", value= "stackVln",
             box(width = NULL,solidHeader = T,collapsible = F,
                 footer = tagList(shiny::icon("cat"), "Nya"),
-              plotOutput(NS(id,"plot_stackVln"),height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
+                dropdownButton(
+					fluidRow(
+						column(4, style='padding-left:12px; padding-right:3px;', numericInput(NS(id,"pdf_width_StackedViolin"),"Width",value = 7)),
+						column(4, style='padding-left:3px; padding-right:3px;', numericInput(NS(id,"pdf_height_StackedViolin"),"Height",value = 7)),
+						column(4, style='padding-left:3px; padding-right:12px; padding:16px', downloadButton(NS(id,'export_StackedViolin')))
+					),
+                  circle = FALSE,
+                  status = "primary",
+                  icon = icon("download"),
+                  width = "300px",
+                  size= "sm",
+                  up = F,
+                  tooltip = tooltipOptions(title = "Download")
+                ),
+              plotOutput(NS(id,"plot_stackVln"),height = "80vh") %>% withLoader(type='html',loader = 'dnaspin')
             )
           )
         )
@@ -197,6 +288,14 @@ ExpressionServer <- function(id,sce,point.size=20) {
       }
     })
     
+    observeEvent(ignoreInit = T,input$button,{
+      if(input$button) {
+        updateTabsetPanel(inputId = "switcher3", selected = "cluster_panel")
+      } else{
+        updateTabsetPanel(inputId = "switcher3", selected = "expression_panel")
+      }
+    })
+    
     updatePickerInput(session, 'partitionType', 
                          choices = names(colData(sce))[sapply(colData(sce), is.factor)])
     
@@ -207,20 +306,23 @@ ExpressionServer <- function(id,sce,point.size=20) {
     })
     
     observeEvent(c(dimVector()),{
-      req(input$scatter_heatmap == "scatter")
+      #req(input$scatter_heatmap == "scatter")
       updatePickerInput(session,inputId = "DimType", choices = (c("3","2")[c(3,2) %in% dimVector()]))
     })
     
     observeEvent(c(input$DimType,dimVector()), {
-      req(input$scatter_heatmap == "scatter")
+      #req(input$scatter_heatmap == "scatter")
       req(!is.null(dimVector()))
       req(input$DimType)
-	  updatePickerInput(session,inputId = "plotType", choices = rev(names(which(dimVector() == as.numeric(input$DimType)  | dimVector() > 3))))
-      # if(input$DimType == "3"){
-        # updatePickerInput(session,inputId = "plotType", choices = rev(names(which(dimVector() == as.numeric(input$DimType)  | dimVector() > 3))))
-      # } else if(input$DimType == "2") { 
-        # updatePickerInput(session,inputId = "plotType", choices = rev(names(which(dimVector() == as.numeric(input$DimType)  | dimVector() > 3))))
-      # }
+	    updatePickerInput(session,inputId = "plotType", choices = rev(names(which(dimVector() == as.numeric(input$DimType)  | dimVector() > 3))))
+    })
+    
+    observeEvent(input$Cell_Exp,{
+      req(input$Cell_Exp)
+      switch(input$Cell_Exp,
+             'Violin'    = updateTabsetPanel(inputId = "switcher2",  selected = "Violin_panel"),
+             'SpikePlot' = updateTabsetPanel(inputId = "switcher2", selected = "SpikePlot_panel")
+      )
     })
     
     ### Gen selected & data preparation ----
@@ -232,7 +334,7 @@ ExpressionServer <- function(id,sce,point.size=20) {
     })
     
     ExpressionL <- eventReactive(genes.L(),{
-      req(input$scatter_heatmap == "scatter")
+      #req(input$scatter_heatmap == "scatter")
       req(input$GL_T == F)
       req(!is.null(genes.L()))
       if(length(genes.L()) > 1) {
@@ -244,7 +346,7 @@ ExpressionServer <- function(id,sce,point.size=20) {
     })
     
     HeatmapL <- eventReactive(c(genes.L(),input$norm_heat),{
-      req(input$scatter_heatmap == "heatmap")
+      #req(input$scatter_heatmap == "heatmap")
       req(input$GL_T == F)
       req(!is.null(genes.L()))
       value <- ifelse(input$norm_heat,yes = "logcounts.norm",no = "logcounts") #To swtich between norm ot not normalize expression gene.
@@ -276,7 +378,7 @@ ExpressionServer <- function(id,sce,point.size=20) {
     })
     
     ExpressionGL <- eventReactive(genes.GL(),{
-      req(input$scatter_heatmap == "scatter")
+      #req(input$scatter_heatmap == "scatter")
       req(input$GL_T == T)
       req(length(genes.GL()$genes) > 0)
       
@@ -290,7 +392,7 @@ ExpressionServer <- function(id,sce,point.size=20) {
     })
     
     HeatmapGL <- eventReactive(c(genes.GL(),input$norm_heat),{
-      req(input$scatter_heatmap == "heatmap")
+      #req(input$scatter_heatmap == "heatmap")
       req(input$GL_T == T)
       req(length(genes.GL()$genes) > 0)
       value <- ifelse(input$norm_heat,yes = "logcounts.norm",no = "logcounts") #To swtich between norm ot not normalize expression gene.
@@ -306,7 +408,7 @@ ExpressionServer <- function(id,sce,point.size=20) {
     #### Selecting ----
     #I do that because if it change, it haven't to calculated everything again, just change the dataframe
     HeatmapF <- reactive({
-      req(input$scatter_heatmap == "heatmap")
+      #req(input$scatter_heatmap == "heatmap")
       if(input$GL_T){
         HeatmapGL()    
       } else { 
@@ -332,7 +434,7 @@ ExpressionServer <- function(id,sce,point.size=20) {
     
     ### Scatter ----
     ClusterPlot <- eventReactive(c(input$plotType,input$partitionType),{
-      req(input$scatter_heatmap == "scatter")
+      #req(input$scatter_heatmap == "scatter")
       #3D
       if(input$DimType == "3"){
         plot_ly(type = "scatter3d", mode = "markers",source = "PlotMix")  %>%
@@ -415,12 +517,14 @@ ExpressionServer <- function(id,sce,point.size=20) {
       
     })
     
-    output$plot <- renderPlotly({
-      if(input$button == T){
+    output$plot_cluster <- renderPlotly({
+      req(!is.null(ClusterPlot()))
         ClusterPlot()
-      } else{
-        ExpressionPlot()
-      }
+    })
+    
+    output$plot_expression <- renderPlotly({
+      req(!is.null(ExpressionPlot()))
+      ExpressionPlot()
     })
     
     
@@ -428,7 +532,7 @@ ExpressionServer <- function(id,sce,point.size=20) {
     ### Heatmaps ----
     #Here I made everything in the same reactive object to manipulated all the reactive order at the same time
     Heatmap_Plot <- eventReactive(c(HeatmapF(),input$partitionType,input$mean_heat,input$cluster_row,input$cluster_column),{
-      req(input$scatter_heatmap == "heatmap")
+      #req(input$scatter_heatmap == "heatmap")
       req(input$partitionType)
       req(!is.null(HeatmapF()))
       req(!is.null(OrderPartReact()))
@@ -506,7 +610,7 @@ ExpressionServer <- function(id,sce,point.size=20) {
     })
 
     output$plot_heatmap <- renderPlot({
-      req(input$scatter_heatmap == "heatmap")
+      #req(input$scatter_heatmap == "heatmap")
       req(!is.null(Heatmap_Plot()))
       Heatmap_Plot()
     })
@@ -519,7 +623,7 @@ ExpressionServer <- function(id,sce,point.size=20) {
      })
      
      ViolinReact <- reactive({
-       req(!is.null(ExpressionF()) & input$Cell_Exp == "Violin")
+       req(!is.null(ExpressionF()))
        data.frame(Y =ExpressionF()$Exp,
                   X=factor(colData(sce)[,input$partitionType]))
      })
@@ -529,8 +633,8 @@ ExpressionServer <- function(id,sce,point.size=20) {
      })
      
      ViolinPlot <-reactive({
-       req(input$scatter_heatmap == "scatter")
-       req(!is.null(ExpressionF()) & input$Cell_Exp == "Violin")
+       #req(input$scatter_heatmap == "scatter")
+       req(!is.null(ExpressionF()))
        ggplot(ViolinReact()) + 
          geom_violin(aes(y = Y, 
                          x = X, 
@@ -548,31 +652,38 @@ ExpressionServer <- function(id,sce,point.size=20) {
      
      
      SpikePlot <-reactive({
-       req(input$scatter_heatmap == "scatter")
-       req(!is.null(ExpressionF()) & input$Cell_Exp == "SpikePlot")
-       barplot(ExpressionF()$Exp[OrderPartReact()$ordPart],
+       #req(input$scatter_heatmap == "scatter")
+       req(!is.null(ExpressionF()))
+       m <- barplot(ExpressionF()$Exp[OrderPartReact()$ordPart],
                col = OrderPartReact()$colPart[colData(sce)[,input$partitionType]][OrderPartReact()$ordPart],
                border = OrderPartReact()$colPart[colData(sce)[,input$partitionType]][OrderPartReact()$ordPart],
                ylab = "log(counts)", main = ifelse(length(ExpressionF()$Genes)>1,"mean expression","expression"), names.arg = F) 
-       legend("bottom", legend = names(OrderPartReact()$colPart), col = OrderPartReact()$colPart,
-              pch=19, ncol=6, xpd=T, inset=c(0,-0.25))
-       abline(h=mean(ExpressionF()$Exp[ExpressionF()$Exp>0]),lty=2,col="grey")
+		colleg <- legend_col(names(OrderPartReact()$colPart), max(m))
+       legend(max(m)/2, -0.05, legend = names(OrderPartReact()$colPart), col = OrderPartReact()$colPart,
+              pch=19, xpd=T, xjust = 0.5, cex = 0.9, ncol=colleg$ncol, text.width = colleg$colwidth)
+       lines(x = m,
+             tapply(ExpressionF()$Exp,
+                    INDEX = colData(sce)[,input$partitionType],
+                    FUN = mean)[colData(sce)[,input$partitionType]][OrderPartReact()$ordPart],
+             lty=2,col="black")
+       graph <- recordPlot()
+       graph
      })
      
-     output$Violin.Bar_Plot <- renderPlot({
-       req(!is.null(ExpressionF()))
-       req(input$Cell_Exp)
-       if(input$Cell_Exp == "Violin"){
-         ViolinPlot()
-       } else { 
-         SpikePlot()
-       }
+     output$plot_Violin <- renderPlot({
+       req(!is.null(ViolinPlot()))
+         ViolinPlot() %>% plot()
+     })
+     
+     output$plot_SpikePlot <- renderPlot({
+       req(!is.null(SpikePlot()))
+       SpikePlot() %>% print()
      })
      
      
      #### Dotplots ----
-     output$plot_DotPlot <- renderPlotly({
-        req(input$scatter_heatmap == "dotplot")
+     DotPlot  <- reactive({
+        #req(input$scatter_heatmap == "dotplot")
         req(input$partitionType)
         if(input$GL_T){
           req(length(genes.GL()$genes) > 0)
@@ -596,15 +707,20 @@ ExpressionServer <- function(id,sce,point.size=20) {
         }
         
          g$data$Feature <- factor(g$data$Feature,levels = vtor)
+         g
          
-         ggplotly(g) %>% config(modeBarButtonsToRemove = c("select2d", "lasso2d", "hoverCompareCartesian"))
          
 
      })
      
+     output$plot_DotPlot <- renderPlotly({
+       req(!is.null(DotPlot()))
+       DotPlot() %>% ggplotly() %>% config(modeBarButtonsToRemove = c("select2d", "lasso2d", "hoverCompareCartesian"))
+     })
+     
      #### Stacked Violin ----
-     output$plot_stackVln <- renderPlot({
-       req(input$scatter_heatmap == "stackVln")
+     stackVln <- reactive({
+       #req(input$scatter_heatmap == "stackVln")
        req(input$partitionType)
        if(input$GL_T){
          req(length(genes.GL()$genes) > 0)
@@ -649,5 +765,69 @@ ExpressionServer <- function(id,sce,point.size=20) {
        
        g
      })
+     
+     output$plot_stackVln <- renderPlot({
+       req(!is.null(stackVln()))
+       stackVln()
+     })
+     ### Downloads -----
+     
+     output$export_violin = downloadHandler(
+       filename = function() {"Violin_Categories.pdf"},
+       content = function(file) {
+         pdf(file,
+             width = input$pdf_width_violin,
+             height = input$pdf_height_violin
+         )
+         ViolinPlot() %>% plot()
+         dev.off()
+       })
+     
+     output$export_SpikePlot = downloadHandler(
+       filename = function() {"SpikePlot_Categories.pdf"},
+       content = function(file) {
+         pdf(file,
+             width = input$pdf_width_SpikePlot,
+             height = input$pdf_height_SpikePlot
+         )
+         SpikePlot() %>% print()
+         dev.off()
+       })
+     
+     output$export_heatmap = downloadHandler(
+       filename = function() {"Heatmap_Categories.pdf"},
+       content = function(file) {
+         pdf(file,
+             width = input$pdf_width_heatmap,
+             height = input$pdf_height_heatmap
+         )
+         Heatmap_Plot() %>% plot()
+         dev.off()
+       }
+     )
+     
+     output$export_dotplot = downloadHandler(
+       filename = function() {"DotPlot_Categories.pdf"},
+       content = function(file) {
+         pdf(file,
+             width = input$pdf_width_dotplot,
+             height = input$pdf_height_dotplot
+         )
+         DotPlot() %>% plot()
+         dev.off()
+       }
+     )
+     
+     output$export_StackedViolin = downloadHandler(
+       filename = function() {"StackedViolin_Categories.pdf"},
+       content = function(file) {
+         pdf(file,
+             width = input$pdf_width_StackedViolin,
+             height = input$pdf_height_StackedViolin
+         )
+         stackVln() %>% plot()
+         dev.off()
+       }
+     )
   }) 
 }

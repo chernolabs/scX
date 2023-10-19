@@ -1,0 +1,41 @@
+---
+title: "Exploratory Data Analysis"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE,
+  fig.path = "man/figures/",
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+In **Exploratory Data Analysis** section you will be able to understand the relationship between different features contained as metadata in your SCE object.
+ 
+## Categories
+
+<p align="justify"> 
+Here you can observe the proportion of cells belonging to the different levels of a categorical variable presented in the metadata and disaggregate these proportions according to the levels of another categorical variable. All this information is displayed in the form of a barplot. In the subsection "Matrix" a confusion matrix between the two selected features can be plotted with the option to display the Jaccard index for each of the grid cells. In addition, the Rand index is displayed, which is a global measure of the similarity between the two clusterings.
+</p>
+
+
+```{r}
+knitr::include_graphics("figures/exploratory_categories.gif")
+
+```
+
+
+## Fields
+
+In a similar way to the previous subsection, in "Field" you can explore how the value of one or more numerical variables changes as a function of another variable, either numerical or categorical. You can make different types of plots such as: Distribution Plots, Heatmaps, Dotplots and StackedViolins.
+
+
+```{r}
+knitr::include_graphics("figures/fields.gif")
+
+```
+
+
+
+

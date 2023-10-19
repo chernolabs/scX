@@ -8,7 +8,9 @@ launch_scXplorer(
   cseo,
   dataset_name = "scXplorer",
   point.size = 20,
-  launch.browser = T
+  launch.browser = T,
+  host = getOption("shiny.host", "127.0.0.1"),
+  port = getOption("shiny.port")
 )
 }
 \arguments{

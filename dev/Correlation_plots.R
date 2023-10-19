@@ -1,7 +1,7 @@
 #Maeke correlation betw
 col1 <- "SampleID"
-val<-c("N","nCounts","nFeatures")
-df <- colData(sce) %>% as.data.frame() %>% group_by(.data[[col1]]) %>% summarise(Correlation = cor(cbind(across(all_of(val)))))
+val<-c("nCounts","nFeatures")
+df <- colData(sce) %>% as.data.frame() %>% group_by(SampleID) %>% summarise(Correlation = cor(cbind(across(all_of(val)))))
 rownames(df$Correlation)  <- paste0(df[,col1,drop=T],"_",rownames(df$Correlation))
 colnames(df$Correlation) <- val
 
@@ -34,6 +34,17 @@ Heatmap(dta,
         # use_raster = TRUE,
         # raster_by_magick = TRUE
 )
+if(input$partitionColor != 'None'){
+        ht <-   HeatmapAnnotation(Type = df()[,input$partitionColor],
+                                  col=list(Type=OrderPartReact()$colPart),
+                                  show_legend = c(Type =FALSE),
+                                  annotation_label = c(input$partitionColor),
+                                  show_annotation_name = T)
+        col_split <- df()[,input$partitionColor]
+        } else{
+          ht <- NULL
+          col_split <- NULL
+        }
 Heatmap(t(df$Correlation),
         col = if(max(t(df$Correlation))==min(t(df$Correlation))) {viridis(1)} else {viridis(100)},
         border =F,
@@ -64,7 +75,7 @@ df <- colData(sce) %>% as.data.frame() %>% summarise(Correlation = cor(cbind(acr
 ###Dotplot to columns ----
 
 #Modified from https://rdrr.io/github/davismcc/scater/src/R/plotDots.R to allow column vectors
-plotDots <- function(object, features, group = NULL, block=NULL,
+plotDots_fields <- function(object, features, group = NULL, block=NULL,
                      exprs_values = "logcounts", detection_limit = 0, zlim = NULL, 
                      colour = color, color = NULL,
                      max_detected = NULL, other_fields = list(),
@@ -172,7 +183,9 @@ plotDots <- function(object, features, group = NULL, block=NULL,
     heatmap_scale$colour_scale 
 }
 
-plotDots(object = sce,features = c("N","nCounts","nFeatures"),group ="ds1clusterP",scale = T,center = T)
+plotDots(object = sce,
+         features = c("nCounts","nFeatures"),
+         group ="ds1clusterP",scale = T,center = T)
 
 
 

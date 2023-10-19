@@ -1,0 +1,34 @@
+url: https://tvegawaichman.github.io/scXplorer/
+navbar:
+  bg: light
+  title: scXplorer
+  right:
+  - icon: fa-home
+    href: https://www.leloir.org.ar/bioinformatica-y-biologia-computacional
+  - icon: fa-github
+    href: https://github.com/tvegawaichman/scXplorer
+development:
+  mode: auto
+template:
+  bootstrap: 5
+  params:
+    bootswatch: superhero
+  bslib:
+    base_font:
+      google: Roboto
+    heading_font:
+      google: Roboto
+    code_font:
+      google: JetBrains Mono
+articles:
+- title: Sections
+  navbar: Sections
+  desc: Details about sections
+  contents:
+  - articles/Summary
+  - articles/Markers
+  - articles/Gene_Expression
+  - articles/Differential_Expression
+  - articles/Exploratory_Data_Analysis
+  - articles/Visual_Tools
+

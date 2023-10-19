@@ -12,13 +12,13 @@ N_markersUI <- function(id) {
             width = NULL, status = "primary",solidHeader = T,collapsible = T,
           fluidRow(
             column(6,style='padding-left:12px; padding-right:3px;', align="center",
-              pickerInput(NS(id,"partitionType"),
-                          "Partition",
+              pickerInput(NS(id,"plotType2D"), 
+                          "Plot Type 2D", 
                           choices = NULL)
             ),
             column(6,style='padding-left:3px; padding-right:12px;', align="center",
-              pickerInput(NS(id,"plotType2D"), 
-                          "Plot Type 2D", 
+              pickerInput(NS(id,"partitionType"),
+                          "Partition",
                           choices = NULL)
             )
           ),
@@ -59,7 +59,7 @@ N_markersUI <- function(id) {
             box(title = "Scatter Plot",
               width = NULL,solidHeader = T,collapsible = F,
               footer = tagList(shiny::icon("cat"), "Nya"),
-              plotlyOutput(NS(id,"plot"),height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
+              plotlyOutput(NS(id,"plot"),height = "80vh") %>% withLoader(type='html',loader = 'dnaspin')
             )
           ),
           tabPanelBody("panel2",
@@ -73,13 +73,50 @@ N_markersUI <- function(id) {
                                          placement= "right"),
                 right = F
               ),
-              plotlyOutput(NS(id,"plot2"),height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
-            ),
-            box(title = "Expression Plots",
-                width = NULL,solidHeader = T,collapsible = T,
-                footer = tagList(shiny::icon("cat"), "Nya"),
+              plotlyOutput(NS(id,"plot2"),height = "80vh") %>% withLoader(type='html',loader = 'dnaspin'),
               uiOutput(NS(id,"Violin.Bar_Input")),
-              plotOutput(NS(id,"Violin.Bar_Plot")) %>%  shinycssloaders::withSpinner()
+              conditionalPanel("typeof output.plot2 !== 'undefined'", ns = NS(id),
+                               tabsetPanel(id = NS(id,"switcher2"),
+                                           type = "hidden",
+                                           selected = "Violin_panel",
+                                           tabPanelBody("Violin_panel",
+                                                        dropdownButton(
+															fluidRow(
+																column(7, style='padding-left:6px; padding-right:3px;',
+																	column(6, style='padding-left:2px; padding-right:1px;', numericInput(NS(id,"pdf_width_violin"),"Width",value = 7)),
+																	column(6, style='padding-left:1px; padding-right:2px;', numericInput(NS(id,"pdf_height_violin"),"Height",value = 7))),
+																column(5, style='padding-left:0px; padding-right:6px; padding:16px', downloadButton(NS(id,'export_violin')))
+															),
+                                                          circle = FALSE,
+                                                          status = "primary",
+                                                          icon = icon("download"),
+                                                          width = "300px",
+                                                          size= "sm",
+                                                          up = T,
+                                                          tooltip = tooltipOptions(title = "Download")
+                                                        ),
+                                                        plotOutput(NS(id,"plot_Violin")) %>% withSpinner()
+                                           ),
+                                           tabPanelBody("SpikePlot_panel",
+                                                        dropdownButton(
+															fluidRow(
+																column(7, style='padding-left:6px; padding-right:3px;',
+																	column(6, style='padding-left:2px; padding-right:1px;', numericInput(NS(id,"pdf_width_SpikePlot"),"Width",value = 7)),
+																	column(6, style='padding-left:1px; padding-right:2px;', numericInput(NS(id,"pdf_height_SpikePlot"),"Height",value = 7))),
+																column(5, style='padding-left:0px; padding-right:6px; padding:16px', downloadButton(NS(id,'export_SpikePlot')))
+															),
+                                                          circle = FALSE,
+                                                          status = "primary",
+                                                          icon = icon("download"),
+                                                          width = "300px",
+                                                          size= "sm",
+                                                          up = T,
+                                                          tooltip = tooltipOptions(title = "Download")
+                                                        ),
+                                                        plotOutput(NS(id,"plot_SpikePlot")) %>% withSpinner()
+                                           )
+                               )
+              )
             )
           )
         )
@@ -129,6 +166,14 @@ N_markersServer <- function(id,sce,point.size = 20) {
       req(!is.null(cells_selected()))
       updateTabsetPanel(inputId = "switcher", selected = "panel1")
       runjs("Shiny.setInputValue('plotly_selected-PlotMix', null);")
+    })
+    
+    observeEvent(input$Cell_Exp,{
+      req(input$Cell_Exp)
+      switch(input$Cell_Exp,
+             'Violin'    = updateTabsetPanel(inputId = "switcher2",  selected = "Violin_panel"),
+             'SpikePlot' = updateTabsetPanel(inputId = "switcher2", selected = "SpikePlot_panel")
+      )
     })
     
     ### Cluster and Gen selected ----
@@ -295,7 +340,7 @@ N_markersServer <- function(id,sce,point.size = 20) {
     })
     
     ViolinReact <- reactive({
-      req(!is.null(gene_marker_selected()) & input$Cell_Exp == "Violin")
+      req(!is.null(gene_marker_selected()))
       data.frame(Y = logcounts(sce)[gene_marker_selected(),],
                  X=factor(colData(sce)[,input$partitionType]))
     })
@@ -305,7 +350,7 @@ N_markersServer <- function(id,sce,point.size = 20) {
     })
     
     ViolinPlot <-reactive({
-      req(!is.null(gene_marker_selected()) & input$Cell_Exp == "Violin")
+      req(!is.null(gene_marker_selected()))
       ggplot(ViolinReact()) + 
         geom_violin(aes(y = Y, 
                         x = X, 
@@ -321,28 +366,57 @@ N_markersServer <- function(id,sce,point.size = 20) {
     })
     
     SpikePlot <-reactive({
-      req(!is.null(gene_marker_selected()) & input$Cell_Exp == "SpikePlot")
-      barplot(assay(sce,"logcounts")[gene_marker_selected(),][OrderPartReact()$ordPart],
+      req(!is.null(gene_marker_selected()))
+      m <- barplot(assay(sce,"logcounts")[gene_marker_selected(),][OrderPartReact()$ordPart],
               col = OrderPartReact()$colPart[colData(sce)[,input$partitionType]][OrderPartReact()$ordPart],
               border = OrderPartReact()$colPart[colData(sce)[,input$partitionType]][OrderPartReact()$ordPart],
               ylab = "log(counts)", main = paste(gene_marker_selected(), 'expression'), names.arg = F) 
-      legend("bottom", legend = names(OrderPartReact()$colPart), col = OrderPartReact()$colPart,
-             pch=19, ncol=6, xpd=T, inset=c(0,-0.25))
-      abline(h=mean(assay(sce,"logcounts")[gene_marker_selected(),][assay(sce,"logcounts")[gene_marker_selected(),]>0]),lty=2,col="grey")
+      colleg <- legend_col(names(OrderPartReact()$colPart), max(m))
+	  legend(max(m)/2, -0.05, legend = names(OrderPartReact()$colPart), col = OrderPartReact()$colPart,
+             pch=19, xpd=T, xjust = 0.5, cex = 0.9, ncol=colleg$ncol, text.width = colleg$colwidth)
+      lines(x = m,
+            tapply(assay(sce,"logcounts")[gene_marker_selected(),],
+                   INDEX = colData(sce)[,input$partitionType],
+                   FUN = mean)[colData(sce)[,input$partitionType]][OrderPartReact()$ordPart],
+            lty=2,col="black")
+      graph <- recordPlot()
+      graph
     })
     
-    output$Violin.Bar_Plot <- renderPlot({
-      req(!is.null(gene_marker_selected()))
-      req(input$Cell_Exp)
-      if(input$Cell_Exp == "Violin"){
-        ViolinPlot()
-      } else { 
-        SpikePlot()
-      }
+    output$plot_Violin <- renderPlot({
+      req(!is.null(ViolinPlot()))
+      ViolinPlot() %>% plot()
     })
     
+    output$plot_SpikePlot <- renderPlot({
+      req(!is.null(SpikePlot()))
+      SpikePlot() %>% print()
+    })
     
-      
+    ### Downloads -----
+    
+    output$export_violin = downloadHandler(
+      filename = function() {"Violin_NewMarkers.pdf"},
+      content = function(file) {
+        pdf(file,
+            width = input$pdf_width_violin,
+            height = input$pdf_height_violin
+        )
+        ViolinPlot() %>% plot()
+        dev.off()
+      })
+    
+    output$export_SpikePlot = downloadHandler(
+      filename = function() {"SpikePlot_NewMarkers.pdf"},
+      content = function(file) {
+        pdf(file,
+            width = input$pdf_width_SpikePlot,
+            height = input$pdf_height_SpikePlot
+        )
+        SpikePlot() %>% print()
+        dev.off()
+      })
+    
   })
 }
 

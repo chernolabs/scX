@@ -47,7 +47,7 @@ MultiPlotsUI <- function(id) {
                 fluidRow(
                   column(11, style='padding-left:0px; padding-right:2px;',
                    selectizeInput(NS(id,"gen_exp"),
-                                   label=NULL,
+                                   label="Genes",
                                    choices = NULL, 
                                    options = list(maxItems = 10,
                                                   maxOptions = 20,
@@ -92,7 +92,7 @@ MultiPlotsUI <- function(id) {
               column(10, style='padding-left:12px; padding-right:2px;',
                      selectizeInput(NS(id,"clusterType"), "Clusters",
                                     choices = NULL, 
-                                    options = list(placeholder = 'Please select an option below'),
+                                    options = list(placeholder = 'Please select clusters to plot'),
                                     multiple=T)
               ),
               column(2, style='padding-left:2px; padding-right:12px; padding-top:28px',
@@ -104,12 +104,31 @@ MultiPlotsUI <- function(id) {
                                 size = "xs",
                                 icon = icon("play"))
               )
-            ),
-			hr(style = "border-top: 1px solid #0073b7;"),
-			fluidRow(align="center",
-					div(style = "display:inline-block;color:#0073b7", icon("circle-info"),
-					title = "To color all clusters simultaneously,\ngo to Cluster Markers tab. The plot toolbar\nincludes the option to download as a png.")
-			)
+            )#,
+            # hr(style = "border-top: 1px solid #0073b7;"),
+            # fluidRow(align="center",
+                     # div(style = "display:inline-block;color:#0073b7", icon("circle-info"),
+                         # title = "To color all clusters simultaneously,\ngo to Cluster Markers tab. The plot toolbar\nincludes the option to download as a png.")
+            # )
+          ),
+          conditionalPanel("input.gene_cluster == 'field'",ns=NS(id),
+            fluidRow(
+              column(10, style='padding-left:12px; padding-right:2px;',
+                selectizeInput(NS(id,"fieldType"), "Fields",
+                               choices = NULL, 
+                               options = list(placeholder = 'Please select fields to plot'),
+                               multiple=T)
+              ),
+              column(2, style='padding-left:2px; padding-right:12px; padding-top:28px',
+                     align="center",
+                actionBttn((NS(id,"field_actionButton")),
+                           label = NULL,
+                           style = "unite",
+                           color = "primary",
+                           size = "xs",
+                           icon = icon("play"))
+              )
+            )
           )
         )
       ),
@@ -117,13 +136,62 @@ MultiPlotsUI <- function(id) {
         tabBox(id = NS(id,"gene_cluster"),
                selected = "gene",
                width = NULL,
-          tabPanel("by Gene Expression",value = "gene",
+          tabPanel("Gene Expression",value = "gene",
+                   dropdownButton(
+					fluidRow(
+						column(7, style='padding-left:6px; padding-right:3px;',
+							column(6, style='padding-left:2px; padding-right:1px;', numericInput(NS(id,"pdf_width_bygene"),"Width",value = 7)),
+							column(6, style='padding-left:1px; padding-right:2px;', numericInput(NS(id,"pdf_height_bygene"),"Height",value = 7))),
+						column(5, style='padding-left:0px; padding-right:6px; padding:16px', downloadButton(NS(id,'export_bygene')))
+					),
+                     circle = FALSE,
+                     status = "primary",
+                     icon = icon("download"),
+                     width = "300px",
+                     size= "sm",
+                     up = F,
+                     tooltip = tooltipOptions(title = "Download")
+                   ),
             plotOutput(NS(id,"plot_gene"),
-                       height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
+                       height = "80vh") %>% withLoader(type='html',loader = 'dnaspin')
           ),
-          tabPanel("by Cluster",value = "cluster",
+          tabPanel("Categories",value = "cluster",
+                   dropdownButton(
+					fluidRow(
+						column(7, style='padding-left:6px; padding-right:3px;',
+							column(6, style='padding-left:2px; padding-right:1px;', numericInput(NS(id,"pdf_width_bycluster"),"Width",value = 7)),
+							column(6, style='padding-left:1px; padding-right:2px;', numericInput(NS(id,"pdf_height_bycluster"),"Height",value = 7))),
+						column(5, style='padding-left:0px; padding-right:6px; padding:16px', downloadButton(NS(id,'export_bycluster')))
+					),
+                     circle = FALSE,
+                     status = "primary",
+                     icon = icon("download"),
+                     width = "300px",
+                     size= "sm",
+                     up = F,
+                     tooltip = tooltipOptions(title = "Download")
+                   ),
             plotOutput(NS(id,"plot_cluster"),
-                      height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
+                      height = "80vh") %>% withLoader(type='html',loader = 'dnaspin')
+          ),
+          tabPanel("Fields",value = "field",
+                   dropdownButton(
+					fluidRow(
+						column(7, style='padding-left:6px; padding-right:3px;',
+							column(6, style='padding-left:2px; padding-right:1px;', numericInput(NS(id,"pdf_width_byfield"),"Width",value = 7)),
+							column(6, style='padding-left:1px; padding-right:2px;', numericInput(NS(id,"pdf_height_byfield"),"Height",value = 7))),
+						column(5, style='padding-left:0px; padding-right:6px; padding:16px', downloadButton(NS(id,'export_byfield')))
+					),
+                     circle = FALSE,
+                     status = "primary",
+                     icon = icon("download"),
+                     width = "300px",
+                     size= "sm",
+                     up = F,
+                     tooltip = tooltipOptions(title = "Download")
+                   ),
+                   plotOutput(NS(id,"plot_field"),
+                              height = "100vh") %>% withLoader(type='html',loader = 'dnaspin')
           )
         )
       )
@@ -163,6 +231,9 @@ MultiPlotsServer <- function(id,sce) {
                            server = TRUE)
     }) 
     
+    updateSelectizeInput(session, 'fieldType', 
+                         choices = names(colData(sce))[sapply(colData(sce), is.numeric)],
+                         server = TRUE)
     
     ### Gen selected & data preparation ----
     #### Selected Gene -----
@@ -194,7 +265,7 @@ MultiPlotsServer <- function(id,sce) {
     
     #### Plots ----
     list_plots <- reactive({
-      req(!is.null(input$plotType))
+      req(input$plotType)
       if(input$GL_T){
         req(length(genes.GL()$genes) > 0)
         feature <- genes.GL()$genes
@@ -211,7 +282,7 @@ MultiPlotsServer <- function(id,sce) {
       list_plots
     })
     
-    output$plot_gene <- renderPlot({
+    list_gene_plot <- reactive({
       f_plot <- list_plots()
       if(input$colPal != "viridis"){
       for(i in 1:length(f_plot)){
@@ -221,6 +292,13 @@ MultiPlotsServer <- function(id,sce) {
       
       cowplot::plot_grid(plotlist = f_plot)
     })
+      
+    output$plot_gene <- renderPlot({
+      req(!is.null(list_gene_plot()))
+      list_gene_plot()
+      })
+    
+    ### Clusters ----
     
     list_cluster_plot <- eventReactive(c(input$actionButton,input$plotType,input$colPal_cluster),{
       req(length(input$clusterType) > 0)
@@ -230,14 +308,73 @@ MultiPlotsServer <- function(id,sce) {
         f_plot[[i]] <- reducedDimPlot_cluster(sce = sce,reducedDim = input$plotType,partition = input$partitionType,
                                               cluster = input$clusterType[i],alpha = 0.5,palette = input$colPal_cluster)
       }
-      f_plot
+      cowplot::plot_grid(plotlist = f_plot)
+      
     })
     
     output$plot_cluster <- renderPlot({
-      cowplot::plot_grid(plotlist = list_cluster_plot())
+      req(!is.null(list_cluster_plot()))
+      list_cluster_plot()
     })
     
-
+    ### Fields ---
+    
+    list_field_plot <- eventReactive(c(input$field_actionButton,input$plotType),{
+      req(length(input$fieldType) > 0)
+      req(!is.null(input$plotType))
+      list_plots <- list()
+      feature <- input$fieldType
+      for(i in 1:length(feature)){
+        list_plots[[feature[i]]] <- scater::plotReducedDim(object = sce, dimred = input$plotType,ncomponents = 2, colour_by=feature[i]) + ggtitle(feature[i]) + 
+          scale_color_distiller(palette ='YlOrRd',direction = 1) + labs(color=feature[i])
+        
+      }
+      
+      cowplot::plot_grid(plotlist = list_plots)
+    })
+    
+    
+    output$plot_field <- renderPlot({
+      req(!is.null(list_field_plot()))
+      list_field_plot()
+    })
+    
+  
+    ### Downloads -----
+    
+    output$export_bygene = downloadHandler(
+      filename = function() {"MultiPlot_byGeneExpression.pdf"},
+      content = function(file) {
+        pdf(file,
+            width = input$pdf_width_bygene,
+            height = input$pdf_height_bygene
+        )
+        list_gene_plot() %>% plot()
+        dev.off()
+      })
+    
+    output$export_bycluster = downloadHandler(
+      filename = function() {"MultiPlot_byCluster.pdf"},
+      content = function(file) {
+        pdf(file,
+            width = input$pdf_width_bycluster,
+            height = input$pdf_height_bycluster
+        )
+        list_cluster_plot() %>% plot()
+        dev.off()
+      })
+    
+    output$export_byfield = downloadHandler(
+      filename = function() {"MultiPlot_byField.pdf"},
+      content = function(file) {
+        pdf(file,
+            width = input$pdf_width_byfield,
+            height = input$pdf_height_byfield
+        )
+        list_field_plot() %>% plot()
+        dev.off()
+      })
+    
   })
 }
 

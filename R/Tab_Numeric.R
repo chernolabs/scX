@@ -3,38 +3,33 @@
 #####                              ######## 
 
 ##### Cluster UI Module ----
-Clusters_UI <- function(id) {
+Fields_UI <- function(id) {
   tagList(
     fluidRow(
       column(3,
              box(title = htmltools::span(icon("gears"), " Settings"),
                  width = NULL, status = "primary",solidHeader = T,collapsible = F,
                  conditionalPanel("input.scatter_heatmap == 'scatter'",ns=NS(id),
-                   column(4, 
-                          style='padding-left:12px; padding-right:3px;',
-                          align="center",
-                          pickerInput(NS(id,"partitionType1"),
-                          "Partition #1",
-                          choices = NULL)
+                   fluidRow(
+                     column(6, 
+                            style='padding-left:12px; padding-right:3px;',
+                            align="center",
+                            pickerInput(NS(id,"partitionType1"),
+                            "Field #1",
+                            choices = NULL)
+                     ),
+                     column(6,
+                            style='padding-left:3px; padding-right:12px;',
+                            align="center",
+                            pickerInput(NS(id,"partitionType2"),
+                            "Field #2",
+                            choices = NULL)
+                     )
                    ),
-                   column(4,
-                          style='padding-left:3px; padding-right:12px;',
-                          align="center",
-                          pickerInput(NS(id,"partitionType2"),
-                          "Partition #2",
-                          choices = NULL)
-                   ),
-                 ),
-                 column(4,
-                        style='padding-left:3px; padding-right:12px;',
-                        align="center",
-                        pickerInput(NS(id,"partitionColor"),
-                                    "Partition Color",
-                                    choices = NULL)
                  ),
                  conditionalPanel("input.scatter_heatmap == 'heatmap' || input.scatter_heatmap == 'dotplot' || input.scatter_heatmap == 'stackVln' || input.scatter_heatmap == 'matrix' ", ns = NS(id),
                                   fluidRow(
-                                    column(11,style='padding-left:0px; padding-right:2px;',
+                                    column(10,style='padding-left:12px; padding-right:2px;',align="center",
                                            selectizeInput(NS(id,"numeric_columns"),
                                                           label=NULL,
                                                           choices = NULL, 
@@ -44,7 +39,8 @@ Clusters_UI <- function(id) {
                                                           width = NULL,
                                                           multiple=T)
                                     ),
-                                    column(1,style='padding-left:2px; padding-right:2px; padding-top:4px',
+                                    column(2,style='padding-left:2px; padding-right:12px; padding-top:4px',
+                                           align="center",
                                            actionBttn((NS(id,"action")),
                                                       label = NULL,
                                                       style = "unite",
@@ -66,7 +62,7 @@ Clusters_UI <- function(id) {
                                                status = "primary",
                                                fill = TRUE),
                                   prettySwitch(NS(id,"norm_heat"),
-                                               "Norm per gene",
+                                               "Norm per field",
                                                value = F,
                                                status = "primary",
                                                fill = TRUE),
@@ -118,6 +114,14 @@ Clusters_UI <- function(id) {
                                                status = "primary",
                                                fill = TRUE)
                                   
+                 ),
+				 hr(style = "border-top: 1px solid #0073b7;"),
+				 column(12,
+                        style='padding-left:20px; padding-right:20px;',
+                        align="center",
+                        pickerInput(NS(id,"partitionColor"),
+                                    "Partition Color",
+                                    choices = NULL)
                  )
              )
       ),
@@ -125,36 +129,93 @@ Clusters_UI <- function(id) {
              tabBox(id = NS(id,"scatter_heatmap"),
                     selected = "scatter",
                     width = NULL,
-                    tabPanel("Scatter",value = "scatter",
-                             box(title = "Scatter Plot",
+                    tabPanel("Distribution",value = "scatter",
+                             box(title = "Distribution Plot",
                                  width = NULL, solidHeader = T, collapsible = T,
                                  footer = tagList(shiny::icon("cat"), "Nya"),
-                                 plotlyOutput(NS(id,"plot_numeric"),height = "100vh") %>% withSpinner()
+                                 dropdownButton(
+									fluidRow(
+										column(7, style='padding-left:6px; padding-right:3px;',
+											column(6, style='padding-left:2px; padding-right:1px;', numericInput(NS(id,"pdf_width_scatter"),"Width",value = 7)),
+											column(6, style='padding-left:1px; padding-right:2px;', numericInput(NS(id,"pdf_height_scatter"),"Height",value = 7))),
+										column(5, style='padding-left:0px; padding-right:6px; padding:16px', downloadButton(NS(id,'export_scatter')))
+									),
+                                   circle = FALSE,
+                                   status = "primary",
+                                   icon = icon("download"),
+                                   width = "300px",
+                                   size= "sm",
+                                   up = F,
+                                   tooltip = tooltipOptions(title = "Download")
+                                 ),
+                                 plotlyOutput(NS(id,"plot_numeric"),height = "80vh") %>% withSpinner()
                              )
                     ),
                     tabPanel("Heatmap", value= "heatmap",
                              box(width = NULL, solidHeader = T, collapsible = F,
                                  footer = tagList(shiny::icon("cat"), "Nya"),
-                                 plotOutput(NS(id,"plot_heatmap"),height = "100vh") %>% withSpinner()
+                                 dropdownButton(
+									fluidRow(
+										column(7, style='padding-left:6px; padding-right:3px;',
+											column(6, style='padding-left:2px; padding-right:1px;', numericInput(NS(id,"pdf_width_heatmap"),"Width",value = 7)),
+											column(6, style='padding-left:1px; padding-right:2px;', numericInput(NS(id,"pdf_height_heatmap"),"Height",value = 7))),
+										column(5, style='padding-left:0px; padding-right:6px; padding:16px', downloadButton(NS(id,'export_heatmap')))
+									),
+                                   circle = FALSE,
+                                   status = "primary",
+                                   icon = icon("download"),
+                                   width = "300px",
+                                   size= "sm",
+                                   up = F,
+                                   tooltip = tooltipOptions(title = "Download")
+                                 ),
+                                 plotOutput(NS(id,"plot_heatmap"),height = "80vh") %>% withSpinner()
                              )
                     ),
                     tabPanel("DotPlot", value= "dotplot",
                              box(width = NULL,solidHeader = T,collapsible = F,
                                  footer = tagList(shiny::icon("cat"), "Nya"),
-                                 plotlyOutput(NS(id,"plot_DotPlot"),height = "100vh") %>% withSpinner()
+                                 dropdownButton(
+									fluidRow(
+										column(7, style='padding-left:6px; padding-right:3px;',
+											column(6, style='padding-left:2px; padding-right:1px;', numericInput(NS(id,"pdf_width_dotplot"),"Width",value = 7)),
+											column(6, style='padding-left:1px; padding-right:2px;', numericInput(NS(id,"pdf_height_dotplot"),"Height",value = 7))),
+										column(5, style='padding-left:0px; padding-right:6px; padding:16px', downloadButton(NS(id,'export_dotplot')))
+									),
+                                   circle = FALSE,
+                                   status = "primary",
+                                   icon = icon("download"),
+                                   width = "300px",
+                                   size= "sm",
+                                   up = F,
+                                   tooltip = tooltipOptions(title = "Download")
+                                 ),
+                                 plotlyOutput(NS(id,"plot_DotPlot"),height = "80vh") %>% withSpinner()
                              )
                     ),
                     tabPanel("StackedViolin", value= "stackVln",
                              box(width = NULL,solidHeader = T,collapsible = F,
                                  footer = tagList(shiny::icon("cat"), "Nya"),
-                                 plotOutput(NS(id,"plot_stackVln"),height = "100vh") %>% withSpinner()
+                                 dropdownButton(
+									fluidRow(
+										column(7, style='padding-left:6px; padding-right:3px;',
+											column(6, style='padding-left:2px; padding-right:1px;', numericInput(NS(id,"pdf_width_StackedViolin"),"Width",value = 7)),
+											column(6, style='padding-left:1px; padding-right:2px;', numericInput(NS(id,"pdf_height_StackedViolin"),"Height",value = 7))),
+										column(5, style='padding-left:0px; padding-right:6px; padding:16px', downloadButton(NS(id,'export_StackedViolin')))
+									),
+                                   circle = FALSE,
+                                   status = "primary",
+                                   icon = icon("download"),
+                                   width = "300px",
+                                   size= "sm",
+                                   up = F,
+                                   tooltip = tooltipOptions(title = "Download")
+                                 ),
+                                 plotOutput(NS(id,"plot_stackVln"),height = "80vh") %>% withSpinner()
                              )
                     ),
-                    tabPanel("Matrix", value= "matrix",
-                             box(width = NULL, solidHeader = T, collapsible = F,
-                                 footer = tagList(shiny::icon("cat"), "Nya"),
-                                 plotOutput(NS(id,"plot_Matrix"),height = "100vh") %>% withSpinner()
-                             )
+                    tabPanel("Correlation", value= "matrix",
+                                 uiOutput(NS(id,"CorheatMapOutput"))
                     )
              )
       )
@@ -163,7 +224,7 @@ Clusters_UI <- function(id) {
 }
 
 ##### Cluster Server Module ----
-Clusters_Server <- function(id,sce) {
+Fields_Server <- function(id,sce) {
   moduleServer(id, function(input,output,session) {
     
     ### Observe Events ----
@@ -208,12 +269,12 @@ Clusters_Server <- function(id,sce) {
     
     ### scatters ----
     
-    output$plot_numeric <- renderPlotly({
+    PlotNumeric <- reactive({
       req(!is.null(df()))
       req(input$partitionType1)  
       req(input$partitionType2)
       req(input$partitionColor)  
-      req(input$scatter_heatmap == "scatter")
+      #req(input$scatter_heatmap == "scatter")
       if(input$partitionType2 == "None"){
         if(input$partitionColor == "None"){
           g <- df() %>% ggplot(aes(y=.data[[input$partitionType1]],x='All',fill='All')) + geom_boxplot() +
@@ -237,9 +298,13 @@ Clusters_Server <- function(id,sce) {
             xlab(input$partitionType1) + ylab(input$partitionType2) + scale_color_manual(values=OrderPartReact()$colPart)
         }
       }
-       ggplotly(g) %>% toWebGL()
+       g
     })
     
+    output$plot_numeric <- renderPlotly({
+      req(!is.null(PlotNumeric()))
+      PlotNumeric() %>% ggplotly() %>% toWebGL()
+      })
     
     feature <- eventReactive(input$action,{
       req(length(input$numeric_columns) >0)
@@ -248,14 +313,14 @@ Clusters_Server <- function(id,sce) {
     
     ### Heatmap ----
     Heatmap_DF <- eventReactive(c(feature(),input$norm_heat),{
-      req(input$scatter_heatmap == "heatmap")
+      #req(input$scatter_heatmap == "heatmap")
       req(length(feature()) > 0)
       
       # value <- ifelse(input$norm_heat,yes = "logcounts.norm",no = "logcounts") #To swtich between norm ot not normalize expression gene.
       exp_mtx <- df()[,feature(),drop=F] %>% as.matrix %>% t()
       
       if(input$norm_heat){
-        exp_mtx <- apply(exp_mtx,1,function(x){x/max(x)}) %>% t()
+        exp_mtx <- apply(exp_mtx,1,function(x){x/max(x,na.rm = T)}) %>% t()
       }
       
       exp_mtx
@@ -264,14 +329,14 @@ Clusters_Server <- function(id,sce) {
     ### Heatmaps ----
     #Here I made everything in the same reactive object to manipulated all the reactive order at the same time
     Heatmap_Plot <- eventReactive(c(Heatmap_DF(),input$partitionColor,input$mean_heat,input$cluster_row,input$cluster_column),{
-      req(input$scatter_heatmap == "heatmap")
+      #req(input$scatter_heatmap == "heatmap")
       req(input$partitionColor)
       req(!is.null(Heatmap_DF()))
       
       if(input$mean_heat) {
         byPartition <- if(input$partitionColor != 'None'){df()[,input$partitionColor,drop=T]}else{rep('All',ncol(Heatmap_DF()))}
         dta <- apply(Heatmap_DF(),1,FUN =  function(x){
-          tapply(x,byPartition,FUN=mean)
+          tapply(x,byPartition,FUN=function(y){mean(y,na.rm = T)})
         }
         )
         
@@ -289,9 +354,10 @@ Clusters_Server <- function(id,sce) {
         }
         
         h1 <- Heatmap(dta,
-                      col = if(max(dta)==min(dta)) {viridis(1)} else {viridis(100)},
+                      col = if(max(dta,na.rm = T)==min(dta,na.rm = T)) {viridis::viridis(1)} else {viridis::viridis(100)},
                       border =F,
-                      name = "Gene expression",
+                      na_col = "grey",
+                      name = "Value",
                       cluster_rows = input$cluster_row,
                       cluster_columns = input$cluster_column,
                       row_names_side = "left",
@@ -300,7 +366,7 @@ Clusters_Server <- function(id,sce) {
                       # column_title_gp = gpar(fontsize = 10),
                       column_title_side = "bottom",
                       # column_title = "Partition",
-                      row_title = "Genes",
+                      row_title = "Fields",
                       row_gap = unit(1, "mm"),
                       column_gap = unit(1, "mm"),
                       show_row_names = T,
@@ -325,9 +391,10 @@ Clusters_Server <- function(id,sce) {
         }
         # colnames(HeatmapF()) <- NULL
         h1 <- Heatmap(as.matrix(Heatmap_DF()),
-                      col = if(max(Heatmap_DF())==min(Heatmap_DF())) {viridis(1)} else {viridis(100)},
+                      col = if(max(Heatmap_DF(),na.rm = T)==min(Heatmap_DF(),na.rm = T)) {viridis::viridis(1)} else {viridis::viridis(100)},
                       border =F,
-                      name = "Gene expression",
+                      na_col = "grey",
+                      name = "Value",
                       cluster_rows = input$cluster_row,
                       cluster_columns = input$cluster_column,
                       row_names_side = "left",
@@ -336,7 +403,7 @@ Clusters_Server <- function(id,sce) {
                       # column_title_gp = gpar(fontsize = 10),
                       column_title_side = "bottom",
                       # column_title = "Partition",
-                      row_title = "Genes",
+                      row_title = "Fields",
                       row_gap = unit(1, "mm"),
                       column_gap = unit(1, "mm"),
                       show_row_names = T,
@@ -352,22 +419,24 @@ Clusters_Server <- function(id,sce) {
     })
     
     output$plot_heatmap <- renderPlot({
-      req(input$scatter_heatmap == "heatmap")
+      #req(input$scatter_heatmap == "heatmap")
       req(!is.null(Heatmap_Plot()))
       Heatmap_Plot()
     })
     
     #### Dotplots ----
-    output$plot_DotPlot <- renderPlotly({
+    DotPlot <- reactive({
       req(length(feature()) > 0)
-      req(input$scatter_heatmap == "dotplot")
+      #req(input$scatter_heatmap == "dotplot")
       req(input$partitionColor)
       
       byPartition <- if(input$partitionColor != 'None'){ input$partitionColor}else{NULL}
-      g  <- plotDots(object = sce,features = feature(),group = ,
+      g  <- plotDots_fields(df = df(),
+                            features = feature(),
+                            group = byPartition,
                      scale = input$scale_dotplot,center = input$center_dotplot) + 
         theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1,size=15)) +
-        xlab(input$partitionType) + ylab("Genes")
+        xlab(input$partitionType) + ylab("Fields")
       if(input$ord_dotplot){ #Define the order if the input is selected and the is not a heatmap of 1 row, received the order vector
         vtor <- if(length(feature())>1) {
           ord <- matrix(g$data$Average,byrow = F,nrow=length(unique(g$data$Feature))) %>% dist %>% hclust %>% .$order
@@ -379,16 +448,18 @@ Clusters_Server <- function(id,sce) {
       
       g$data$Feature <- factor(g$data$Feature,levels = vtor)
       
-      ggplotly(g) %>% config(modeBarButtonsToRemove = c("select2d", "lasso2d", "hoverCompareCartesian"))
-      
-      
+      g
     })
     
+    output$plot_DotPlot <- renderPlotly({
+      req(!is.null(DotPlot()))
+      DotPlot() %>% ggplotly() %>% config(modeBarButtonsToRemove = c("select2d", "lasso2d", "hoverCompareCartesian"))
+    })
     
     ### Stck Violin
-    output$plot_stackVln <- renderPlot({
+    stackVln <- reactive({
       req(length(feature()) > 0)
-      req(input$scatter_heatmap == "stackVln")
+      #req(input$scatter_heatmap == "stackVln")
       #Adaptated from https://github.com/ycl6/StackedVlnPlot
       df_plot <- df()[,feature(),drop=F] %>% as.data.frame
       # Add cell ID and identity classes
@@ -425,7 +496,7 @@ Clusters_Server <- function(id,sce) {
         scale_y_continuous(expand = c(0, 0), position="right", labels = function(x)
           c(rep(x = "", times = max(length(x)-2, 0) ), x[length(x) - 1], "")) +
         facet_grid(rows = vars(Feat), scales = "free", switch = "y") +
-        theme_cowplot(font_size = 12) +
+        cowplot::theme_cowplot(font_size = 12) +
         theme(axis.text.x = element_text(angle = 45, vjust = 1, hjust=1),
               legend.position = "none", panel.spacing = unit(0, "lines"),
               plot.title = element_text(hjust = 0.5),
@@ -433,7 +504,7 @@ Clusters_Server <- function(id,sce) {
               strip.background = element_blank(),
               strip.text = element_text(face = "bold"),
               strip.text.y.left = element_text(angle = 0)) +
-         ylab("Expression Level")
+         ylab("Value")
       
         if(input$partitionColor == "None"){
           g <- g + scale_fill_manual(values="grey") + xlab("")
@@ -442,19 +513,23 @@ Clusters_Server <- function(id,sce) {
         }
       g
     })
-  
+    
+    output$plot_stackVln <- renderPlot({
+      req(!is.null(stackVln()))
+      stackVln()
+    })
     ### Matrix ----
     
     Matrix_DF <- eventReactive(c(input$partitionColor,feature()),{
-      req(input$scatter_heatmap == "matrix")
+      #req(input$scatter_heatmap == "matrix")
       req(length(feature()) > 1)
       byPartition <- if(input$partitionColor != 'None'){input$partitionColor}else{NULL}
-      df_corr <- df() %>% group_by(across(all_of(byPartition))) %>% summarise(Correlation = cor(cbind(across(all_of(feature())))))
+      df_corr <- df() %>% group_by(across(all_of(byPartition))) %>% summarise(Correlation = cor(cbind(across(all_of(feature())))),use = "complete.obs",method = "spearman")
       df_corr
     })
     
-    output$plot_Matrix <- renderPlot({
-      req(input$scatter_heatmap == "matrix")
+    PlotMatrix <- reactive({
+      #req(input$scatter_heatmap == "matrix")
       req(!is.null(Matrix_DF()))
       if(input$partitionColor != 'None'){
         # rownames(df_corr$Correlation)  <- paste0(mtx[,input$partitionColor,drop=T],"_",rownames(mtx$Correlation))
@@ -474,15 +549,16 @@ Clusters_Server <- function(id,sce) {
         col_split <- NULL
       }
       Heatmap(mtx,
-              col = if(max(t(mtx))==min(t(mtx))) {viridis(1)} else {viridis(100)},
+              col = if(max(t(mtx),na.rm = T)==min(t(mtx),na.rm = T)) {viridis::viridis(1)} else {viridis::viridis(100)},
               border =F,
-              name = "Gene expression",
+              name = "Correlation",
+              na_col = "grey",
               cluster_rows = input$matrix_cluster_row,
               cluster_columns = input$matrix_cluster_column,
               row_names_side = "left",
               column_title_rot = 45,
               column_title_side = "bottom",
-              row_title = "Genes",
+              row_title = "Fields",
               row_gap = unit(1, "mm"),
               column_gap = unit(1, "mm"),
               show_row_names = T,
@@ -494,15 +570,111 @@ Clusters_Server <- function(id,sce) {
       )
     })
     
+    output$plot_Matrix <- renderPlot({
+      req(!is.null(PlotMatrix()))
+      PlotMatrix()
+    })
+    
+    output$CorheatMapOutput <- renderUI({
+      #req(input$scatter_heatmap == "matrix")
+      req(!is.null(Matrix_DF()))
+      #If there are only 1 and NA values, it doens't show any plot.
+      if(all(unique(as.vector(Matrix_DF()$Correlation))%in% c(NA,1))){
+        HTML('<p style="text-align: center;"><strong>No correlation could be found with this conditions.</strong></p>')  
+      } else{
+        tagList(
+          box(width = NULL, solidHeader = T, collapsible = F,
+              footer = tagList(shiny::icon("cat"), "Nya"),
+              dropdownButton(
+				fluidRow(
+				  column(7, style='padding-left:6px; padding-right:3px;',
+				         column(6, style='padding-left:2px; padding-right:1px;', numericInput(NS(id,"pdf_width_matrix"),"Width",value = 7)),
+				         column(6, style='padding-left:1px; padding-right:2px;', numericInput(NS(id,"pdf_height_matrix"),"Height",value = 7))),
+				  column(5, style='padding-left:0px; padding-right:6px; padding:16px', downloadButton(NS(id,'export_matrix')))
+				),
+                circle = FALSE,
+                status = "primary",
+                icon = icon("download"),
+                width = "300px",
+                size= "sm",
+                up = F,
+                tooltip = tooltipOptions(title = "Download")
+              ),
+        plotOutput(NS(id,"plot_Matrix"),height = "80vh") %>% withSpinner()
+          )
+        )
+      }
+    })
+    
+    ### Downloads -----
+    
+    output$export_scatter = downloadHandler(
+      filename = function() {"Distribution_Numerics.pdf"},
+      content = function(file) {
+        pdf(file,
+            width = input$pdf_width_scatter,
+            height = input$pdf_height_scatter
+        )
+        PlotNumeric() %>% plot()
+        dev.off()
+      })
+    
+    output$export_heatmap = downloadHandler(
+      filename = function() {"Heatmap_Numerics.pdf"},
+      content = function(file) {
+        pdf(file,
+            width = input$pdf_width_heatmap,
+            height = input$pdf_height_heatmap
+        )
+        Heatmap_Plot() %>% plot()
+        dev.off()
+      }
+    )
+    
+    output$export_dotplot = downloadHandler(
+      filename = function() {"DotPlot_Numerics.pdf"},
+      content = function(file) {
+        pdf(file,
+            width = input$pdf_width_dotplot,
+            height = input$pdf_height_dotplot
+        )
+        DotPlot() %>% plot()
+        dev.off()
+      }
+    )
+    
+    output$export_StackedViolin = downloadHandler(
+      filename = function() {"StackedViolin_Numerics.pdf"},
+      content = function(file) {
+        pdf(file,
+            width = input$pdf_width_StackedViolin,
+            height = input$pdf_height_StackedViolin
+        )
+        stackVln() %>% plot()
+        dev.off()
+      }
+    )
+    
+    output$export_matrix = downloadHandler(
+      filename = function() {"CorrMatrix_Numerics.pdf"},
+      content = function(file) {
+        pdf(file,
+            width = input$pdf_width_matrix,
+            height = input$pdf_height_matrix
+        )
+        PlotMatrix() %>% plot()
+        dev.off()
+      }
+    )
     
   })
 }
-
-ui <- fluidPage(
-  Clusters_UI(id = 'lala')
-)
-server <- function(input, output, session) {
-  Clusters_Server(sce = sce,id = 'lala')
-}
-shinyApp(ui = ui,server = server)
+# 
+# ui <- fluidPage(
+#   Clusters_UI(id = 'lala')
+# )
+# server <- function(input, output, session) {
+#   Clusters_Server(sce = sce,id = 'lala')
+# }
+# shinyApp(ui = ui,server = server)
 

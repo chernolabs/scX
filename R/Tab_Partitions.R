@@ -71,12 +71,42 @@ Clusters_UI <- function(id) {
                selected = "barplot",
                width = NULL,
           tabPanel("BarPlot",value = "barplot",
+                   dropdownButton(
+					fluidRow(
+						column(7, style='padding-left:6px; padding-right:3px;',
+							column(6, style='padding-left:2px; padding-right:1px;', numericInput(NS(id,"pdf_width_barplot"),"Width",value = 7)),
+							column(6, style='padding-left:1px; padding-right:2px;', numericInput(NS(id,"pdf_height_barplot"),"Height",value = 7))),
+						column(5, style='padding-left:0px; padding-right:6px; padding:16px', downloadButton(NS(id,'export_barplot')))
+					),
+                     circle = FALSE,
+                     status = "primary",
+                     icon = icon("download"),
+                     width = "300px",
+                     size= "sm",
+                     up = F,
+                     tooltip = tooltipOptions(title = "Download")
+                   ),
             plotOutput(NS(id,"plot_cluster"),
-                     height = "100vh") %>% withSpinner()
+                     height = "80vh") %>% withSpinner()
           ),
           tabPanel("Matrix",value = "matrix",
+                   dropdownButton(
+					fluidRow(
+						column(7, style='padding-left:6px; padding-right:3px;',
+							column(6, style='padding-left:2px; padding-right:1px;', numericInput(NS(id,"pdf_width_matrix"),"Width",value = 7)),
+							column(6, style='padding-left:1px; padding-right:2px;', numericInput(NS(id,"pdf_height_matrix"),"Height",value = 7))),
+						column(5, style='padding-left:0px; padding-right:6px; padding:16px', downloadButton(NS(id,'export_matrix')))
+					),
+                     circle = FALSE,
+                     status = "primary",
+                     icon = icon("download"),
+                     width = "300px",
+                     size= "sm",
+                     up = F,
+                     tooltip = tooltipOptions(title = "Download")
+                   ),
             plotOutput(NS(id,"plot_matrix"),
-                       height = "100vh") %>% withSpinner()
+                       height = "80vh") %>% withSpinner()
           )
         )
       )
@@ -141,10 +171,10 @@ Clusters_Server <- function(id,sce) {
     
     ### BarPlots ----
     
-    output$plot_cluster <- renderPlot({
+    Barplot_cluster <- reactive({
       req(input$partitionType1)  
       req(input$partitionType2)  
-      req(input$barplot_matrix == "barplot")
+      # req(input$barplot_matrix == "barplot")
       if(input$partitionType2 == "None"){
         ### Simple BarPlot ----
               ### Proportion ----
@@ -252,22 +282,28 @@ Clusters_Server <- function(id,sce) {
       
     })
     
+    output$plot_cluster <- renderPlot({
+      req(!is.null(Barplot_cluster()))
+      Barplot_cluster()
+    })
+    
     #### Matrix  -----
     #### Metric ----
     
     output$randValue <- renderText({
       req(input$partitionType1)  
       req(input$partitionType2 != "None")
-      req(input$barplot_matrix == "matrix")
+      #req(input$barplot_matrix == "matrix")
       rand <- bluster::pairwiseRand(colData(sce)[,input$partitionType1],
                    colData(sce)[,input$partitionType2],
                    mode="index")
       paste('<b style="color:black;">Rand Index:',round(rand,2),'<b><br>')
     })
-    output$plot_matrix <- renderPlot({
+    
+    PlotMatrix <- reactive({
       req(input$partitionType1)  
       req(input$partitionType2 != "None")
-      req(input$barplot_matrix == "matrix")
+      #req(input$barplot_matrix == "matrix")
       
       if(input$Metric == "Count"){
         tab <- table(colData(sce)[,input$partitionType1],
@@ -300,6 +336,37 @@ Clusters_Server <- function(id,sce) {
       
       
     })
+    
+    output$plot_matrix <- renderPlot({
+    req(!is.null(PlotMatrix()))
+      PlotMatrix()
+    })
+    
+    ### Downloads -----
+    
+    output$export_barplot = downloadHandler(
+      filename = function() {"BarPlots_Categories.pdf"},
+      content = function(file) {
+        pdf(file,
+            width = input$pdf_width_barplot,
+            height = input$pdf_height_barplot
+        )
+        Barplot_cluster() %>% plot()
+        dev.off()
+      }
+    )
+    
+    output$export_matrix = downloadHandler(
+      filename = function() {"Matrix_Categories.pdf"},
+      content = function(file) {
+        pdf(file,
+            width = input$pdf_width_matrix,
+            height = input$pdf_height_matrix
+        )
+        PlotMatrix() %>% plot()
+        dev.off()
+      }
+    )
     
   })
 }

@@ -11,10 +11,12 @@ Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
 Depends: 
+    R (>= 2.10),
     SingleCellExperiment
 Imports: 
     bluster,
-    ComplexHeatmap,
+    circlize,
+    ComplexHeatmap (>= 2.12.1),
     cowplot,
     dplyr,
     DT,
@@ -42,7 +44,13 @@ Imports:
     shinyjs,
     shinyWidgets,
     tidyr,
+	uwot,
     viridis
 Suggests: 
     doParallel,
-	Seurat
+    knitr,
+    rmarkdown,
+    Seurat
+LazyData: true
+VignetteBuilder: knitr
+URL: https://tvegawaichman.github.io/scXplorer/

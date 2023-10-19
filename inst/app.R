@@ -15,7 +15,7 @@ ui <- function(){
 				path_git,
 				"' target='_blank'><img style =
 						  'display: block; margin-left: auto; margin-right: auto;'
-						  src='scXplorer-03.png' width = '186'></a>",
+						  src='www/scXplorer-03.png' width = '186'></a>",
 				"<br>",
 				paste0(
 				  "<p style = 'text-align: center;'><small><a href='",
@@ -53,17 +53,26 @@ ui <- function(){
 			),
 			menuItem("Gene Expression", tabName = "g_expTab",
 					 icon = icon('chart-simple'), startExpanded = F,
-					 menuSubItem('Expression', tabName = "g_exp",
-								 icon = icon('signal')
+					 menuSubItem('Categories', tabName = "g_exp",
+					             icon = icon('signal')
+					 ),
+					 menuSubItem('Fields', tabName = "g_numeric_exp",
+								 icon = icon('audible')
 					 ),
 					 menuSubItem('Co-expression', tabName = "g_coexp",
-								 icon = icon('clone', class = 'fa-regular'))
+								 icon = icon('comments', class = 'fa-regular'))
 			),
 			menuItem("Differential Expression", tabName = "volcanoTab",
 					 icon = icon("chart-column")
 			),
-			menuItem("Partitions", tabName = "clustersTab",
-					 icon = icon("circle-nodes")
+			menuItem("Exploratory Data Analysis", tabName = "EDATab",
+			         icon = icon("circle-nodes"), startExpanded = F,
+			         menuSubItem('Categories', tabName = "clustersTab",
+			                     icon = icon('bars-progress')
+			         ),
+			         menuSubItem('Fields', tabName = "fieldsTab",
+			                     icon = icon('clone')
+			         )
 			),
 			menuItem("Visual Tools", tabName = "toolsTab",
 					 icon = icon("toolbox"), startExpanded = F,
@@ -83,7 +92,7 @@ ui <- function(){
       
       ### Styling ----
       tags$head(
-        tags$link(rel="shortcut icon", href="scXplorer-03.ico"),
+        tags$link(rel="shortcut icon", href="www/scXplorer-03.ico"),
         tags$script(glue::glue('document.title = {dataset_name}')),
         tags$style(
           HTML(".tab-content { padding-left: 20px; padding-right: 30px; }")
@@ -125,6 +134,11 @@ ui <- function(){
                         {width:0px; font-size:0px; padding:0px; margin:0px;}')
         )
       ),
+	  tags$footer(align = "left",
+			style = "position:absolute; bottom:0; width:100%; height:20px; z-index:1000;
+				text-align:center; font-size:10px; color:white; padding:1px; background-color:gray;",
+			HTML('<footer> Icon by @irimiodo </footer>')
+		),
       ### Main -----
       tabItems(
         tabItem(tabName = "smryTab",
@@ -139,8 +153,12 @@ ui <- function(){
                 N_markersUI(id="n_markers")
         ),
         tabItem(tabName = "g_exp",
-                HTML('<h4><span style="font-family:Trebuchet MS,Helvetica,sans-serif"><strong><span style="color:#4e5f70">Expression</span></strong></span></h4>'),
+                HTML('<h4><span style="font-family:Trebuchet MS,Helvetica,sans-serif"><strong><span style="color:#4e5f70">Expression by Partitions</span></strong></span></h4>'),
                 ExpressionUI(id="Exp")
+        ),
+        tabItem(tabName = "g_numeric_exp",
+                HTML('<h4><span style="font-family:Trebuchet MS,Helvetica,sans-serif"><strong><span style="color:#4e5f70">Expression by Fields</span></strong></span></h4>'),
+                Numeric_ExpressionUI(id="numeric_Exp")
         ),
         tabItem(tabName = "g_coexp",
                 HTML('<h4><span style="font-family:Trebuchet MS,Helvetica,sans-serif"><strong><span style="color:#4e5f70">Co-expression</span></strong></span></h4>'),
@@ -153,6 +171,10 @@ ui <- function(){
         tabItem(tabName = "clustersTab",
                 HTML('<h4><span style="font-family:Trebuchet MS,Helvetica,sans-serif"><strong><span style="color:#4e5f70">Partition Analysis</span></strong></span></h4>'),
                 Clusters_UI("cluster")
+        ),
+        tabItem(tabName = "fieldsTab",
+                HTML('<h4><span style="font-family:Trebuchet MS,Helvetica,sans-serif"><strong><span style="color:#4e5f70">Fields Analysis</span></strong></span></h4>'),
+                Fields_UI("fields")
         ),
         tabItem(tabName = "t_VGL",
                 HTML('<h4><span style="font-family:Trebuchet MS,Helvetica,sans-serif"><strong><span style="color:#4e5f70">Violin by Partition </span></strong></span></h4>'),
@@ -173,13 +195,15 @@ ui <- function(){
 }
 
 server <- function(input, output, session) {
-	QC_Server("qc", sce = cseo$SCE)
+  QC_Server(id ="qc",sce = cseo$SCE,descriptionText = cseo$text)
 	markersServer(id="markers", sce=cseo$SCE, ldf = cseo$ldf, point.size=point.size)
 	N_markersServer(id="n_markers", sce=cseo$SCE, point.size=point.size)
 	ExpressionServer(id="Exp", sce=cseo$SCE, point.size=point.size)
+	Numeric_ExpressionServer(id="numeric_Exp",sce=cseo$SCE,point.size = point.size)
 	COExpServer(id="Co-exp", sce=cseo$SCE, point.size = point.size)
 	VolcanoServer(id="volcano", sce=cseo$SCE, sce.markers=cseo$sce.markers)
 	VT_Server(id = "tools", sce = cseo$SCE)
 	MultiPlotsServer(id = "MP", sce=cseo$SCE)
-	Clusters_Server("cluster", sce=cseo$SCE)
+	Clusters_Server(id ="cluster", sce=cseo$SCE)
+  Fields_Server("fields",sce = cseo$SCE)                                                                                                                                                                                                     
 }
