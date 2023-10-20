@@ -1,7 +1,9 @@
-url: https://tvegawaichman.github.io/scXplorer/
+url: https://tvegawaichman.github.io/scX/
 
 home:
   title: scX
+  sidebar:
+    structure: [links, license, community, citation, authors, dev]
 
 template:
   bootstrap: 5
@@ -15,43 +17,43 @@ template:
     code_font:
       google: JetBrains Mono
 
-authors:
-  Tomás Vega Waichman:
-    href: https://github.com/tvegawaichman
-  Luz Vercesi:
-    href: https://github.com/mluzvercesi
-  Ariel Berardino:
-    href: https://github.com/ariberar
-  Maximiliano S. Beckel:
-    href: https://github.com/msbeckel
+# authors:
+#   Tomas Vega Waichman:
+#     href: https://github.com/tvegawaichman
+#   Luz Vercesi:
+#     href: https://github.com/mluzvercesi
+#   Ariel Berardino:
+#     href: https://github.com/ariberar
+#   Maximiliano S. Beckel:
+#     href: https://github.com/msbeckel
 
 navbar:
   bg: light
-  title: scXplorer
+  title: scX
   right:
   - icon: fa-home
     href: https://www.leloir.org.ar/biologia-de-sistemas-integrativa?area=bioinformatica-y-biologia-computacional
   - icon: fa-github
-    href: https://github.com/tvegawaichman/scXplorer
+    href: https://github.com/tvegawaichman/scX
   left:
     - text: "Install"
-      href: articles/install
+      href: articles/install.html
     - text: "Quick Start"
-      href: articles/get_started
+      href: articles/get_started.html
     - text: "Tabs"
       menu:
         - text: Summary
-          href: articles/Summary
+          href: articles/Summary.html
         - text: Markers
-          href: articles/Markers
+          href: articles/Markers.html
         - text: Gene Expression
-          href: articles/Gene_Expression
+          href: articles/Gene_Expression.html
         - text: Differential Gene Expression
-          href: articles/Differential_Expression
+          href: articles/Differential_Expression.html
         - text: Explotarory Data Analysis
-          href: articles/Exploratory_Data_Analysis
+          href: articles/Exploratory_Data_Analysis.html
         - text: Visual Tools
-          href: articles/Visual_Tools
+          href: articles/Visual_Tools.html
     - text: "FAQ"
       href: articles/FAQ.html
 development:

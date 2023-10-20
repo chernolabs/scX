@@ -1,9 +1,16 @@
-Package: scXplorer
+Package: scX
 Title: What the Package Does (One Line, Title Case)
 Version: 0.0.0.9000
-Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID"))
+Authors@R: c(
+    person(given = "Tomás",family = "Vega Waichman", email = "tomas.vegawaichman@mail.mcgill.ca", role = c("aut", "cre"),
+           comment = c(GitHub = "https://github.com/tvegawaichman")),
+    person(given = "Maria Luz",family = "Vercesi",  role = c("aut"),
+           comment = c(GitHub = "https://github.com/mluzvercesi")),
+    person(given = "Ariel Agustín",family = "Berardino",  role = c("aut"),
+           comment = c(GitHub = "https://github.com/ariberar")),
+    person(given = "Maximiliano Sebastian",family = "Beckel",  role = c("aut"),
+           comment = c(GitHub = "https://github.com/msbeckel"))
+           )
 Description: What the package does (one paragraph).
 License: MIT + file LICENSE
 Encoding: UTF-8
@@ -52,4 +59,4 @@ Suggests:
     Seurat
 LazyData: true
 VignetteBuilder: knitr
-URL: https://tvegawaichman.github.io/scXplorer/
+URL: https://tvegawaichman.github.io/scX/

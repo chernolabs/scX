@@ -8,8 +8,10 @@ articles:
   Markers: Markers.html
   Summary: Summary.html
   Visual_Tools: Visual_Tools.html
-last_built: 2023-10-20T16:16Z
+  get_started: get_started.html
+  install: install.html
+last_built: 2023-10-20T22:01Z
 urls:
-  reference: https://tvegawaichman.github.io/scXplorer/reference
-  article: https://tvegawaichman.github.io/scXplorer/articles
+  reference: https://tvegawaichman.github.io/scX/reference
+  article: https://tvegawaichman.github.io/scX/articles
 
