@@ -1,0 +1,27 @@
+---
+title: "Install"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE,
+  fig.path = "man/figures/",
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## Installation 
+
+scXplorer requires certain packages to be installed. If the user does not have these packages installed, they can execute the following code: 
+
+```{r}
+BiocManager::install(c("SingleCellExperiment","scran","scatter","ComplexHeatmap"))
+```
+
+
+scXplorer can be installed from Github as follows:
+
+```{r}
+devtools::install_github("tvegawaichman/scXplorer")
+```

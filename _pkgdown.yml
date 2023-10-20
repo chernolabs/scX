@@ -1,54 +1,12 @@
 url: https://tvegawaichman.github.io/scXplorer/
-navbar:
-  bg: light
-  title: scXplorer
-  right:
-  - icon: fa-home
-    href: https://www.leloir.org.ar/bioinformatica-y-biologia-computacional
-  - icon: fa-github
-    href: https://github.com/tvegawaichman/scXplorer
-  left:
-    - text: "Install"
-      href: articles/install.html
-    - text: "Install"
-      href: articles/get_started.html
-    - text: "Tabs"
-      menu:
-        - text: Summary and Quality Control
-        - text: Summary
-          href: articles/Summary
-        - text: -------
-        - text: Markers
-        - text: Gene Markers
-          href: articles/Markers
-        - text: -------
-        - text: Expression
-        - text: Gene Expression
-          href: articles/Gene_Expression
-        - text: -------
-        - text: Differential Gene Expression
-        - text: Differential Gene Expression
-          href: articles/Differential_Expression
-        - text: -------
-        - text: Differential Gene Expression
-        - text: Differential Gene Expression
-          href: articles/Differential_Expression
-        - text: -------
-        - text: EDA
-        - text: Explotarory Data Analysis
-          href: articles/Exploratory_Data_Analysis
-        - text: -------
-        - text: Visual Tools
-        - text: Visual Tools
-          href: articles/Visual_Tools
-    - text: "FAQ"
-      href: articles/FAQ.html
-development:
-  mode: auto
+
+home:
+  title: scX
+
 template:
   bootstrap: 5
   params:
-    bootswatch: lumen
+    bootswatch: flatly
   bslib:
     base_font:
       google: Roboto
@@ -56,6 +14,49 @@ template:
       google: Roboto
     code_font:
       google: JetBrains Mono
+
+authors:
+  Tomás Vega Waichman:
+    href: https://github.com/tvegawaichman
+  Luz Vercesi:
+    href: https://github.com/mluzvercesi
+  Ariel Berardino:
+    href: https://github.com/ariberar
+  Maximiliano S. Beckel:
+    href: https://github.com/msbeckel
+
+navbar:
+  bg: light
+  title: scXplorer
+  right:
+  - icon: fa-home
+    href: https://www.leloir.org.ar/biologia-de-sistemas-integrativa?area=bioinformatica-y-biologia-computacional
+  - icon: fa-github
+    href: https://github.com/tvegawaichman/scXplorer
+  left:
+    - text: "Install"
+      href: articles/install
+    - text: "Quick Start"
+      href: articles/get_started
+    - text: "Tabs"
+      menu:
+        - text: Summary
+          href: articles/Summary
+        - text: Markers
+          href: articles/Markers
+        - text: Gene Expression
+          href: articles/Gene_Expression
+        - text: Differential Gene Expression
+          href: articles/Differential_Expression
+        - text: Explotarory Data Analysis
+          href: articles/Exploratory_Data_Analysis
+        - text: Visual Tools
+          href: articles/Visual_Tools
+    - text: "FAQ"
+      href: articles/FAQ.html
+development:
+  mode: auto
+
 # articles:
 # - title: Sections
 #   navbar: Sections
