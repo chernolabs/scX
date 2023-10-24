@@ -8,9 +8,10 @@ Authors@R: c(
            comment = c(GitHub = "https://github.com/mluzvercesi")),
     person(given = "Ariel Agustín",family = "Berardino",  role = c("aut"),
            comment = c(GitHub = "https://github.com/ariberar")),
-    person(given = "Maximiliano Sebastian",family = "Beckel",  role = c("aut"),
+    person(given = "Maximiliano Sebastián",family = "Beckel",  role = c("aut"),
            comment = c(GitHub = "https://github.com/msbeckel")),
-	person(given = "Ariel",family = "Chernomoretz",  role = c("ctb"))
+	  person(given = "Ariel",family = "Chernomoretz",  role = c("ctb")),
+	  person("Cherno Lab and Collaborators", role = "fnd")  
            )
 Description: A Shiny-based application for interacting with the main single-cell data 
 	embeddings - UMAP, tSNE, PCA - both in 2D and 3D, as well as performing different 

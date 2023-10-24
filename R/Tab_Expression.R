@@ -81,7 +81,7 @@ ExpressionUI <- function(id) {
             fluidRow(
               column(8,style='padding-left:12px; padding-right:3px;',
                 pickerInput(inputId = NS(id,"partitionType"), 
-                            label = "Partition",
+                            label = "Category",
                             choices = NULL)
               ),
               conditionalPanel("input.scatter_heatmap == 'scatter'",ns=NS(id),

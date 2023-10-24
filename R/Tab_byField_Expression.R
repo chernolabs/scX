@@ -100,7 +100,7 @@ Numeric_ExpressionUI <- function(id) {
 			  fluidRow(
 			    column(12,style='padding-left:12px; padding-right:12px;',
 			           pickerInput(inputId = NS(id,"partitionType"), 
-			                       label = "Partition",
+			                       label = "Category",
 			                       choices = NULL)
 			    )
 			  )
