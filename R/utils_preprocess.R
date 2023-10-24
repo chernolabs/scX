@@ -1,10 +1,10 @@
 # Object to sce ----
-#' SingleCellExperiment object ready for use in scXplorer
+#' SingleCellExperiment object ready for use in scX
 #'
 #' `createSCEobject()` returns a list which includes a SingleCellExperiment object with counts, at
 #'		least one clusterization, gene markers for each clusterization, reduced dimensions for
 #'		visualization, and any additional data provided. This list is used as input when launching
-#'		the scXplorer app.
+#'		the scX app.
 #' 
 #' @param xx Either a matrix with counts, or a SCE or Seurat object.
 #' @param assay.name.raw Assay name for raw counts matrix if object is a SCE. Defaults to `counts`.
@@ -29,7 +29,7 @@
 #'		used in large datasets for visual purposes, and it does not affect computations.
 #' @param descriptionText Optional short description of the object being analized. This can help when 
 #'		working with multiple tabs. 
-#' @returns List with a SingleCellExperiment object and additional data ready for use in `scXplorer`.
+#' @returns List with a SingleCellExperiment object and additional data ready for use in `scX`.
 #' @export
 createSCEobject <- function(xx,
                             assay.name.raw="counts",

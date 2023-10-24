@@ -20,7 +20,7 @@ ui <- function(){
 				paste0(
 				  "<p style = 'text-align: center;'><small><a href='",
 				  path_button,
-				  "' target='_blank'>scXplorer</a></small></p>"
+				  "' target='_blank'>scX</a></small></p>"
 				),
 				"<br>"
 			  )

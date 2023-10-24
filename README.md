@@ -1,7 +1,7 @@
-<h1 align="center">  scXplorer package </h1>
+<h1 align="center">  scX package </h1>
 
 <div align="justify" >
-<img align="left" width="25%" src="man/figures/scXplorer-03.png" title="@irimiodo"> scXplorer is an R package that enables interactive visualization and analysis of single-cell experiment data by creating a Shiny-based application. With scXplorer all aspects of single-cell data can be explored using a large number of different types of plots, such as scatter plots, heatmaps, boxplots, dot and violins plots, etc. All the information associated with cells can be displayed in a customized way: both numerical variables such as logcounts or pseudotime values, and categorical variables such as cell types or sample. One of the main hallmarks of scXplorer is the possibility to plot the main embeddings used for single cell - UMAP, tSNE and PCA - both in 2D and 3D in an interactive way. Thus, embeddings can be rotated, translated and zoomed. But scXplorer is not only a visualization tool, it also allows you to perform different types of analysis on single cell data, such as finding the markers of a cell type or determining the differential genes between two different conditions.
+<img align="left" width="25%" src="man/figures/scXplorer-03.png" title="@irimiodo"> scX is an R package that enables interactive visualization and analysis of single-cell experiment data by creating a Shiny-based application. With scX all aspects of single-cell data can be explored using a large number of different types of plots, such as scatter plots, heatmaps, boxplots, dot and violins plots, etc. All the information associated with cells can be displayed in a customized way: both numerical variables such as logcounts or pseudotime values, and categorical variables such as cell types or sample. One of the main hallmarks of scX is the possibility to plot the main embeddings used for single cell - UMAP, tSNE and PCA - both in 2D and 3D in an interactive way. Thus, embeddings can be rotated, translated and zoomed. But scX is not only a visualization tool, it also allows you to perform different types of analysis on single cell data, such as finding the markers of a cell type or determining the differential genes between two different conditions.
 </div>
 
 ---
@@ -32,26 +32,26 @@
 
 ## Install
 
-scXplorer requires certain packages to be installed. If the user does not have these packages installed, they can execute the following code: 
+scX requires certain packages to be installed. If the user does not have these packages installed, they can execute the following code: 
 
 ```R
 BiocManager::install(c("SingleCellExperiment","scran","scatter","ComplexHeatmap")
 ```
 
-scXplorer can be installed from Github as follows:
+scX can be installed from Github as follows:
 
 ```R
-devtools::install_github("tvegawaichman/scXplorer")
+devtools::install_github("tvegawaichman/scX")
 ```
 ## Quick Start Guide
 ### Loading Datasets
 
-To show the different capabilities of scXplorer, we will use single cell data related to the oligodendrocyte developmental lineage ([Marques et al. 2016](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5221728/)). In this dataset we have cells from 12 regions of the central nervous system of juvenile and adult mice and 10 distinct cell populations have been identified. This package includes a modified version of this dataset in which the original cells have been subsampled and a pseudotime has been calculated to demonstrate how scXplorer can represent numerical attributes.
+To show the different capabilities of scX, we will use single cell data related to the oligodendrocyte developmental lineage ([Marques et al. 2016](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5221728/)). In this dataset we have cells from 12 regions of the central nervous system of juvenile and adult mice and 10 distinct cell populations have been identified. This package includes a modified version of this dataset in which the original cells have been subsampled and a pseudotime has been calculated to demonstrate how scX can represent numerical attributes.
 
 In this example we will use the 'inferred_cell_type' covariate to explore differential expression patterns (partitionVars parameter). The rest of the metadata will be used for visualization purposes (metadataVars parameter). While partitionVars should be categorical variables, metadataVars can be discrete or continuous covariates
 
 ```R
-library(scXplorer)
+library(scX)
 
 #SCE example data
 sce
@@ -66,7 +66,7 @@ colData(sce)[1:3,]
 ```
 
 <p align="justify">  
-The scXplorer app can be created and launched with only two functions. **_createSCEobject()_** creates the single cell experiment object that will be used within the application. This function performs a set of preprocessing steps required for the various scXplorer functions. Among these steps we can mention:
+The scX app can be created and launched with only two functions. **_createSCEobject()_** creates the single cell experiment object that will be used within the application. This function performs a set of preprocessing steps required for the various scX functions. Among these steps we can mention:
  
 1. Calculation of quality control metrics. 
 
@@ -78,28 +78,28 @@ The scXplorer app can be created and launched with only two functions. **_create
 
 5. Calculation of different dimensionality reductions: PCA, tSNE, and UMAP.
 
-If the input dataset already has these characteristics, some of these steps can be avoided.  For example, if the dataset already has a precomputed PCA, scXplorer will not recalculate it but will calculate the dimensionality reductions that are not already calculated in the dataset.
+If the input dataset already has these characteristics, some of these steps can be avoided.  For example, if the dataset already has a precomputed PCA, scX will not recalculate it but will calculate the dimensionality reductions that are not already calculated in the dataset.
 
 On the other hand, different options for the calculation of the marker genes of the different clusters can be determined. This can be done within the parameter "paramFindMarkers" which expects a list of parameters taken by scran's _FindMarkers()_ function. 
 
-Finally with the **_launch_scXplorer()_** function the application is deployed.
+Finally with the **_launch_scX()_** function the application is deployed.
 
 </p>
 
 ```R
-library(scXplorer)
+library(scX)
 # Creating SCE object
 cseo <- createSCEobject(xx = sce, 
                         partitionVars = "inferred_cell_type", 
                         metadataVars = c("source_name", "age", "sex", "strain", "treatment", "pseudotime"),
                         descriptionText = "Quick Start Guide")
 
-launch_scXplorer(cseo)
+launch_scX(cseo)
 ```
 ## Summary
 
 <p align="justify">  
-scXplorer displays a summary of the main descriptive information of the dataset: number of cells and genes, mean number of genes detected per cell, partions, experiments and average library size.
+scX displays a summary of the main descriptive information of the dataset: number of cells and genes, mean number of genes detected per cell, partions, experiments and average library size.
 
 In the summary section, you can explore through graphical visualization the coventional quality control metrics: this is the relationship between the number of features and the count numbers. In this plot you can distinguish the cells coming from the different partitions of the dataset.
 </p>
@@ -113,7 +113,7 @@ In the summary section, you can explore through graphical visualization the cove
 ##  Markers
 
 <p align="justify">  
-This section allows to find and interact with the markers of each different clusterization. In "Markers" section there are two types of analysis. On the one hand, in "Cluster markers" clicking on a cell displays a table with the marker genes of the cluster to which that cell belongs. On the other hand, in "Find new markers" you can select a group of cells in the embedding and scXplorer will calculate their marker genes.
+This section allows to find and interact with the markers of each different clusterization. In "Markers" section there are two types of analysis. On the one hand, in "Cluster markers" clicking on a cell displays a table with the marker genes of the cluster to which that cell belongs. On the other hand, in "Find new markers" you can select a group of cells in the embedding and scX will calculate their marker genes.
 </p>
 
 <details><summary> <h5> View more </h5> </summary>
@@ -133,7 +133,7 @@ By clicking on a marker in the table you can see its expression profile across t
 ### Find new markers 
 
 <p align="justify">  
-Here you can select with the box or lasso tool a set of cells in the embedding and scXplorer will calculate the marker genes. You can download not only the marker table but also the selected cell list.
+Here you can select with the box or lasso tool a set of cells in the embedding and scX will calculate the marker genes. You can download not only the marker table but also the selected cell list.
 
 As in the previous section, if you click on one of the markers you can see its expression along the dataset with violin and spikeplots.
 </p>
@@ -246,15 +246,15 @@ By selecting or uploading a set of genes of interest, a set of Violin plots can 
 
 ## FAQs
 
-<details><summary> <h3> 1 -   What type of input does scXplorer accept? </h3> </summary><blockquote>
+<details><summary> <h3> 1 -   What type of input does scX accept? </h3> </summary><blockquote>
 
 </blockquote></details>
 
-<details><summary> <h3> 2 -  Is there a maximum input size that scXplorer can receive? </h3> </summary><blockquote>
+<details><summary> <h3> 2 -  Is there a maximum input size that scX can receive? </h3> </summary><blockquote>
 
 </blockquote></details>
 
-<details><summary> <h3> 3 -  How can I deploy my scXplorer app online? </h3> </summary><blockquote>
+<details><summary> <h3> 3 -  How can I deploy my scX app online? </h3> </summary><blockquote>
 
 </blockquote></details>
 

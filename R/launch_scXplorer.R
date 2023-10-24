@@ -1,17 +1,17 @@
 #' A Shiny app for visualization of single-cell data
 #'
-#' `launch_scXplorer()` launches the scXplorer Shiny app for visualizing single-cell data
+#' `launch_scX()` launches the scX Shiny app for visualizing single-cell data
 #'
 #' @param cseo List with a SingleCellExperiment object returned by `createSCEobject()`.
 #' @param dataset_name Optional name for app title.
 #' @param point.size Point size for plots in app. Defaults to 20.
 #' @param launch.browser Launch Shiny app in browser or not. Defaults to `TRUE`.
 #' @export
-launch_scXplorer <- function(cseo, dataset_name='scXplorer', point.size=20, launch.browser = T, host = getOption("shiny.host", "127.0.0.1"), port = getOption("shiny.port")) {
+launch_scX <- function(cseo, dataset_name='scX', point.size=20, launch.browser = T, host = getOption("shiny.host", "127.0.0.1"), port = getOption("shiny.port")) {
 
 	options(bitmapType='cairo')
 	options(spinner.color="#006272")
-  file_path <- system.file("app.R", package = "scXplorer")
+  file_path <- system.file("app.R", package = "scX")
   if (!nzchar(file_path)) stop("Shiny app not found")
   ui <- server <- NULL # avoid NOTE about undefined globals
   source(file_path, local = TRUE)
@@ -29,6 +29,6 @@ launch_scXplorer <- function(cseo, dataset_name='scXplorer', point.size=20, laun
   shiny::shinyApp(ui, server, options = list(launch.browser = launch.browser, host = host, port = port))
 }
 # load(file = 'data/Dataset1_paper.Rdata')
-#launch_scXplorer(cseo = cseo,
+#launch_scX(cseo = cseo,
 #                 point.size = 20,
 #                 dataset_name = 'Dataset 1')
