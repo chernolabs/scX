@@ -15,7 +15,7 @@ ui <- function(){
 				path_git,
 				"' target='_blank'><img style =
 						  'display: block; margin-left: auto; margin-right: auto;'
-						  src='www/scXplorer-03.png' width = '186'></a>",
+						  src='www/scX.png' width = '186'></a>",
 				"<br>",
 				paste0(
 				  "<p style = 'text-align: center;'><small><a href='",
@@ -92,7 +92,7 @@ ui <- function(){
       
       ### Styling ----
       tags$head(
-        tags$link(rel="shortcut icon", href="www/scXplorer-03.ico"),
+        tags$link(rel="shortcut icon", href="www/scX.ico"),
         tags$script(glue::glue('document.title = {dataset_name}')),
         tags$style(
           HTML(".tab-content { padding-left: 20px; padding-right: 30px; }")
