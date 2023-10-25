@@ -17,18 +17,18 @@ template:
     code_font:
       google: JetBrains Mono
 
-# authors:
-#   Tomas Vega Waichman:
-#     href: https://github.com/tvegawaichman
-#   Luz Vercesi:
-#     href: https://github.com/mluzvercesi
-#   Ariel Berardino:
-#     href: https://github.com/ariberar
-#   Maximiliano S. Beckel:
-#     href: https://github.com/msbeckel
+authors:
+   Tomás Vega Waichman:
+     href: https://github.com/tvegawaichman
+   Maria Luz Vercesi:
+     href: https://github.com/mluzvercesi
+   Ariel A. Berardino:
+     href: https://github.com/ariberar
+   Maximiliano S. Beckel:
+     href: https://github.com/msbeckel
 
 navbar:
-  bg: light
+  #bg: light
   title: scX
   right:
   - icon: fa-home

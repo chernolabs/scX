@@ -6,12 +6,11 @@ Authors@R: c(
            comment = c(GitHub = "https://github.com/tvegawaichman")),
     person(given = "Maria Luz",family = "Vercesi",  role = c("aut"),
            comment = c(GitHub = "https://github.com/mluzvercesi")),
-    person(given = "Ariel Agustín",family = "Berardino",  role = c("aut"),
+    person(given = "Ariel A.",family = "Berardino",  role = c("aut"),
            comment = c(GitHub = "https://github.com/ariberar")),
-    person(given = "Maximiliano Sebastián",family = "Beckel",  role = c("aut"),
-           comment = c(GitHub = "https://github.com/msbeckel")),
-	  person(given = "Ariel",family = "Chernomoretz",  role = c("ctb")),
-	  person("Cherno Lab and Collaborators", role = "fnd")  
+    person(given = "Maximiliano S.",family = "Beckel",  role = c("aut"),
+           comment = c(ORCID = "0000-0002-2284-9529")),
+	  person("Chernomoretz Lab and Collaborators", role = "fnd")  
            )
 Description: A Shiny-based application for interacting with the main single-cell data 
 	embeddings - UMAP, tSNE, PCA - both in 2D and 3D, as well as performing different 
@@ -55,7 +54,7 @@ Imports:
     shinyjs,
     shinyWidgets,
     tidyr,
-	uwot,
+	  uwot,
     viridis
 Suggests: 
     doParallel,

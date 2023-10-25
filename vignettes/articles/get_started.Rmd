@@ -64,5 +64,5 @@ cseo <- createSCEobject(xx = sce,
                         metadataVars = c("source_name", "age", "sex", "strain", "treatment", "pseudotime"),
                         descriptionText = "Quick Start Guide")
 
-launch_scXplorer(cseo)
+launch_scX(cseo)
 ```
