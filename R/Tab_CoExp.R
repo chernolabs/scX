@@ -30,7 +30,7 @@ COExpUI <- function(id) {
             fluidRow(
               column(8,style='padding-left:12px; padding-right:3px;',
                 pickerInput(inputId = NS(id,"partitionType"), 
-                            label = "Partition",
+                            label = "Category",
                             choices = NULL)
               ),
               column(4,style='padding-left:3px; padding-right:1px;padding-top:12px',

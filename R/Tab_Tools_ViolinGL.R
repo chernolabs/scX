@@ -14,14 +14,14 @@ VT_UI <- function(id) {
                    style='padding-left:12px; padding-right:3px;',
                    align="center",
               pickerInput(NS(id,"partitionType"),
-                          "Partition",
+                          "Category",
                           choices = NULL)
             ),
             column(6,
                    style='padding-left:3px; padding-right:12px;',
                    align="center",
               pickerInput(NS(id,"partitionType_wrap"),
-                          "Partition wrap",
+                          "Category wrap",
                           choices = NULL)
             )
           ),

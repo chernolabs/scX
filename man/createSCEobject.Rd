@@ -2,21 +2,21 @@
 % Please edit documentation in R/utils_preprocess.R
 \name{createSCEobject}
 \alias{createSCEobject}
-\title{SingleCellExperiment object ready for use in scXplorer}
+\title{SingleCellExperiment object ready for use in scX}
 \usage{
 createSCEobject(
   xx,
   assay.name.raw = "counts",
   assay.name.normalization = "logcounts",
   metadata = NULL,
-  toFactors = NULL,
-  toKeep = NULL,
+  partitionVars = NULL,
+  metadataVars = NULL,
   chosen.hvg = NULL,
   nHVGs = 3000,
   nPCs = 50,
   calcRedDim = TRUE,
   paramFindMarkers = list(test.type = "wilcox", pval.type = "all", direction = "any"),
-  calcAllToFactors = FALSE,
+  calcAllPartitions = FALSE,
   cells2keep = NULL,
   descriptionText = NULL,
   verbose = TRUE
@@ -32,11 +32,11 @@ it computes \code{logcounts} (default).}
 
 \item{metadata}{Optional dataframe with cell metadata.}
 
-\item{toFactors}{Optional metadata column names (or \code{colData}) to use as factors. If \code{NULL} (default),
+\item{partitionVars}{Optional metadata column names (or \code{colData}) to use as factors. If \code{NULL} (default),
 a quick clusterization will be computed.}
 
-\item{toKeep}{Additional metadata column names (or \code{colData}) to use only for coloring in plots.
-If \code{NULL} (default), only \code{toFactors} columns will be available for coloring plots.}
+\item{metadataVars}{Additional metadata column names (or \code{colData}) to use only for coloring in plots.
+If \code{NULL} (default), only \code{partitionVars} columns will be available for coloring plots.}
 
 \item{chosen.hvg}{Optional list of Highly Variable Genes.}
 
@@ -50,8 +50,8 @@ TSNE2D). Defaults to \code{TRUE}.}
 \item{paramFindMarkers}{List of parameters to pass to \code{scran::findMarkers(...)} to compute marker
 genes for clusters. Defaults to \code{list(test.type="wilcox", pval.type="all", direction="any")}.}
 
-\item{calcAllToFactors}{Logical indicating whether to force the computation of markers and DEGs from
-the entire list of \code{toFactors}.}
+\item{calcAllPartitions}{Logical indicating whether to force the computation of markers and DEGs from
+the entire list of \code{partitionVars}.}
 
 \item{cells2keep}{List of names for cells to keep when subsampling data. NOTE: Subsampling is only
 used in large datasets for visual purposes, and it does not affect computations.}
@@ -62,11 +62,11 @@ working with multiple tabs.}
 \item{verbose}{Logical for step by step status while function is running. Defaults to \code{TRUE}.}
 }
 \value{
-List with a SingleCellExperiment object and additional data ready for use in \code{scXplorer}.
+List with a SingleCellExperiment object and additional data ready for use in \code{scX}.
 }
 \description{
 \code{createSCEobject()} returns a list which includes a SingleCellExperiment object with counts, at
 least one clusterization, gene markers for each clusterization, reduced dimensions for
 visualization, and any additional data provided. This list is used as input when launching
-the scXplorer app.
+the scX app.
 }

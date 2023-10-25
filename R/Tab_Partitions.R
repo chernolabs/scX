@@ -14,13 +14,13 @@ Clusters_UI <- function(id) {
                    style='padding-left:12px; padding-right:3px;',
                    align="center",
               pickerInput(NS(id,"partitionType1"),
-                          "Partition #1",
+                          "Category #1",
                           choices = NULL)),
             column(6,
                    style='padding-left:3px; padding-right:12px;',
                    align="center",
               pickerInput(NS(id,"partitionType2"),
-                          "Partition #2",
+                          "Category #2",
                           choices = NULL)
             )
           ),
