@@ -134,11 +134,11 @@ ui <- function(){
                         {width:0px; font-size:0px; padding:0px; margin:0px;}')
         )
       ),
-	  tags$footer(align = "left",
-			style = "position:absolute; bottom:0; width:100%; height:20px; z-index:1000;
-				text-align:center; font-size:10px; color:white; padding:1px; background-color:gray;",
-			HTML('<footer> Icon by @irimiodo </footer>')
-		),
+	  # tags$footer(align = "left",
+			# style = "position:absolute; bottom:0; width:100%; height:20px; z-index:1000;
+				# text-align:center; font-size:10px; color:white; padding:1px; background-color:gray;",
+			# HTML('<footer> Icon by @irimiodo </footer>')
+		# ),
       ### Main -----
       tabItems(
         tabItem(tabName = "smryTab",
