@@ -168,11 +168,11 @@ createSCEobject <- function(xx,
   if(verbose) cat('Computing QC metrics...')
   if(!assay.name.raw %in% names(assays(xx.sce))){
     if(assay.name.normalization %in% names(assays(xx.sce))){
-      warning(paste0('Assays ',name.assay.raw,' not found in SCE object'))
+      warning(paste0('Assays ',assay.name.raw,' not found in SCE object'))
       xx.sce$nCounts   <- NA
       xx.sce$nFeatures <- NA
     } else {
-      stop(paste0('Assay ',paste(name.assay.raw, name.assay.normalization, sep = ' & '),' not found in SCE object'))
+      stop(paste0('Assay ',paste(assay.name.raw, assay.name.normalization, sep = ' & '),' not found in SCE object'))
     }
   } else {
       xx.sce$nCounts <- colSums(assay(xx.sce, assay.name.raw))
