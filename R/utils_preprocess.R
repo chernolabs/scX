@@ -457,7 +457,7 @@ ldf_func <- function(sce, partition, paramFindMarkers, minSize=50){
       cat("Computing correlation\n")
       
       if(length(u) > 0){
-        Z   <- assay(sce, "counts")[u,,drop=FALSE]  
+        Z   <- assay(sce, "logcounts")[u,,drop=FALSE]  
         
         pattern <- rep(0,ncol(Z))
         pattern[colData(sce)[,partition]%in%coi] <- 1
