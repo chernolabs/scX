@@ -30,7 +30,7 @@ COExpUI <- function(id) {
             fluidRow(
               column(8,style='padding-left:12px; padding-right:3px;',
                 pickerInput(inputId = NS(id,"partitionType"), 
-                            label = "Partition",
+                            label = "Category",
                             choices = NULL)
               ),
               column(4,style='padding-left:3px; padding-right:1px;padding-top:12px',
@@ -54,7 +54,7 @@ COExpUI <- function(id) {
       ),
       column(9,
         box(title = "Scatter Plot",
-            width = NULL, solidHeader = T, collapsible = T,
+            width = NULL, solidHeader = T, collapsible = F,
           conditionalPanel("!input.button && typeof output.plot_expression !== 'undefined'", ns = NS(id),
             fluidRow(column=12,align = "left",style='padding-left:12px; padding-right:12px;',
               dropdownButton(

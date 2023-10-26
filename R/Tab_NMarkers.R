@@ -18,7 +18,7 @@ N_markersUI <- function(id) {
             ),
             column(6,style='padding-left:3px; padding-right:12px;', align="center",
               pickerInput(NS(id,"partitionType"),
-                          "Partition",
+                          "Category",
                           choices = NULL)
             )
           ),

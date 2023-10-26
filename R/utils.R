@@ -125,7 +125,7 @@ COexp_Vtor <- function(sce,genes){
 .onAttach <- function(libname, pkgname) {
   shiny::addResourcePath('www',
                          system.file('www',
-                                     package = 'scXplorer'))
+                                     package = 'scX'))
 }
 
 #' @keywords internal

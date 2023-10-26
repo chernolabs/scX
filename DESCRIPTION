@@ -1,12 +1,22 @@
-Package: scXplorer
-Title: What the Package Does (One Line, Title Case)
+Package: scX
+Title: Interactive Visualization and Analysis of Single-Cell Experiment Data
 Version: 0.0.0.9000
-Authors@R: 
-    person("First", "Last", , "first.last@example.com", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID"))
-Description: What the package does (one paragraph).
-License: `use_mit_license()`, `use_gpl3_license()` or friends to pick a
-    license
+Authors@R: c(
+    person(given = "Tomás",family = "Vega Waichman", email = "tomas.vegawaichman@mail.mcgill.ca", role = c("aut", "cre"),
+           comment = c(GitHub = "https://github.com/tvegawaichman")),
+    person(given = "Maria Luz",family = "Vercesi",  role = c("aut"),
+           comment = c(GitHub = "https://github.com/mluzvercesi")),
+    person(given = "Ariel A.",family = "Berardino",  role = c("aut"),
+           comment = c(GitHub = "https://github.com/ariberar")),
+    person(given = "Maximiliano S.",family = "Beckel",  role = c("aut"),
+           comment = c(ORCID = "0000-0002-2284-9529")),
+	  person("Chernomoretz Lab and Collaborators", role = "fnd")  
+           )
+Description: A Shiny-based application for interacting with the main single-cell data 
+	embeddings - UMAP, tSNE, PCA - both in 2D and 3D, as well as performing different 
+	types of analysis of said data, such as finding cell type markers or determining 
+	the differential genes between two different conditions.
+License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.2.3
@@ -44,7 +54,7 @@ Imports:
     shinyjs,
     shinyWidgets,
     tidyr,
-	uwot,
+	  uwot,
     viridis
 Suggests: 
     doParallel,
@@ -53,4 +63,4 @@ Suggests:
     Seurat
 LazyData: true
 VignetteBuilder: knitr
-URL: https://tvegawaichman.github.io/scXplorer/
+URL: https://tvegawaichman.github.io/scX/

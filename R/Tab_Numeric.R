@@ -1,8 +1,8 @@
 #####                              ######## 
-#####        Partition Tab         ######## 
+#####        Fields  Tab           ######## 
 #####                              ######## 
 
-##### Cluster UI Module ----
+##### Fields UI Module ----
 Fields_UI <- function(id) {
   tagList(
     fluidRow(
@@ -120,7 +120,7 @@ Fields_UI <- function(id) {
                         style='padding-left:20px; padding-right:20px;',
                         align="center",
                         pickerInput(NS(id,"partitionColor"),
-                                    "Partition Color",
+                                    "Category Color",
                                     choices = NULL)
                  )
              )
@@ -130,8 +130,7 @@ Fields_UI <- function(id) {
                     selected = "scatter",
                     width = NULL,
                     tabPanel("Distribution",value = "scatter",
-                             box(title = "Distribution Plot",
-                                 width = NULL, solidHeader = T, collapsible = T,
+                             box(width = NULL, solidHeader = T, collapsible = F,
                                  footer = tagList(shiny::icon("cat"), "Nya"),
                                  dropdownButton(
 									fluidRow(
@@ -151,7 +150,28 @@ Fields_UI <- function(id) {
                                  plotlyOutput(NS(id,"plot_numeric"),height = "80vh") %>% withSpinner()
                              )
                     ),
-                    tabPanel("Heatmap", value= "heatmap",
+									tabPanel("StackedViolin", value= "stackVln",
+									         box(width = NULL,solidHeader = T,collapsible = F,
+									             footer = tagList(shiny::icon("cat"), "Nya"),
+									             dropdownButton(
+									               fluidRow(
+									                 column(7, style='padding-left:6px; padding-right:3px;',
+									                        column(6, style='padding-left:2px; padding-right:1px;', numericInput(NS(id,"pdf_width_StackedViolin"),"Width",value = 7)),
+									                        column(6, style='padding-left:1px; padding-right:2px;', numericInput(NS(id,"pdf_height_StackedViolin"),"Height",value = 7))),
+									                 column(5, style='padding-left:0px; padding-right:6px; padding:16px', downloadButton(NS(id,'export_StackedViolin')))
+									               ),
+									               circle = FALSE,
+									               status = "primary",
+									               icon = icon("download"),
+									               width = "300px",
+									               size= "sm",
+									               up = F,
+									               tooltip = tooltipOptions(title = "Download")
+									             ),
+									             plotOutput(NS(id,"plot_stackVln"),height = "80vh") %>% withSpinner()
+									         )
+									),
+                  tabPanel("Heatmap", value= "heatmap",
                              box(width = NULL, solidHeader = T, collapsible = F,
                                  footer = tagList(shiny::icon("cat"), "Nya"),
                                  dropdownButton(
@@ -193,28 +213,7 @@ Fields_UI <- function(id) {
                                  plotlyOutput(NS(id,"plot_DotPlot"),height = "80vh") %>% withSpinner()
                              )
                     ),
-                    tabPanel("StackedViolin", value= "stackVln",
-                             box(width = NULL,solidHeader = T,collapsible = F,
-                                 footer = tagList(shiny::icon("cat"), "Nya"),
-                                 dropdownButton(
-									fluidRow(
-										column(7, style='padding-left:6px; padding-right:3px;',
-											column(6, style='padding-left:2px; padding-right:1px;', numericInput(NS(id,"pdf_width_StackedViolin"),"Width",value = 7)),
-											column(6, style='padding-left:1px; padding-right:2px;', numericInput(NS(id,"pdf_height_StackedViolin"),"Height",value = 7))),
-										column(5, style='padding-left:0px; padding-right:6px; padding:16px', downloadButton(NS(id,'export_StackedViolin')))
-									),
-                                   circle = FALSE,
-                                   status = "primary",
-                                   icon = icon("download"),
-                                   width = "300px",
-                                   size= "sm",
-                                   up = F,
-                                   tooltip = tooltipOptions(title = "Download")
-                                 ),
-                                 plotOutput(NS(id,"plot_stackVln"),height = "80vh") %>% withSpinner()
-                             )
-                    ),
-                    tabPanel("Correlation", value= "matrix",
+                    tabPanel("Correlation Matrix", value= "matrix",
                                  uiOutput(NS(id,"CorheatMapOutput"))
                     )
              )
@@ -669,12 +668,3 @@ Fields_Server <- function(id,sce) {
     
   })
 }
-# 
-# ui <- fluidPage(
-#   Clusters_UI(id = 'lala')
-# )
-# server <- function(input, output, session) {
-#   Clusters_Server(sce = sce,id = 'lala')
-# }
-# shinyApp(ui = ui,server = server)
-

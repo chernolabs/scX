@@ -1,10 +1,10 @@
 # Object to sce ----
-#' SingleCellExperiment object ready for use in scXplorer
+#' SingleCellExperiment object ready for use in scX
 #'
 #' `createSCEobject()` returns a list which includes a SingleCellExperiment object with counts, at
 #'		least one clusterization, gene markers for each clusterization, reduced dimensions for
 #'		visualization, and any additional data provided. This list is used as input when launching
-#'		the scXplorer app.
+#'		the scX app.
 #' 
 #' @param xx Either a matrix with counts, or a SCE or Seurat object.
 #' @param assay.name.raw Assay name for raw counts matrix if object is a SCE. Defaults to `counts`.
@@ -29,7 +29,7 @@
 #'		used in large datasets for visual purposes, and it does not affect computations.
 #' @param descriptionText Optional short description of the object being analized. This can help when 
 #'		working with multiple tabs. 
-#' @returns List with a SingleCellExperiment object and additional data ready for use in `scXplorer`.
+#' @returns List with a SingleCellExperiment object and additional data ready for use in `scX`.
 #' @export
 createSCEobject <- function(xx,
                             assay.name.raw="counts",
@@ -168,11 +168,11 @@ createSCEobject <- function(xx,
   if(verbose) cat('Computing QC metrics...')
   if(!assay.name.raw %in% names(assays(xx.sce))){
     if(assay.name.normalization %in% names(assays(xx.sce))){
-      warning(paste0('Assays ',name.assay.raw,' not found in SCE object'))
+      warning(paste0('Assays ',assay.name.raw,' not found in SCE object'))
       xx.sce$nCounts   <- NA
       xx.sce$nFeatures <- NA
     } else {
-      stop(paste0('Assay ',paste(name.assay.raw, name.assay.normalization, sep = ' & '),' not found in SCE object'))
+      stop(paste0('Assay ',paste(assay.name.raw, assay.name.normalization, sep = ' & '),' not found in SCE object'))
     }
   } else {
       xx.sce$nCounts <- colSums(assay(xx.sce, assay.name.raw))
@@ -362,7 +362,7 @@ createSCEobject <- function(xx,
   if(ncol(xx.sce)>nmaxcell){
       csceo$CELLS2KEEP <- subsampling_func(xx.sce, cellsToKeep = cells2keep, nmaxcell = nmaxcell)
   } else {
-    csceo$CELLS2KEEP <- colnames(xx.sce)
+    csceo$CELLS2KEEP <- "all"
   }
 
 
@@ -457,7 +457,7 @@ ldf_func <- function(sce, partition, paramFindMarkers, minSize=50){
       cat("Computing correlation\n")
       
       if(length(u) > 0){
-        Z   <- assay(sce, "counts")[u,,drop=FALSE]  
+        Z   <- assay(sce, "logcounts")[u,,drop=FALSE]  
         
         pattern <- rep(0,ncol(Z))
         pattern[colData(sce)[,partition]%in%coi] <- 1
@@ -490,11 +490,13 @@ subsampling_func = function(sce, cellsToKeep=NULL, nmaxcell=50000){
 
   if(is.null(cellsToKeep)){
       ccells2keep <- sample(colnames(sce), nmaxcell, replace=FALSE)
+      ccells2keep <- match(ccells2keep, colnames(sce))
   }else{
       ccells2keep <- cells2keep[cells2keep%in%colnames(sce)]
       if(length(ccells2keep)<nmaxcell){
         naddcells <- nmaxcell-length(cells2keep)
         ccells2keep <- c(ccells2keep, sample(colnames(sce)[!colnames(sce)%in%ccells2keep],naddcells,replace=FALSE))
+        ccells2keep <- match(ccells2keep, colnames(sce))
       }
   }
   return(ccells2keep)

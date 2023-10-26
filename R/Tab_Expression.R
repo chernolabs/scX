@@ -81,7 +81,7 @@ ExpressionUI <- function(id) {
             fluidRow(
               column(8,style='padding-left:12px; padding-right:3px;',
                 pickerInput(inputId = NS(id,"partitionType"), 
-                            label = "Partition",
+                            label = "Category",
                             choices = NULL)
               ),
               conditionalPanel("input.scatter_heatmap == 'scatter'",ns=NS(id),
@@ -151,8 +151,8 @@ ExpressionUI <- function(id) {
                selected = "scatter",
                width = NULL,
           tabPanel("Scatter",value = "scatter",
-            box(title = "Scatter Plot",
-                width = NULL, solidHeader = T, collapsible = T,
+            box(#title = "Scatter Plot",
+                width = NULL, solidHeader = T, collapsible = F,
                 footer = tagList(shiny::icon("cat"), "Nya"),
                 tabsetPanel(id = NS(id,"switcher3"),
                             type = "hidden",

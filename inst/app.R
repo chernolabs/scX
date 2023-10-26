@@ -1,6 +1,7 @@
 ui <- function(){
-	path_git <- "https://www.leloir.org.ar/biologia-de-sistemas-integrativa?area=bioinformatica-y-biologia-computacional"
-	path_button <- "https://github.com/chernolab"
+	path_lab <- "https://www.leloir.org.ar/biologia-de-sistemas-integrativa?area=bioinformatica-y-biologia-computacional"
+	path_git <- "https://github.com/chernolab"
+	path_site <- "https://tvegawaichman.github.io/scX/"
 	
 	# SideBar ----
 	siderbar <- dashboardSidebar(
@@ -12,16 +13,16 @@ ui <- function(){
 			HTML(
 			  paste0(
 				"<br>","<a href='",
-				path_git,
+				path_site,
 				"' target='_blank'><img style =
 						  'display: block; margin-left: auto; margin-right: auto;'
-						  src='www/scXplorer-03.png' width = '186'></a>",
-				"<br>",
-				paste0(
-				  "<p style = 'text-align: center;'><small><a href='",
-				  path_button,
-				  "' target='_blank'>scXplorer</a></small></p>"
-				),
+						  src='www/scX.png' width = '186'></a>",
+				# "<br>",
+				# paste0(
+				  # "<p style = 'text-align: center;'><small><a href='",
+				  # path_git,
+				  # "' target='_blank'>scX</a></small></p>"
+				# ),
 				"<br>"
 			  )
 			),
@@ -76,7 +77,7 @@ ui <- function(){
 			),
 			menuItem("Visual Tools", tabName = "toolsTab",
 					 icon = icon("toolbox"), startExpanded = F,
-					 menuSubItem('Violin by Partition', tabName = "t_VGL",
+					 menuSubItem('Violin by Category', tabName = "t_VGL",
 								 icon = icon('wrench')
 					 ),
 					 menuSubItem('MultiPlots', tabName = "t_MP",
@@ -92,7 +93,7 @@ ui <- function(){
       
       ### Styling ----
       tags$head(
-        tags$link(rel="shortcut icon", href="www/scXplorer-03.ico"),
+        tags$link(rel="shortcut icon", href="www/scX.ico"),
         tags$script(glue::glue('document.title = {dataset_name}')),
         tags$style(
           HTML(".tab-content { padding-left: 20px; padding-right: 30px; }")
@@ -134,11 +135,11 @@ ui <- function(){
                         {width:0px; font-size:0px; padding:0px; margin:0px;}')
         )
       ),
-	  tags$footer(align = "left",
-			style = "position:absolute; bottom:0; width:100%; height:20px; z-index:1000;
-				text-align:center; font-size:10px; color:white; padding:1px; background-color:gray;",
-			HTML('<footer> Icon by @irimiodo </footer>')
-		),
+	  # tags$footer(align = "left",
+			# style = "position:absolute; bottom:0; width:100%; height:20px; z-index:1000;
+				# text-align:center; font-size:10px; color:white; padding:1px; background-color:gray;",
+			# HTML('<footer> Icon by @irimiodo </footer>')
+		# ),
       ### Main -----
       tabItems(
         tabItem(tabName = "smryTab",
@@ -153,7 +154,7 @@ ui <- function(){
                 N_markersUI(id="n_markers")
         ),
         tabItem(tabName = "g_exp",
-                HTML('<h4><span style="font-family:Trebuchet MS,Helvetica,sans-serif"><strong><span style="color:#4e5f70">Expression by Partitions</span></strong></span></h4>'),
+                HTML('<h4><span style="font-family:Trebuchet MS,Helvetica,sans-serif"><strong><span style="color:#4e5f70">Expression by Categories</span></strong></span></h4>'),
                 ExpressionUI(id="Exp")
         ),
         tabItem(tabName = "g_numeric_exp",
@@ -169,7 +170,7 @@ ui <- function(){
                 VolcanoUI(id="volcano")
         ),
         tabItem(tabName = "clustersTab",
-                HTML('<h4><span style="font-family:Trebuchet MS,Helvetica,sans-serif"><strong><span style="color:#4e5f70">Partition Analysis</span></strong></span></h4>'),
+                HTML('<h4><span style="font-family:Trebuchet MS,Helvetica,sans-serif"><strong><span style="color:#4e5f70">Category Analysis</span></strong></span></h4>'),
                 Clusters_UI("cluster")
         ),
         tabItem(tabName = "fieldsTab",
@@ -177,7 +178,7 @@ ui <- function(){
                 Fields_UI("fields")
         ),
         tabItem(tabName = "t_VGL",
-                HTML('<h4><span style="font-family:Trebuchet MS,Helvetica,sans-serif"><strong><span style="color:#4e5f70">Violin by Partition </span></strong></span></h4>'),
+                HTML('<h4><span style="font-family:Trebuchet MS,Helvetica,sans-serif"><strong><span style="color:#4e5f70">Violin by Category</span></strong></span></h4>'),
                 VT_UI(id = "tools")
         ),
         tabItem(tabName = "t_MP",
