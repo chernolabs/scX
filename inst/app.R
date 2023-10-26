@@ -76,7 +76,7 @@ ui <- function(){
 			),
 			menuItem("Visual Tools", tabName = "toolsTab",
 					 icon = icon("toolbox"), startExpanded = F,
-					 menuSubItem('Violin by Partition', tabName = "t_VGL",
+					 menuSubItem('Violin by Category', tabName = "t_VGL",
 								 icon = icon('wrench')
 					 ),
 					 menuSubItem('MultiPlots', tabName = "t_MP",
@@ -153,7 +153,7 @@ ui <- function(){
                 N_markersUI(id="n_markers")
         ),
         tabItem(tabName = "g_exp",
-                HTML('<h4><span style="font-family:Trebuchet MS,Helvetica,sans-serif"><strong><span style="color:#4e5f70">Expression by Partitions</span></strong></span></h4>'),
+                HTML('<h4><span style="font-family:Trebuchet MS,Helvetica,sans-serif"><strong><span style="color:#4e5f70">Expression by Categories</span></strong></span></h4>'),
                 ExpressionUI(id="Exp")
         ),
         tabItem(tabName = "g_numeric_exp",
@@ -169,7 +169,7 @@ ui <- function(){
                 VolcanoUI(id="volcano")
         ),
         tabItem(tabName = "clustersTab",
-                HTML('<h4><span style="font-family:Trebuchet MS,Helvetica,sans-serif"><strong><span style="color:#4e5f70">Partition Analysis</span></strong></span></h4>'),
+                HTML('<h4><span style="font-family:Trebuchet MS,Helvetica,sans-serif"><strong><span style="color:#4e5f70">Category Analysis</span></strong></span></h4>'),
                 Clusters_UI("cluster")
         ),
         tabItem(tabName = "fieldsTab",
@@ -177,7 +177,7 @@ ui <- function(){
                 Fields_UI("fields")
         ),
         tabItem(tabName = "t_VGL",
-                HTML('<h4><span style="font-family:Trebuchet MS,Helvetica,sans-serif"><strong><span style="color:#4e5f70">Violin by Partition </span></strong></span></h4>'),
+                HTML('<h4><span style="font-family:Trebuchet MS,Helvetica,sans-serif"><strong><span style="color:#4e5f70">Violin by Category</span></strong></span></h4>'),
                 VT_UI(id = "tools")
         ),
         tabItem(tabName = "t_MP",

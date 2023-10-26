@@ -130,8 +130,7 @@ Fields_UI <- function(id) {
                     selected = "scatter",
                     width = NULL,
                     tabPanel("Distribution",value = "scatter",
-                             box(title = "Distribution Plot",
-                                 width = NULL, solidHeader = T, collapsible = T,
+                             box(width = NULL, solidHeader = T, collapsible = F,
                                  footer = tagList(shiny::icon("cat"), "Nya"),
                                  dropdownButton(
 									fluidRow(

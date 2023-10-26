@@ -8,7 +8,7 @@ Clusters_UI <- function(id) {
     fluidRow(
       column(3,
         box(title = htmltools::span(icon("gears"), " Settings"),
-            width = NULL, status = "primary",solidHeader = T,collapsible = T,
+            width = NULL, status = "primary",solidHeader = T,collapsible = F,
           fluidRow(
             column(6, 
                    style='padding-left:12px; padding-right:3px;',

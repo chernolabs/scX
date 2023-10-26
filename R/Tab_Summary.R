@@ -140,7 +140,7 @@ QC_Server <- function(id,sce,descriptionText) {
     })
     
     output$nFeatureBox <- renderInfoBox({
-      infoBox(title="Gene Detected",value= round(mean(sce$nFeatures),2),subtitle = "Mean gene detected per cell",
+      infoBox(title="Genes Detected",value= round(mean(sce$nFeatures),2),subtitle = "Mean gene detected per cell",
               icon = icon('magnifying-glass-chart'),
               color = "light-blue", fill = F
       )
