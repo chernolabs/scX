@@ -1,6 +1,7 @@
 ui <- function(){
-	path_git <- "https://www.leloir.org.ar/biologia-de-sistemas-integrativa?area=bioinformatica-y-biologia-computacional"
-	path_button <- "https://github.com/chernolab"
+	path_lab <- "https://www.leloir.org.ar/biologia-de-sistemas-integrativa?area=bioinformatica-y-biologia-computacional"
+	path_git <- "https://github.com/chernolab"
+	path_site <- "https://tvegawaichman.github.io/scX/"
 	
 	# SideBar ----
 	siderbar <- dashboardSidebar(
@@ -12,16 +13,16 @@ ui <- function(){
 			HTML(
 			  paste0(
 				"<br>","<a href='",
-				path_git,
+				path_site,
 				"' target='_blank'><img style =
 						  'display: block; margin-left: auto; margin-right: auto;'
 						  src='www/scX.png' width = '186'></a>",
-				"<br>",
-				paste0(
-				  "<p style = 'text-align: center;'><small><a href='",
-				  path_button,
-				  "' target='_blank'>scX</a></small></p>"
-				),
+				# "<br>",
+				# paste0(
+				  # "<p style = 'text-align: center;'><small><a href='",
+				  # path_git,
+				  # "' target='_blank'>scX</a></small></p>"
+				# ),
 				"<br>"
 			  )
 			),
