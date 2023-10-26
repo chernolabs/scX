@@ -1,4 +1,4 @@
-url: https://tvegawaichman.github.io/scX/
+url: https://chernolabs.github.io/scX/
 
 home:
   title: scX
@@ -20,7 +20,7 @@ template:
 authors:
    Tomás Vega Waichman:
      href: https://github.com/tvegawaichman
-   Maria Luz Vercesi:
+   María Luz Vercesi:
      href: https://github.com/mluzvercesi
    Ariel A. Berardino:
      href: https://github.com/ariberar
@@ -34,7 +34,7 @@ navbar:
   - icon: fa-home
     href: https://www.leloir.org.ar/biologia-de-sistemas-integrativa?area=bioinformatica-y-biologia-computacional
   - icon: fa-github
-    href: https://github.com/tvegawaichman/scX
+    href: https://github.com/chernolabs/scX
   left:
     - text: "Install"
       href: articles/install.html
