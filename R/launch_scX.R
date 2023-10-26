@@ -16,7 +16,9 @@ launch_scX <- function(cseo, dataset_name='scX', point.size=20, launch.browser =
   ui <- server <- NULL # avoid NOTE about undefined globals
   source(file_path, local = TRUE)
   
-  cseo$SCE = cseo$SCE[,cseo$CELLS2KEEP]
+  if(all(cseo$CELLS2KEEP!="all")){
+    cseo$SCE = cseo$SCE[,cseo$CELLS2KEEP]
+  }
 
   server_env <- environment(server)
   server_env$cseo <- cseo

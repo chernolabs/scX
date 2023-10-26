@@ -362,7 +362,7 @@ createSCEobject <- function(xx,
   if(ncol(xx.sce)>nmaxcell){
       csceo$CELLS2KEEP <- subsampling_func(xx.sce, cellsToKeep = cells2keep, nmaxcell = nmaxcell)
   } else {
-    csceo$CELLS2KEEP <- colnames(xx.sce)
+    csceo$CELLS2KEEP <- "all"
   }
 
 
@@ -490,11 +490,13 @@ subsampling_func = function(sce, cellsToKeep=NULL, nmaxcell=50000){
 
   if(is.null(cellsToKeep)){
       ccells2keep <- sample(colnames(sce), nmaxcell, replace=FALSE)
+      ccells2keep <- match(ccells2keep, colnames(sce))
   }else{
       ccells2keep <- cells2keep[cells2keep%in%colnames(sce)]
       if(length(ccells2keep)<nmaxcell){
         naddcells <- nmaxcell-length(cells2keep)
         ccells2keep <- c(ccells2keep, sample(colnames(sce)[!colnames(sce)%in%ccells2keep],naddcells,replace=FALSE))
+        ccells2keep <- match(ccells2keep, colnames(sce))
       }
   }
   return(ccells2keep)
