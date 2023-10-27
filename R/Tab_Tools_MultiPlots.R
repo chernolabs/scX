@@ -70,7 +70,7 @@ MultiPlotsUI <- function(id) {
                   column(12, style='padding-left:0px; padding-right:0px;',
                     fileInput(NS(id,'listGenes'), label = NULL, multiple = T, 
                               accept = c("txt/csv", "text/comma-separated-values,
-                                        text/plain", ".csv", ".xlsx"),
+                                        text/plain", ".csv", ".xlsx", ".xls"),
                               buttonLabel = "Search", 
                               placeholder = "Select Gene list"),
                     htmlOutput(NS(id,"missingGenes"))

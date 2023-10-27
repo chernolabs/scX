@@ -27,13 +27,16 @@
 #' @keywords internal
 #' @noRd
 genesList <- function(dataPath){
-  if(tools::file_ext(dataPath$name) == "txt"){
+  filext <- tools::file_ext(dataPath$name)
+  if(filext %in% c("txt","text","csv")){
     # txt list of genes, separated by commas or newline
     genes <- readr::read_csv(file=dataPath$datapath, col_names = FALSE, col_types = readr::cols())
-  }
-  else{
+  } else if(filext %in% c("xls","xlsx")){
     # xlsx list of genes
     genes <- readxl::read_excel(path = dataPath$datapath, col_names = FALSE)
+  } else {
+    genes <- NULL
+	warning('Supported file formats for gene lists are .txt, .csv, .xls, .xlsx')
   }
   genes <- as.vector(as.matrix(genes))
   
