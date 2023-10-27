@@ -200,7 +200,7 @@ VolcanoUI <- function(id) {
 
 
 ### Volcano Server Module -----
-VolcanoServer <- function(id, sce, sce.markers) {
+VolcanoServer <- function(id, sce, sce.degs) {
   js_volcano <- c(
     "function(row, data, displayNum, index){",
     "  var x = data[2];",
@@ -212,11 +212,11 @@ VolcanoServer <- function(id, sce, sce.markers) {
   moduleServer(id, function(input, output, session) {
     ### Observe Events ----
     updatePickerInput(session, "partitionType",
-      choices = names(sce.markers)
+      choices = names(sce.degs)
     )
 
     observeEvent(input$partitionType, {
-      updateSelectizeInput(session, inputId = "clusterType", choices = names(sce.markers[[input$partitionType]]), server = TRUE)
+      updateSelectizeInput(session, inputId = "clusterType", choices = names(sce.degs[[input$partitionType]]), server = TRUE)
     })
 
     # When I change the partition if I had selected a cluster, it deleted the previous selection.
@@ -231,7 +231,7 @@ VolcanoServer <- function(id, sce, sce.markers) {
       req(input$partitionType)
       req(length(input$clusterType) > 1)
 
-      dta <- sce.markers[[input$partitionType]][[input$clusterType[2]]][[c(paste0("stats.", input$clusterType[1]))]]
+      dta <- sce.degs[[input$partitionType]][[input$clusterType[2]]][[c(paste0("stats.", input$clusterType[1]))]]
       dta$diffexpressed <- "NO"
       fc_Thr <- abs(log2(input$fc_thr))
       fdr_Thr <- abs(log(input$fdr_thr))

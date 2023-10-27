@@ -111,13 +111,13 @@ markersUI <- function(id = "markers") {
 # )
 
 ##### Marker Server Module ----
-markersServer <- function(id = "markers",sce,ldf,point.size = 20) {
+markersServer <- function(id = "markers",sce,sce.markers,point.size = 20) {
   moduleServer(id, function(input,output,session) {
     
     ### Observe Events ----
     
     updatePickerInput(session, 'partitionType', 
-                      choices = names(ldf)
+                      choices = names(sce.markers)
     )
     
     observeEvent(input$DTMarkers_rows_selected,{
@@ -195,8 +195,8 @@ markersServer <- function(id = "markers",sce,ldf,point.size = 20) {
     #DT markers of cluster
     output$DTMarkers <- renderDT(server = FALSE,datatable({
       req(!is.null(cluster_selected()))
-      # ldf[[input$partitionType]][[cluster_selected()]][,c("robustness","boxcor","selectivity","meanX")]
-      df <- ldf[[input$partitionType]][[cluster_selected()]]
+      # sce.markers[[input$partitionType]][[cluster_selected()]][,c("robustness","boxcor","selectivity","meanX")]
+      df <- sce.markers[[input$partitionType]][[cluster_selected()]]
       #Check if it is a cluster without any markers, if it is create a null data.frame
       if(is.null(df)){
         df <- data.frame(matrix(ncol = 3, nrow = 0))
@@ -223,7 +223,7 @@ markersServer <- function(id = "markers",sce,ldf,point.size = 20) {
     #Gene selected from the DT
     gene_marker_selected <- eventReactive(input$DTMarkers_rows_selected,{
       req(!is.null(input$DTMarkers_rows_selected))
-      rownames(ldf[[input$partitionType]][[cluster_selected()]][input$DTMarkers_rows_selected,])
+      rownames(sce.markers[[input$partitionType]][[cluster_selected()]][input$DTMarkers_rows_selected,])
     })
     
     ###Plots ----
