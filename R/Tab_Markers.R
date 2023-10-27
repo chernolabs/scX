@@ -185,7 +185,8 @@ markersServer <- function(id = "markers",sce,ldf,point.size = 20) {
     })
     
     cluster_selected <- reactive({
-      req(input$partitionType)
+      req(!is.null(input$plotType))
+      req(length(input$partitionType)>0) # same req as ClusterPLot to avoid plotly click warnings
       if(!is.null(event_data("plotly_click",source = "PlotMix"))){
         event_data("plotly_click",source = "PlotMix")[,"customdata"]
       } else{ NULL }
