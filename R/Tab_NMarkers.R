@@ -316,6 +316,7 @@ N_markersServer <- function(id,sce,point.size = 20) {
                       color = ~logcounts(sce)[gene_marker_selected(),], 
                       size = I(point.size),span=I(0),text=~colData(sce)[,input$partitionType],hoverinfo='text') %>% 
           colorbar(title = "log(counts)") %>% 
+		  config(modeBarButtonsToRemove = c("select2d", "lasso2d")) %>% 
           toWebGL()
       }
       
