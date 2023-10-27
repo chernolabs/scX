@@ -1,7 +1,7 @@
 ui <- function(){
 	path_lab <- "https://www.leloir.org.ar/biologia-de-sistemas-integrativa?area=bioinformatica-y-biologia-computacional"
-	path_git <- "https://github.com/chernolab"
-	path_site <- "https://tvegawaichman.github.io/scX/"
+	path_git <- "https://github.com/chernolabs/scX/"
+	path_site <- "https://chernolabs.github.io/scX/"
 	
 	# SideBar ----
 	siderbar <- dashboardSidebar(
@@ -196,7 +196,7 @@ ui <- function(){
 }
 
 server <- function(input, output, session) {
-  QC_Server(id ="qc",sce = cseo$SCE,descriptionText = cseo$text)
+	QC_Server(id = "qc", sce = cseo$SCE, descriptionText = cseo$text, Npartition = length(cseo$ldf))
 	markersServer(id="markers", sce=cseo$SCE, ldf = cseo$ldf, point.size=point.size)
 	N_markersServer(id="n_markers", sce=cseo$SCE, point.size=point.size)
 	ExpressionServer(id="Exp", sce=cseo$SCE, point.size=point.size)
@@ -206,5 +206,5 @@ server <- function(input, output, session) {
 	VT_Server(id = "tools", sce = cseo$SCE)
 	MultiPlotsServer(id = "MP", sce=cseo$SCE)
 	Clusters_Server(id ="cluster", sce=cseo$SCE)
-  Fields_Server("fields",sce = cseo$SCE)                                                                                                                                                                                                     
+	Fields_Server("fields",sce = cseo$SCE)                                                                                                                                                                                                     
 }

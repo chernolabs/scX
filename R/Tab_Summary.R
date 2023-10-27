@@ -87,7 +87,7 @@ QC_UI <- function(id) {
 }
 
 ##### Expression Server Module ----
-QC_Server <- function(id,sce,descriptionText) {
+QC_Server <- function(id, sce, descriptionText, Npartition) {
   moduleServer(id, function(input,output,session) {
     
     ### Observe Events ----
@@ -113,28 +113,28 @@ QC_Server <- function(id,sce,descriptionText) {
     #### Summary Box ----
     output$CellBox <- renderInfoBox({
       infoBox("Cells", value = ncol(sce),
-              icon = icon('vial'), #icon("sign-in"),
+              icon = icon('vial'),
               color = "light-blue", fill = F
       )
     })
     
     output$GenesBox <- renderInfoBox({
       infoBox(title = "Genes", value = nrow(sce),
-              icon = icon('dna'), #icon("sign-in"),
+              icon = icon('dna'),
               color = "light-blue", fill = F
       )
     })
     
     output$PartitionBox <- renderInfoBox({
-      infoBox(title = "Partitions", value = ncol(colData(sce)[sapply(colData(sce), is.factor)]),
-              icon = icon('filter'), #icon("sign-in"),
+      infoBox(title = "Partitions", value = Npartition, #ncol(colData(sce)[sapply(colData(sce), is.factor)]),
+              icon = icon('filter'),
               color = "light-blue", fill = F
       )
     })
     
     output$ExpBox <- renderInfoBox({
       infoBox(title="Experiments",value= length(sce@metadata),subtitle = "Integrated experiments",
-              icon = icon('coins'), #icon("sign-in"),
+              icon = icon('coins'),
               color = "light-blue", fill = F
       )
     })
@@ -148,7 +148,7 @@ QC_Server <- function(id,sce,descriptionText) {
     
     output$nGeneBox <- renderInfoBox({
       infoBox(title="Lib size",value= round(mean(sce$nCounts),2),subtitle = "Mean lib size per cell",
-              icon = icon('book'), #icon("sign-in"),
+              icon = icon('book'),
               color = "light-blue", fill = F
       )
     })
