@@ -99,34 +99,32 @@ createSCEobject <- function(xx,
         chosen.hvg <- Seurat::VariableFeatures(xx)
       }
     }
-  } 
   ## Matrix+Metadata to SCE object ----
   ##Check if the input class is a dense or sparse matrix object
-  else if (class(xx)[1] %in% c("dgCMatrix", "Matrix", "matrix")){
-    ##The matrix must contain rownames and colnames for the function to be able to identify genes and cells
-    if(is.null(rownames(xx)) | is.null(colnames(xx))){
-      stop('Matrix must have rownames "gene_id" and colnames "barcodes"')
-    }
-    ##Creating a SCE object from the matrix
-    xx.sce <- SingleCellExperiment(list(counts=xx))
-    ##Checking if metadata was specified
-    if(!is.null(metadata)){
-      if(all(colnames(xx.sce) %in% rownames(metadata))){
-        ##Assing colData() of the sce oject to be the metadata if all the cells have metadata
-        colData(xx.sce) <- cbind(colData(xx.sce), metadata[colnames(xx.sce),,drop=F])
-        ##Checking if partitions from 'partitionVars' are present in the metadata
-        if((!("scx.clust" %in% partitionVars)) & (!all(partitionVars %in% names(colData(xx.sce))))){
-          warning('at least one partition is not present in metadata')
+  } else if (class(xx)[1] %in% c("dgCMatrix", "Matrix", "matrix")){
+      ##The matrix must contain rownames and colnames for the function to be able to identify genes and cells
+      if(is.null(rownames(xx)) | is.null(colnames(xx))){
+        stop('Matrix must have rownames "gene_id" and colnames "barcodes"')
+      }
+      ##Creating a SCE object from the matrix
+      xx.sce <- SingleCellExperiment(list(counts=xx))
+      ##Checking if metadata was specified
+      if(!is.null(metadata)){
+        if(all(colnames(xx.sce) %in% rownames(metadata))){
+          ##Assing colData() of the sce oject to be the metadata if all the cells have metadata
+          colData(xx.sce) <- cbind(colData(xx.sce), metadata[colnames(xx.sce),,drop=F])
+          ##Checking if partitions from 'partitionVars' are present in the metadata
+          if((!("scx.clust" %in% partitionVars)) & (!all(partitionVars %in% names(colData(xx.sce))))){
+            warning('at least one partition is not present in metadata')
+          }
+        ##Stop if there is at least one cell it is not included in the metadata
+        } else {
+          stop('Some cells in metadata are not present in the matrix colnames.\n')
         }
-      ##Stop if there is at least one cell it is not included in the metadata
-      } else {
-        stop('Some cells in metadata are not present in the matrix colnames.\n')
-        }
-    }
-  } 
-  ## xx as SCE object ----
-  ##Check if the input class is a SCE object
-  else if (class(xx)[1]=="SingleCellExperiment"){
+      }
+    ## xx as SCE object ----
+    ##Check if the input class is a SCE object
+  } else if (class(xx)[1]=="SingleCellExperiment"){
     xx.sce <- xx
     ##Checking if metadata was specified
     if(!is.null(metadata)){
@@ -169,6 +167,7 @@ createSCEobject <- function(xx,
     warning("No partition passed the controls, a quick clusterization will be computed.")
     ##A quick clusterization will be computed in order to calculate gene markers and DEGs
     ttoFactors <- "scx.clust"
+    colData(xx.sce)[ttoFactors] <- NA
   }else{
     ##Transforming partitions to factors (in case a partition is numeric or character)
 	  colData(xx.sce)[ttoFactors] <- lapply(colData(xx.sce)[ttoFactors], as.factor)
