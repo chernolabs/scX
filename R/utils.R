@@ -27,7 +27,7 @@
 #' @keywords internal
 #' @noRd
 genesList <- function(dataPath){
-  if(file_ext(dataPath$name) == "txt"){
+  if(tools::file_ext(dataPath$name) == "txt"){
     # txt list of genes, separated by commas or newline
     genes <- readr::read_csv(file=dataPath$datapath, col_names = FALSE, col_types = readr::cols())
   }
