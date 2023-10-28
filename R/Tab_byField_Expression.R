@@ -582,7 +582,8 @@ Numeric_ExpressionServer <- function(id,sce,point.size=20) {
      LinesPlot  <- reactive({
        #req(input$scatter_heatmap == "scatter")
        req(!is.null(LinesReact()))
-        p <- LinesReact() %>% ggplot(aes(y=Exp,x=Numeric)) + geom_point(aes(col = if(input$partitionType != 'None'){partitionType} else{NULL}),alpha=0.5) + geom_smooth(se = F) +
+        p <- LinesReact() %>% ggplot(aes(y=Exp,x=Numeric)) + geom_point(aes(col = if(input$partitionType != 'None'){partitionType} else{NULL}),alpha=0.5) + 
+		 geom_smooth(se = F, method = 'gam', formula = y ~ s(x, bs = "cs")) +
          labs(color = input$partitionType) + 
           xlab(input$numericType) + 
           ylab("log(counts)") +
@@ -654,7 +655,7 @@ Numeric_ExpressionServer <- function(id,sce,point.size=20) {
        df_plot <- reshape2::melt(df_plot, id.vars = c("Cell","Numeric"), measure.vars = feature,
                                 variable.name = "Feat", value.name = "Expr")
        
-       p <- df_plot %>% ggplot(aes(y=Expr,x=Numeric,col = Feat)) + geom_smooth(se = F) +
+       p <- df_plot %>% ggplot(aes(y=Expr,x=Numeric,col = Feat)) + geom_smooth(se = F, method = 'gam', formula = y ~ s(x, bs = "cs")) +
          xlab(input$numericType) + 
          ylab("log(counts)") +
          ggtitle("Expression")   
