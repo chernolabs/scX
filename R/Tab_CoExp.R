@@ -267,11 +267,11 @@ COExpServer <- function(id,sce,point.size=20) {
      CorrPlot <- reactive({
        req(!is.null(CoExpressionVtor()))
        req(input$partitionType)
-       apply(table(CoExpressionVtor(),colData(sce)[,input$partitionType]),2,function(x){(x/sum(x))}) %>% 
+       ggcorr <- apply(table(CoExpressionVtor(),colData(sce)[,input$partitionType]),2,function(x){(x/sum(x))}) %>% 
          .[nrow(.):1,] %>% #Reverse the matrix to make it similar to Table 
          t %>% 
-         ggcorrplot::ggcorrplot(lab=T) +
-         scale_fill_gradient2(midpoint = 0.5,low="white",high ="#E46726",mid="#ffa18c") + labs(fill="Proportion")
+         ggcorrplot::ggcorrplot(lab=T)
+       suppressMessages(ggcorr + scale_fill_gradient2(midpoint = 0.5,low="white",high ="#E46726",mid="#ffa18c") + labs(fill="Proportion"))
      })
      
      output$CorrPlot <- renderPlot({
