@@ -325,8 +325,8 @@ MultiPlotsServer <- function(id,sce) {
       list_plots <- list()
       feature <- input$fieldType
       for(i in 1:length(feature)){
-        list_plots[[feature[i]]] <- scater::plotReducedDim(object = sce, dimred = input$plotType,ncomponents = 2, colour_by=feature[i]) + ggtitle(feature[i]) + 
-          scale_color_distiller(palette ='YlOrRd',direction = 1) + labs(color=feature[i])
+        list_plots[[feature[i]]] <- suppressMessages(scater::plotReducedDim(object = sce, dimred = input$plotType,ncomponents = 2, colour_by=feature[i]) + ggtitle(feature[i]) + 
+          scale_color_distiller(palette ='YlOrRd',direction = 1) + labs(color=feature[i]))
         
       }
       
