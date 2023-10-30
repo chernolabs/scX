@@ -46,7 +46,7 @@ sce <- SingleCellExperiment(list(logcounts=norm.mat))
 cseo <- createSCEobject(xx = sce)
 ```
 
-## 2 - Is there a maximum input size that scX can receive?
+## 2 - Is there a maximum input size that scXplorer can receive?
 
 The limitations of scX are solely dependent on the PC's hardware, such as the RAM and CPU. A 'standard' PC (16gb, i5-8400) can comfortably manage medium-sized datasets of up to 30k cells. However, to ensure smooth application and visualization plots for datasets exceeding 50k cells, the 'createSCEobject()' function subsamples the SCE object with 50k random cells while storing the cell names in the 'CELLS2KEEP' output.
 

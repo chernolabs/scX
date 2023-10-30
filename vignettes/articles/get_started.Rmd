@@ -15,13 +15,13 @@ knitr::opts_chunk$set(
 
 ### Loading Datasets
 
-To show the different capabilities of scX, we will use single cell data related to the oligodendrocyte developmental lineage ([Marques et al. 2016](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5221728/)). In this dataset we have cells from 12 regions of the central nervous system of juvenile and adult mice and 10 distinct cell populations have been identified. This package includes a modified version of this dataset in which the original cells have been subsampled and a pseudotime has been calculated to demonstrate how scX can represent numerical attributes.
+To show the different capabilities of scXplorer, we will use single cell data related to the oligodendrocyte developmental lineage ([Marques et al. 2016](https://www.ncbi.nlm.nih.gov/pmc/articles/PMC5221728/)). In this dataset we have cells from 12 regions of the central nervous system of juvenile and adult mice and 10 distinct cell populations have been identified. This package includes a modified version of this dataset in which the original cells have been subsampled and a pseudotime has been calculated to demonstrate how scXplorer can represent numerical attributes.
 
 In this example we will use the 'inferred_cell_type' covariate to explore differential expression patterns (partitionVars parameter). The rest of the metadata will be used for visualization purposes (metadataVars parameter). While partitionVars should be categorical variables, metadataVars can be discrete or continuous covariates
 
 
 ```R
-library(scX)
+library(scXplorer)
 
 #SCE example data
 sce
@@ -36,7 +36,7 @@ colData(sce)[1:3,]
 ```
 
 <p align="justify">  
-The scX app can be created and launched with only two functions. **_createSCEobject()_** creates the single cell experiment object that will be used within the application. This function performs a set of preprocessing steps required for the various scX functions. Among these steps we can mention:
+The scXplorer app can be created and launched with only two functions. **_createSCEobject()_** creates the single cell experiment object that will be used within the application. This function performs a set of preprocessing steps required for the various scXplorer functions. Among these steps we can mention:
  
 1. Calculation of quality control metrics. 
 
@@ -52,12 +52,12 @@ If the input dataset already has these characteristics, some of these steps can 
 
 On the other hand, different options for the calculation of the marker genes of the different clusters can be determined. This can be done within the parameter "paramFindMarkers" which expects a list of parameters taken by scran's _FindMarkers()_ function. 
 
-Finally with the **_launch_scX()_** function the application is deployed.
+Finally with the **_launch_scXplorer()_** function the application is deployed.
 
 </p>
 
 ```R
-library(scX)
+library(scXplorer)
 # Creating SCE object
 cseo <- createSCEobject(xx = sce, 
                         partitionVars = "inferred_cell_type", 
