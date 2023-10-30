@@ -1,6 +1,6 @@
 Package: scX
 Title: Interactive Visualization and Analysis of Single-Cell Experiment Data
-Version: 0.0.0.9000
+Version: 0.2.0
 Authors@R: c(
     person(given = "Tomás",family = "Vega Waichman", email = "tomas.vegawaichman@mail.mcgill.ca", role = c("aut", "cre"),
            comment = c(ORCID = "0009-0000-7002-9413")),
@@ -63,4 +63,4 @@ Suggests:
     Seurat
 LazyData: true
 VignetteBuilder: knitr
-URL: https://tvegawaichman.github.io/scX/
+URL: https://chernolabs.github.io/scX/
