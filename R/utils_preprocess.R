@@ -6,7 +6,7 @@
 #'		visualization, and any additional data provided. This list is used as input when launching
 #'		the scX app.
 #' 
-#' @param xx Either a matrix with counts, or a SCE or Seurat object.
+#' @param xx Either a matrix with counts, or a SCE or Seurat object. It Must have rownames and colnames.
 #' @param assay.name.raw Assay name for raw counts matrix if object is a SCE. Defaults to `counts`.
 #' @param assay.name.normalization Assay name for normalized matrix if present in SCE. If not present,
 #' 		it computes `logcounts` (default).

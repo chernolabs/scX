@@ -1,81 +1,84 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://tvegawaichman.github.io/scX/404.html</loc>
+    <loc>https://chernolabs.github.io/scX/404.html</loc>
   </url>
   <url>
-    <loc>https://tvegawaichman.github.io/scX/LICENSE-text.html</loc>
+    <loc>https://chernolabs.github.io/scX/LICENSE-text.html</loc>
   </url>
   <url>
-    <loc>https://tvegawaichman.github.io/scX/LICENSE.html</loc>
+    <loc>https://chernolabs.github.io/scX/LICENSE.html</loc>
   </url>
   <url>
-    <loc>https://tvegawaichman.github.io/scX/articles/Differential_Expression.html</loc>
+    <loc>https://chernolabs.github.io/scX/articles/Differential_Expression.html</loc>
   </url>
   <url>
-    <loc>https://tvegawaichman.github.io/scX/articles/Exploratory_Data_Analysis.html</loc>
+    <loc>https://chernolabs.github.io/scX/articles/Exploratory_Data_Analysis.html</loc>
   </url>
   <url>
-    <loc>https://tvegawaichman.github.io/scX/articles/Gene_Expression.html</loc>
+    <loc>https://chernolabs.github.io/scX/articles/FAQ.html</loc>
   </url>
   <url>
-    <loc>https://tvegawaichman.github.io/scX/articles/Markers.html</loc>
+    <loc>https://chernolabs.github.io/scX/articles/Gene_Expression.html</loc>
   </url>
   <url>
-    <loc>https://tvegawaichman.github.io/scX/articles/Summary.html</loc>
+    <loc>https://chernolabs.github.io/scX/articles/Markers.html</loc>
   </url>
   <url>
-    <loc>https://tvegawaichman.github.io/scX/articles/Visual_Tools.html</loc>
+    <loc>https://chernolabs.github.io/scX/articles/Summary.html</loc>
   </url>
   <url>
-    <loc>https://tvegawaichman.github.io/scX/articles/articles/Differential_Expression.html</loc>
+    <loc>https://chernolabs.github.io/scX/articles/Visual_Tools.html</loc>
   </url>
   <url>
-    <loc>https://tvegawaichman.github.io/scX/articles/articles/Exploratory_Data_Analysis.html</loc>
+    <loc>https://chernolabs.github.io/scX/articles/articles/Differential_Expression.html</loc>
   </url>
   <url>
-    <loc>https://tvegawaichman.github.io/scX/articles/articles/Gene_Expression.html</loc>
+    <loc>https://chernolabs.github.io/scX/articles/articles/Exploratory_Data_Analysis.html</loc>
   </url>
   <url>
-    <loc>https://tvegawaichman.github.io/scX/articles/articles/Markers.html</loc>
+    <loc>https://chernolabs.github.io/scX/articles/articles/Gene_Expression.html</loc>
   </url>
   <url>
-    <loc>https://tvegawaichman.github.io/scX/articles/articles/Summary.html</loc>
+    <loc>https://chernolabs.github.io/scX/articles/articles/Markers.html</loc>
   </url>
   <url>
-    <loc>https://tvegawaichman.github.io/scX/articles/articles/Visual_Tools.html</loc>
+    <loc>https://chernolabs.github.io/scX/articles/articles/Summary.html</loc>
   </url>
   <url>
-    <loc>https://tvegawaichman.github.io/scX/articles/articles/get_started.html</loc>
+    <loc>https://chernolabs.github.io/scX/articles/articles/Visual_Tools.html</loc>
   </url>
   <url>
-    <loc>https://tvegawaichman.github.io/scX/articles/articles/install.html</loc>
+    <loc>https://chernolabs.github.io/scX/articles/articles/get_started.html</loc>
   </url>
   <url>
-    <loc>https://tvegawaichman.github.io/scX/articles/get_started.html</loc>
+    <loc>https://chernolabs.github.io/scX/articles/articles/install.html</loc>
   </url>
   <url>
-    <loc>https://tvegawaichman.github.io/scX/articles/index.html</loc>
+    <loc>https://chernolabs.github.io/scX/articles/get_started.html</loc>
   </url>
   <url>
-    <loc>https://tvegawaichman.github.io/scX/articles/install.html</loc>
+    <loc>https://chernolabs.github.io/scX/articles/index.html</loc>
   </url>
   <url>
-    <loc>https://tvegawaichman.github.io/scX/authors.html</loc>
+    <loc>https://chernolabs.github.io/scX/articles/install.html</loc>
   </url>
   <url>
-    <loc>https://tvegawaichman.github.io/scX/index.html</loc>
+    <loc>https://chernolabs.github.io/scX/authors.html</loc>
   </url>
   <url>
-    <loc>https://tvegawaichman.github.io/scX/reference/createSCEobject.html</loc>
+    <loc>https://chernolabs.github.io/scX/index.html</loc>
   </url>
   <url>
-    <loc>https://tvegawaichman.github.io/scX/reference/index.html</loc>
+    <loc>https://chernolabs.github.io/scX/reference/createSCEobject.html</loc>
   </url>
   <url>
-    <loc>https://tvegawaichman.github.io/scX/reference/launch_scX.html</loc>
+    <loc>https://chernolabs.github.io/scX/reference/index.html</loc>
   </url>
   <url>
-    <loc>https://tvegawaichman.github.io/scX/reference/sce.html</loc>
+    <loc>https://chernolabs.github.io/scX/reference/launch_scX.html</loc>
+  </url>
+  <url>
+    <loc>https://chernolabs.github.io/scX/reference/sce.html</loc>
   </url>
 </urlset>
