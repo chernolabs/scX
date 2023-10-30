@@ -13,7 +13,7 @@ knitr::opts_chunk$set(
 
 
 <p align="justify">  
-scXplorer displays a summary of the main descriptive information of the dataset: number of cells and genes, mean number of genes detected per cell, partions, experiments and average library size.
+scX displays a summary of the main descriptive information of the dataset: number of cells and genes, mean number of genes detected per cell, partions, experiments and average library size.
 
 In the summary section, you can explore through graphical visualization the coventional quality control metrics: this is the relationship between the number of features and the count numbers. In this plot you can distinguish the cells coming from the different partitions of the dataset.
 </p>

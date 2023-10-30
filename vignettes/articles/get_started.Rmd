@@ -48,7 +48,7 @@ The scXplorer app can be created and launched with only two functions. **_create
 
 5. Calculation of different dimensionality reductions: PCA, tSNE, and UMAP.
 
-If the input dataset already has these characteristics, some of these steps can be avoided.  For example, if the dataset already has a precomputed PCA, scXplorer will not recalculate it but will calculate the dimensionality reductions that are not already calculated in the dataset.
+If the input dataset already has these characteristics, some of these steps can be avoided.  For example, if the dataset already has a precomputed PCA, scX will not recalculate it but will calculate the dimensionality reductions that are not already calculated in the dataset.
 
 On the other hand, different options for the calculation of the marker genes of the different clusters can be determined. This can be done within the parameter "paramFindMarkers" which expects a list of parameters taken by scran's _FindMarkers()_ function. 
 

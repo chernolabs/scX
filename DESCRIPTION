@@ -3,11 +3,11 @@ Title: Interactive Visualization and Analysis of Single-Cell Experiment Data
 Version: 0.0.0.9000
 Authors@R: c(
     person(given = "Tomás",family = "Vega Waichman", email = "tomas.vegawaichman@mail.mcgill.ca", role = c("aut", "cre"),
-           comment = c(GitHub = "https://github.com/tvegawaichman")),
+           comment = c(ORCID = "0009-0000-7002-9413")),
     person(given = "Maria Luz",family = "Vercesi",  role = c("aut"),
            comment = c(GitHub = "https://github.com/mluzvercesi")),
     person(given = "Ariel A.",family = "Berardino",  role = c("aut"),
-           comment = c(GitHub = "https://github.com/ariberar")),
+           comment = c(ORCID = "0009-0004-8112")),
     person(given = "Maximiliano S.",family = "Beckel",  role = c("aut"),
            comment = c(ORCID = "0000-0002-2284-9529")),
 	  person("Chernomoretz Lab and Collaborators", role = "fnd")  

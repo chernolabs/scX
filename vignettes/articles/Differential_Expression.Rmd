@@ -20,7 +20,7 @@ The main figure in this section is a VolcanoPlot in which genes that are down an
 
 
 ```{r}
-knitr::include_graphics("figures/differential_expression.gif")
+knitr::include_graphics("figures/de.gif")
 
 ```
 
