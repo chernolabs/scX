@@ -1,0 +1,80 @@
+---
+title: "FAQ"
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  echo = FALSE,
+  fig.path = "man/figures/",
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## 1 - What type of input does scX accept?
+
+scX is an "plug and play" tool that pre-processes the data using only the raw count matrix, allowing the dataset to be explored in depth.
+Nonetheless, it is advisable to input an SCE object when using the 'createSCEobject' function.
+The function, however, also accepts the counts matrix, whether raw or normalised, or a Seurat object.
+In the latter two cases, it automatically transforms the inputs into an SCE object.
+If you supply cell metadata, it must be contained in a dataframe with the cell names as rownames.
+Typical examples of metadata are cell type, sampleid, percentage of mitochondrial reads.
+
+```R
+# Input = SingleCellExperiment object (sce)
+cseo <- createSCEobject(xx = sce)
+# Input = Seurat object (seu)
+cseo <- createSCEobject(xx = seu)
+# Alternatively, Input = combine a matrix (mat) with metadata as dataframe (df)
+cseo <- createSCEobject(xx = mat, metadata = df)
+```
+
+scX is an extreme valuable tool for visualising and analysing single-cell or single-nuclei RNA sequencing data.
+To maximise its potential, it is important to have a pre-processed object, i.e. one that has already undergone QC filtering for genes and cells, as well as the appropriate normalisation for the type of data.
+If you have already computed partitions, such as a Louvain-Leiden partition to identify cell types or states, you can pass them as input to be visualised in PCA, UMAP, TSNE and obtain markers, DEGs between the different clusters, and so on. In that case use the 'partitionVars' parameter. To visualize any additional information in plots, it must be passed through the 'metadataVars' parameter.
+
+```R
+cseo <- createSCEobject(xx = sce, partitionVars = c("inferred_cell_type"), metadataVars=c("pseudotime", "sex"))
+``` 
+
+## 2 - Is there a maximum input size that scXplorer can receive?
+
+The limitations of scX are solely dependent on the PC's hardware, such as the RAM and CPU. A 'standard' PC (16gb, i5-8400) can comfortably manage medium-sized datasets of up to 30k cells. However, to ensure smooth application and visualization plots for datasets exceeding 50k cells, the 'createSCEobject()' function subsamples the SCE object with 50k random cells while storing the cell names in the 'CELLS2KEEP' output. If you are willing to attempt to utilize all cells within the application with the potential drawback of running low on memory or experiencing extended waiting periods between the plots, you can modify it to 'all' prior to launching 'launch_scX'.
+
+```R
+cseo <- createSCEobject(xx = sce, partitionVars = c("inferred_cell_type"), metadataVars=c("pseudotime", "sex"))
+cseo$CELLS2KEEP <- 'all'
+launch_scX(cseo)
+``` 
+
+Nonetheless, all the calculations in the preprocessing stage apply to every cell within the dataset.
+
+## 3 - How to deploy a shiny app in shiny.io:
+
+1 - Save the data in /data folder.
+2 - app.R:
+```R
+library(scX)
+# Loading SCE object
+load('data/data.Rdata')
+launch_scX(cseo,point.size = 50)
+```
+
+## 4 - How to use Scanpy (.h5ad) or .loom objets:
+For this it's necessary to convert them to a SingleCellExperiment or Seurat objects.
+In this tutorial we will explain how to convert them as SingleCellExperiment using the zellkonverter package.
+```R
+sce <- readH5AD(file,
+		reader =  "R"
+#Then run the createSCEobject as in 1)
+)
+```
+		
+
+From .loom, using the sceasy package
+```R
+sceasy::convertFormat('filename.loom', from="loom", to="sce",
+                       outFile='filename.rds')
+                       
+sce <- readRDS('filename.rds')
+```
