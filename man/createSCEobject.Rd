@@ -165,6 +165,7 @@ Please note that all calculations are already completed, and this step is solely
 }
 
 \examples{
+\dontrun{
 # Quick start guide example:
 library(scX)
 cseo <- createSCEobject(xx = sce, 
@@ -172,6 +173,7 @@ cseo <- createSCEobject(xx = sce,
                         metadataVars = c("source_name", "age", "sex", "strain", "treatment", "pseudotime"),
                         descriptionText = "Quick Start Guide")
 launch_scX(cseo)
+}
 }
 \seealso{
 Related functions from \pkg{scran} and \pkg{scater} packages as suggested in \href{https://bioconductor.org/books/release/OSCA/.}{OSCA} book for:

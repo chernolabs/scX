@@ -124,6 +124,7 @@
 #' }
 
 #' @examples 
+#' \dontrun{
 #' # Quick start guide example:
 #' library(scX)
 #' cseo <- createSCEobject(xx = sce, 
@@ -131,6 +132,7 @@
 #'                         metadataVars = c("source_name", "age", "sex", "strain", "treatment", "pseudotime"),
 #'                         descriptionText = "Quick Start Guide")
 #' launch_scX(cseo)
+#' }
 
 #' @export
 createSCEobject <- function(xx,
