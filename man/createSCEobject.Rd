@@ -2,7 +2,7 @@
 % Please edit documentation in R/utils_preprocess.R
 \name{createSCEobject}
 \alias{createSCEobject}
-\title{SingleCellExperiment object ready for use in scX}
+\title{Creates an object ready for use in scX}
 \usage{
 createSCEobject(
   xx,
@@ -23,50 +23,165 @@ createSCEobject(
 )
 }
 \arguments{
-\item{xx}{Either a matrix with counts, or a SCE or Seurat object.}
+\item{xx}{Either a numeric matrix-like object of the raw count matrix (with genes as rows and cells as columns), a \linkS4class{SingleCellExperiment} object or \linkS4class{Seurat} object.}
 
-\item{assay.name.raw}{Assay name for raw counts matrix if object is a SCE. Defaults to \code{counts}.}
+\item{assay.name.raw}{Assay name for raw counts matrix if object is a \linkS4class{SingleCellExperiment}. Defaults to \code{counts}.}
 
-\item{assay.name.normalization}{Assay name for normalized matrix if present in SCE. If not present,
+\item{assay.name.normalization}{Assay name for normalized matrix if present in \linkS4class{SingleCellExperiment}. If not present,
 it computes \code{logcounts} (default).}
 
-\item{metadata}{Optional dataframe with cell metadata.}
+\item{metadata}{Optional \linkS4class{DataFrame} with cell metadata. Rownames in the metadata must include all cell names of \code{xx}.}
 
-\item{partitionVars}{Optional metadata column names (or \code{colData}) to use as factors. If \code{NULL} (default),
-a quick clusterization will be computed.}
+\item{partitionVars}{Optional metadata column names (or \code{colData}) to use for gene markers and differential
+expression analysis. If \code{NULL} (default),    a quick clusterization using \code{\link[scran]{quickCluster}} from \pkg{scran} package will be computed.}
 
-\item{metadataVars}{Additional metadata column names (or \code{colData}) to use only for coloring in plots.
+\item{metadataVars}{Additional metadata column names (or \code{colData})) to use only for coloring in plots.
 If \code{NULL} (default), only \code{partitionVars} columns will be available for coloring plots.}
 
-\item{chosen.hvg}{Optional list of Highly Variable Genes.}
+\item{chosen.hvg}{Optional list of Highly Variable Genes. NOTE: if \code{chosen.hvg=NULL} and \code{xx} is a \linkS4class{Seurat} object with computed \code{\link[Seurat]{VariableFeatures}} then
+this parameter will be set to that list of genes.}
 
 \item{nHVGs}{Number of Highly Variable Genes to use if \code{chosen.hvg=NULL}. Defaults to 3000.}
 
 \item{nPCs}{Number of Principal Components to use in PCA. Defaults to 50.}
 
 \item{calcRedDim}{Logical indicating whether to compute reduced dimensions (PCA, UMAP, TSNE, UMAP2D,
-TSNE2D). Defaults to \code{TRUE}.}
+TSNE2D). Defaults to \code{TRUE}. If its set to \code{FALSE} but there is no 2D nor 3D or not at all reduced dimension calculated in the input:
+it calculates all. Instead if there is no 2D, it calculates PCA, UMAP2D, TSNE2D. And lastly if there is no 3D, it calculates PCA, UMAP, TSNE.}
 
-\item{paramFindMarkers}{List of parameters to pass to \code{scran::findMarkers(...)} to compute marker
+\item{paramFindMarkers}{List of parameters to pass to \code{\link[scran]{findMarkers}} to compute marker
 genes for clusters. Defaults to \code{list(test.type="wilcox", pval.type="all", direction="any")}.}
 
 \item{calcAllPartitions}{Logical indicating whether to force the computation of markers and DEGs from
-the entire list of \code{partitionVars}.}
+the entire list of \code{partitionVars}. Defaults to \code{FALSE} and only partitions from \code{partitionVars} with less or equal to 30 levels will be account for
+markers and DEGs calculations.}
 
 \item{cells2keep}{List of names for cells to keep when subsampling data. NOTE: Subsampling is only
-used in large datasets for visual purposes, and it does not affect computations.}
+used in large datasets for visual purposes, and it does not affect computations. Only 50k cells will be used for visualization in the app and
+their indexs are stored in the \code{CELLS2KEEP} element of the output list.}
 
-\item{descriptionText}{Optional short description of the object being analized. This can help when
+\item{descriptionText}{Optional short description of the object being analized to be displayed in the \code{scX} app. This can help when
 working with multiple tabs.}
 
 \item{verbose}{Logical for step by step status while function is running. Defaults to \code{TRUE}.}
 }
 \value{
-List with a SingleCellExperiment object and additional data ready for use in \code{scX}.
+A named \linkS4class{List} that serves as input for \code{\link{launch_scX}} which contains the fields:
+\describe{
+\item{\code{SCE}:}{\linkS4class{SingleCellExperiment} object with a computed normalized expression,
+dimensional reduction embedding (PCA, UMAP, TSNE, in 2D & 3D) calculated using the list of \code{chosen.hvg} if not \code{NULL} or
+the top \code{nHVGs}. \code{colData} contains the \code{partitionVArs} and \code{metadataVars} if they where specified, if not only
+a quick clusterization will be available for preliminar analyisis of the data.}
+\item{\code{sce.degs}:}{A named \linkS4class{List} of \linkS4class{DataFrame}s where each DataFrame contains the consolidated marker statistics
+for each gene (row) for the cluster of the same name. Statistics are computed using \code{\link[scran]{findMarkers}} and user can choose \code{test.type}
+parameters to pass to that function. See \code{\link[scran]{combineMarkers}} for the details of how these dataframes are confectioner.}
+\item{\code{sce.markers}:}{A \linkS4class{List} of named \linkS4class{List}s of \linkS4class{DataFrame}s. Each one corresponds to the marker genes of every cluster in a partition
+(names of the nested lists). \code{summary.stats:} AUC if \code{test.type=="wilcox"} and -log.FC for \code{test.type=="t"} or \code{test.type=="binom"}.
+\code{log.FDR:} -Log.FDR of the most appropriate inter-cluster comparison according to the selected p-value type. See \code{\link[scran]{findMarkers}} for the details of how these metrics are computed.
+\code{boxcor:} Correlation scores between the normalized gene expression profiles and a binary vector of cells, in which cells of the selected cluster have a value of 1.}
+\item{(optional) \code{text}:}{String if \code{descriptionText} not \code{NULL}.}
+\item{\code{CELLS2KEEP}:}{Numeric, the indices of the selected cells chosen for visualization in the \code{scX} application.
+(Alternatively) Character, if 'all' no subsampling will be performed for visualization purposes.}
+}
 }
 \description{
-\code{createSCEobject()} returns a list which includes a SingleCellExperiment object with counts, at
-least one clusterization, gene markers for each clusterization, reduced dimensions for
-visualization, and any additional data provided. This list is used as input when launching
-the scX app.
+\code{\link{createSCEobject}} creates the input object (as a \linkS4class{List}) for the function \code{\link{launch_scX}}. This list includes a \linkS4class{SingleCellExperiment} object with normalized expression,
+reduced dimensions for visualization, and any additional data provided. Also, it includes gene markers and differential expression analysis for each specified partition (if no partition is selected, a quick clusterization is computed)
+}
+\details{
+This function handle the basic preprocessing steps for sc/sn-RNAseq experiments data taking advantage of the utility power of \pkg{scran}, \pkg{scater} and \pkg{SingleCellExperiment} packages.
+The steps are: Converting the input to \linkS4class{SingleCellExperiment} object, calculate some QC metrics, normalization of the expression matrix, find the most highly variable genes,
+compute embeddings for various dimensionality reduction techniques, compute if not specified a clustering of the cells for marker genes and DEGs analysis,
+subsampling the \linkS4class{SingleCellExperiment} object to reduce waiting times between plots in the \pkg{scX} app. Below you can find more details for these steps that are recommended in
+\href{https://bioconductor.org/books/release/OSCA/.}{OSCA} book.
+}
+\section{Partitions}{
+
+It is extremely recommended that a curated partition of the data be present in the \linkS4class{SingleCellExperiment} object or in the \code{metadata}.
+Marker genes and differential expression analysis will be compute for partitions that are passed through \code{partitionVars} and have less than 31 groups.
+If user wants run the calculations even if some partitions have more than 30 levels must set \code{calcAllPartitions} to \code{TRUE}.
+It may be worth coloring some partitions in plots but without having to compute marker genes and DEGs analyses for them. Those partitions
+had to be passed through \code{metadataVars}.
+If \code{partitionVars} and \code{metadataVars} are both \code{NULL} a quick clustering (see "Normalization") is used for the marker genes and DEGs analysises.
+}
+
+\section{Normalization}{
+
+If there is no normalized assay in the \linkS4class{SingleCellExperiment} object or \linkS4class{Seurat} object:
+Perform a \href{https://bioconductor.org/books/3.17/OSCA.basic/normalization.html#normalization-by-deconvolution}{Normalization by deconvolution} proposed in the OSCA book.
+First, calculate clusters using the Walktrap community detection algorithm for graph-based clustering with default parameters from \code{\link[scran]{quickCluster}}.
+The resulting clusters are stored in \code{colData} as \code{"scx.clust"}.
+Then compute scale factors for the cells using those clusters.
+Finally, calculate the lognormalized expression matrix by applying a log2 transformation to the product of the raw matrix and scale factors with pseudocounts of 1.
+If a normalized assay exists and "scx.clust" is included in the \code{partitionVars}, the function described before will be applied to compute the clusters, which are stored in \code{colData}.
+}
+
+\section{Highly Variable Genes}{
+
+If \code{chosen.hvg} is not specified, it will calculate the top \code{nHVGs} most variable genes with biological component > 0
+This is computed with \code{\link[scran]{modelGeneVar}} which calculates the variance and mean of the lognormalized expression values.
+By fitting a trend of the variance against the mean, a biological component of variation for each gene can be assigned as the residual from the trend.
+See appropiate documentation for more details.
+}
+
+\section{Reduced Dimensional Analysis Techniques}{
+
+\pkg{scX} is a tool that helps visualizing the data properly, so it runs some dimensionality reduction analysis technique (PCA, UMAP2D, TSNE2D, UMAP3D, TSNE3D)
+If \code{xx} already has dimensionality reduction embeddings calculated, \code{calcRedDim} can be set to \code{FALSE} but:
+\itemize{
+\item if there is no dimRed calculated in the \linkS4class{SingleCellExperiment} object -> it calculates all
+\item if there is no 2D or 3D redDim caclulated -> it calculates all
+\item if there is no 2D -> it calculates only 2D
+\item if there is no 3D -> it calculates only 3D
+Principal Component Analysis is calculated with \code{\link[scater]{runPCA}} using the \code{chosen.hvg} and retaining the first \code{nPCs} components,
+for the normalized expression matrix.
+TSNE and UMAP are calculated with \code{\link[scater]{runTSNE}} and \code{\link[scater]{runUMAP}} functions using the PCA matrix.
+}
+}
+
+\section{Marker Genes Analysis}{
+
+For all partitions in \code{partitionVars} \link{createSCEobject} compute statistics for identify marker genes for every cluster
+using \code{\link[scran]{findMarkers}} with parameters specified by the user in \code{paramFindMarkers}.
+Only genes with FDR<0.05 are selected for each cluster, and the boxcor is calculated for those genes.
+\describe{
+\item{\code{boxcor}:}{The boxcor is the correlation between a gene's expression vector (logcounts) and a binary vector, where only the cells from the selected cluster
+mark 1 while the rest of the cells mark 0.}
+}
+}
+
+\section{Differential Expression Analysis}{
+
+For all partitions in \code{partitionVars} \link{createSCEobject} compute statistics for identify DEGs between clusters using \code{\link[scran]{findMarkers}} by setting
+\code{direction="any"} and \code{pval.type="all"}, the test.type is specified by the user in \code{paramFindMarkers}, with the exception that if the user
+had specified "wilcox" as \code{test.type}, the logFC values would be extracted from the function with \code{test.type="t"}.
+}
+
+\section{Subsampling cells}{
+
+If the \linkS4class{SingleCellExperiment} object contains over 50k cells, a random sample of 50k cells will be chosen for visualization in the application.
+Cell names that the user wants to keep in the visualizations can be passed to \code{cells2keep}.
+Please note that all calculations are already completed, and this step is solely for promoting smooth and efficient visualization.
+}
+
+\examples{
+# Quick start guide example:
+library(scX)
+cseo <- createSCEobject(xx = sce, 
+                        partitionVars = "inferred_cell_type", 
+                        metadataVars = c("source_name", "age", "sex", "strain", "treatment", "pseudotime"),
+                        descriptionText = "Quick Start Guide")
+launch_scX(cseo)
+}
+\seealso{
+Related functions from \pkg{scran} and \pkg{scater} packages as suggested in \href{https://bioconductor.org/books/release/OSCA/.}{OSCA} book for:
+\itemize{
+\item{Preprocessing steps: }{\code{\link[scran]{quickCluster}}, \code{\link[scran]{computeSumFactors}} and \code{\link[scater]{logNormCounts}}.}
+\item{HVGs: }{\code{\link[scran]{modelGeneVar}}.}
+\item{Dimensionality Reduction Techniques: }{\code{\link[scater]{runPCA}}, \code{\link[scater]{runTSNE}} and \code{\link[scater]{runUMAP}}.}
+\item{Marker genes and DEGs analyses: }{\code{\link[scran]{findMarkers}}, \code{\link[scran]{combineMarkers}}.}
+}
+}
+\author{
+Tomás Vega Waichman, Maria Luz Vercesi, Ariel A. Berardino, Maximiliano S. Beckel, Chernomoretz Lab and Collaborators
 }

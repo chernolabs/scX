@@ -7,7 +7,7 @@
 \format{
 \subsection{\code{sce}}{
 
-A Single Cell Experiment object with 2141 cells and 8691 genes:
+A Single Cell Experiment object with 2141 cells and 2000 highly variable genes  (HVG):
 \describe{
 \item{assays}{counts}
 \item{colData}{title source_name age inferred_cell_type sex strain treatment pseudotime}
