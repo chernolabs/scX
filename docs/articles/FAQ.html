@@ -28,7 +28,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">scX</a>
 
-    <small class="nav-text text-danger me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Unreleased version">0.0.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="Released version">0.2.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -141,7 +141,7 @@ matrix, you may transform it into an SCE object before providing it to
 </div>
 </div>
 <div class="section level2">
-<h2 id="is-there-a-maximum-input-size-that-scxplorer-can-receive">2 - Is there a maximum input size that scXplorer can receive?<a class="anchor" aria-label="anchor" href="#is-there-a-maximum-input-size-that-scxplorer-can-receive"></a>
+<h2 id="is-there-a-maximum-input-size-that-scx-can-receive">2 - Is there a maximum input size that scX can receive?<a class="anchor" aria-label="anchor" href="#is-there-a-maximum-input-size-that-scx-can-receive"></a>
 </h2>
 <p>The limitations of scX are solely dependent on the PC’s hardware,
 such as the RAM and CPU. A ‘standard’ PC (16gb, i5-8400) can comfortably
@@ -184,7 +184,7 @@ every cell within the dataset.</p>
 <p>1 - Save the SCE object in /data folder 2 - Create an app.R
 script:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://tvegawaichman.github.io/scX/" class="external-link">scX</a></span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://chernolabs.github.io/scX/">scX</a></span><span class="op">)</span></span>
 <span><span class="co"># Loading SCE object</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/load.html" class="external-link">load</a></span><span class="op">(</span><span class="st">'data/data.Rdata'</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/launch_scX.html">launch_scX</a></span><span class="op">(</span><span class="va">cseo</span>,point.size <span class="op">=</span> <span class="fl">50</span><span class="op">)</span></span></code></pre></div>

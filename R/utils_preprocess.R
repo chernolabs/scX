@@ -461,7 +461,7 @@ createSCEobject <- function(xx,
   if(verbose) cat('Computing cluster markers...')
   ##If test.type = wilcox, calculate FDR with that test and extract logFC values from t test.
   if (paramFindMarkers$test.type == "wilcox"){
-    sce.markers <- list()
+    sce.degs <- list()
     for(i in ttoFactors){
       tout <- scran::findMarkers(xx.sce, 
                                   assay.type = "logcounts",
@@ -486,12 +486,12 @@ createSCEobject <- function(xx,
           names(wout[[ii]][[jj]]) = names(tout[[ii]][[jj]]) 
         }
       }
-      sce.markers[[i]] = wout
+      sce.degs[[i]] = wout
     }
   }else{
-    sce.markers <- list()
+    sce.degs <- list()
     for(i in ttoFactors){
-      sce.markers[[i]] <- scran::findMarkers(xx.sce, 
+      sce.degs[[i]] <- scran::findMarkers(xx.sce, 
                                       assay.type = "logcounts",
                                       group = colData(xx.sce)[,i],
                                       test.type=paramFindMarkers$test.type,
@@ -504,12 +504,12 @@ createSCEobject <- function(xx,
   if(verbose) cat(' Finished\n')
 
 
-  # Attaching sce.markers to output ----
-  csceo[["sce.markers"]] <- sce.markers
+  # Attaching sce.degs to output ----
+  csceo[["sce.degs"]] <- sce.degs
   
   
   # Markers ----
-  # `ldf` is a list of lists of dataframes for every cluster in all partitions in `partitionVars` used by the shiny app to be able to identify gene markers for clusters.
+  # `sce.markers` is a list of lists of dataframes for every cluster in all partitions in `partitionVars` used by the shiny app to be able to identify gene markers for clusters.
   # Every element in the list is a list of data The list is constructed using the output of `scran::findMarkers' with parameters specified by the user in `paramFindMarkers'.
   # Only genes with FDR<0.05 are selected for each cluster, and the boxcor is calculated for those genes.
   # Boxcor:
@@ -519,16 +519,16 @@ createSCEobject <- function(xx,
   numCores <- max(1, parallel::detectCores() - 2, na.rm = TRUE)
   if(require("doParallel", quietly = T)) doParallel::registerDoParallel(numCores)
 
-  ldf <- list()
+  sce.markers <- list()
   for(i in ttoFactors){
-    ldf[[i]] <- ldf_func(xx.sce, i, paramFindMarkers)
+    sce.markers[[i]] <- markers_func(xx.sce, i, paramFindMarkers)
   }
   if(verbose) cat('Finished\n')
   
   
-  # Attaching ldf to output ----
+  # Attaching sce.markers to output ----
 
-  csceo[["ldf"]] <- ldf
+  csceo[["sce.markers"]] <- sce.markers
   
 
   # Attaching text to output ----
@@ -603,11 +603,11 @@ applyReducedDim <- function(sce, reddimstocalculate, chosen.hvgs, nPCs, assaynam
   return(sce)
 }
 
-# ldf func for cluster markers ----
+# markers func for cluster markers ----
 # returns: markers, robustness, correlation with a binary vector "turned on" in that cluster
 #' @keywords internal
 #' @noRd
-ldf_func <- function(sce, partition, paramFindMarkers, minSize=50){
+markers_func <- function(sce, partition, paramFindMarkers, minSize=50){ # previously ldf_func
 
   cat(partition, ":\n", sep = "")
   
@@ -623,8 +623,8 @@ ldf_func <- function(sce, partition, paramFindMarkers, minSize=50){
                                                                )
   
   
-  # calculate ldf ----
-  ldf_t <-list()
+  # calculate sce.markers ----
+  scemarkers_t <-list()
   
   lab   <- colData(sce)[,partition]
   tt   <- table(lab)
@@ -668,10 +668,10 @@ ldf_func <- function(sce, partition, paramFindMarkers, minSize=50){
       else {
         df <- NULL
       }
-      ldf_t[[coi]]<-df
+      scemarkers_t[[coi]]<-df
     }
   }
-  return(ldf_t)
+  return(scemarkers_t)
 }
 
 # subsampling cells for visual purposes

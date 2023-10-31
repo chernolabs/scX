@@ -21,7 +21,7 @@ Here you can observe the proportion of cells belonging to the different levels o
 
 
 ```{r}
-knitr::include_graphics("figures/exploratory_categories.gif")
+knitr::include_graphics("figures/eda_c.gif")
 
 ```
 
@@ -32,7 +32,7 @@ In a similar way to the previous subsection, in "Field" you can explore how the 
 
 
 ```{r}
-knitr::include_graphics("figures/fields.gif")
+knitr::include_graphics("figures/eda_f.gif")
 
 ```
 

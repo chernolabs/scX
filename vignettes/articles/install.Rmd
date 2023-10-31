@@ -13,7 +13,7 @@ knitr::opts_chunk$set(
 
 ## Installation 
 
-scXplorer requires certain packages to be installed. If the user does not have these packages installed, they can execute the following code: 
+scX requires certain packages to be installed. If the user does not have these packages installed, they can execute the following code: 
 
 ```R
 BiocManager::install(c("SingleCellExperiment","scran","scatter","ComplexHeatmap"))
@@ -23,5 +23,5 @@ BiocManager::install(c("SingleCellExperiment","scran","scatter","ComplexHeatmap"
 scX can be installed from Github as follows:
 
 ```R
-devtools::install_github("tvegawaichman/scX")
+devtools::install_github("chernolabs/scX")
 ```

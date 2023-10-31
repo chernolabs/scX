@@ -20,7 +20,7 @@ By selecting or uploading a set of genes of interest, a set of Violin plots can 
 
 
 ```{r}
-knitr::include_graphics("figures/violins.gif")
+knitr::include_graphics("figures/vt_mv.gif")
 
 ```
 
@@ -31,7 +31,7 @@ Multiplots allows you to explore how different variables change across cells in 
  
 
 ```{r}
-knitr::include_graphics("figures/multiplots.gif")
+knitr::include_graphics("figures/vt_mp.gif")
 
 ```
 

@@ -25,7 +25,7 @@ A wide variety of plots are available to analyse the expression of the genes of 
 
 
 ```{r}
-knitr::include_graphics("figures/categories.gif")
+knitr::include_graphics("figures/ge_c3.gif")
 
 ```
 
@@ -38,7 +38,7 @@ Fields allows you to analyse the expression of a set of genes in relation to num
 
 
 ```{r}
-knitr::include_graphics("figures/ge_fields.gif")
+knitr::include_graphics("figures/ge_f.gif")
 
 ```
 
@@ -50,7 +50,7 @@ In Co-expression section you can analyse the co-appearance of pairs of genes, de
 </p>
 
 ```{r}
-knitr::include_graphics("figures/coexpression.gif")
+knitr::include_graphics("figures/ge_ce.gif")
 
 ```
 

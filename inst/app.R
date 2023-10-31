@@ -196,13 +196,13 @@ ui <- function(){
 }
 
 server <- function(input, output, session) {
-	QC_Server(id = "qc", sce = cseo$SCE, descriptionText = cseo$text, Npartition = length(cseo$ldf))
-	markersServer(id="markers", sce=cseo$SCE, ldf = cseo$ldf, point.size=point.size)
+	QC_Server(id = "qc", sce = cseo$SCE, descriptionText = cseo$text, Npartition = length(cseo$sce.markers))
+	markersServer(id="markers", sce=cseo$SCE, sce.markers = cseo$sce.markers, point.size=point.size)
 	N_markersServer(id="n_markers", sce=cseo$SCE, point.size=point.size)
 	ExpressionServer(id="Exp", sce=cseo$SCE, point.size=point.size)
 	Numeric_ExpressionServer(id="numeric_Exp",sce=cseo$SCE,point.size = point.size)
 	COExpServer(id="Co-exp", sce=cseo$SCE, point.size = point.size)
-	VolcanoServer(id="volcano", sce=cseo$SCE, sce.markers=cseo$sce.markers)
+	VolcanoServer(id="volcano", sce=cseo$SCE, sce.degs=cseo$sce.degs)
 	VT_Server(id = "tools", sce = cseo$SCE)
 	MultiPlotsServer(id = "MP", sce=cseo$SCE)
 	Clusters_Server(id ="cluster", sce=cseo$SCE)
