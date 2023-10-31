@@ -26,9 +26,9 @@
 #'    markers and DEGs calculations. If TRUE, force the computation of markers and DEGs for
 #'		the entire list of \code{partitionVars}. 
 #' @param cells2keep (Optional) List of cell names to keep in case of subsampling. NOTE: Subsampling is only 
-#'		activated for visual purposes for large datasets,  it does not used for computations. 50k cells will be used for visualization in the app.
+#'		activated for visual purposes for large datasets, it is not used for computations. 50k cells will be used for visualization in the app.
 #'    Their indexes are stored in the \code{CELLS2KEEP} element of the CSEO object.
-#' @param descriptionText (Optional) Short description of the object being analized. This text will be displayed in the Summary module of the \code{scX} app'.
+#' @param descriptionText (Optional) Short description of the object being analized. This text will be displayed in the Summary module of the \code{scX} app.
 #' @param verbose Logical for step by step status while function is running. Defaults to \code{TRUE}.
 
 #' @details 
@@ -40,14 +40,14 @@
 
 #' @section Partitions:
 #' It is recommended to include a curated partition of the data in the input object or in the \code{metadata}.
-#' Marker genes and differential expression analysis automatically will be compute for partitions having less than 31 levels, that are specified as \code{partitionVars}.
-#' If user wants to run the calculations for partitions presenting more than 30 levels \code{calcAllPartitions} must be set to \code{TRUE} (Note that this stepo could be very time consuming). 
+#' Marker genes and differential expression analysis automatically will be computed for partitions having less than 31 levels, that are specified as \code{partitionVars}.
+#' If user wants to run the calculations for partitions presenting more than 30 levels \code{calcAllPartitions} must be set to \code{TRUE} (Note that this step could be very time consuming). 
 #' It may be worth coloring some partitions in plots but without having to compute marker genes and DEGs analyses for them. Those partitions
-#' had to be passed through \code{metadataVars}.
-#' If \code{partitionVars} and \code{metadataVars} are both \code{NULL} a quickclustering step(see "Normalization") is used in order to identify markers and DEGs.
+#' must be passed through \code{metadataVars}.
+#' If \code{partitionVars} and \code{metadataVars} are both \code{NULL} a quickclustering step (see "Normalization") is used in order to identify markers and DEGs.
 
 #' @section Normalization:
-#' If there is no normalized assay in the \linkS4class{SingleCellExperiment} object or \linkS4class{Seurat} imnput object
+#' If there is no normalized assay in the \linkS4class{SingleCellExperiment} object or \linkS4class{Seurat} input object
 #' a \href{https://bioconductor.org/books/3.17/OSCA.basic/normalization.html#normalization-by-deconvolution}{Normalization by deconvolution} is performed as proposed in the OSCA book.
 #' First, we calculate clusters using the Walktrap community detection algorithm for graph-based clustering (default parameters from \code{\link[scran]{quickCluster}}).
 #' The resulting clusters are stored in \code{colData} as \code{"scx.clust"}.
@@ -56,17 +56,18 @@
 #' If a normalized assay exists and "scx.clust" is included in the \code{partitionVars}, the function described before will be applied to compute the clusters, which are stored in \code{colData}.
 
 #' @section Highly Variable Genes:
-#' If \code{chosen.hvg} is not specified, we will used \code{\link[scran]{modelGeneVar}} to calculate the variance and mean of the lognormalized expression values. 
+#' If \code{chosen.hvg} is not specified, we will use \code{\link[scran]{modelGeneVar}} to calculate the variance and mean of the lognormalized expression values. 
 #' By fitting a trend of the variance against the mean, a biological component of variation for each gene can be assigned as the residual from the trend (see \pkg{scran} documentation for more details).
 #' We consider the top \code{nHVGs} most variable genes with biological component > 0.
 
 #' @section Reduced Dimensional Analysis Techniques:
-#' \pkg{scX} is a tool that helps visualizing the data properly, so it runs some dimensionality reduction analysis technique (PCA, UMAP2D, TSNE2D, UMAP3D, TSNE3D)
+#' \pkg{scX} is a tool that helps visualizing the data properly, so it runs some dimensionality reduction analysis techniques (PCA, UMAP2D, TSNE2D, UMAP3D, TSNE3D).
 #' If \code{xx} already has dimensionality reduction embeddings calculated, \code{calcRedDim} can be set to \code{FALSE} but:
 #' - if there is no dimRed calculated in the \linkS4class{SingleCellExperiment} object -> it calculates all
 #' - if there is no 2D or 3D redDim caclulated -> it calculates all
 #' - if there is no 2D -> it calculates only 2D
 #' - if there is no 3D -> it calculates only 3D
+#' 
 #' Principal Component Analysis is calculated with \code{\link[scater]{runPCA}} using the \code{chosen.hvg} and retaining the first \code{nPCs} components,
 #' for the normalized expression matrix.
 #' TSNE and UMAP are calculated with \code{\link[scater]{runTSNE}} and \code{\link[scater]{runUMAP}} functions using the PCA matrix.
@@ -82,14 +83,14 @@
 #' }
 
 #' @section Differential Expression Analysis:
-#' We use the \code{\link[scran]{findMarkers}} function to identify DEGs between clusters specified in \code{partitionVars}.
-#' (\code{direction="any"},\code{pval.type="all"})
+#' We use the \code{\link[scran]{findMarkers}} function to identify DEGs between clusters specified in \code{partitionVars}
+#' (\code{direction="any"},\code{pval.type="all"}).
 #' The test.type can be specified by the user in \code{paramFindMarkers$test.type}.
 
 #' @section Subsampling cells:
-#' If the \linkS4class{SingleCellExperiment} object contains over than 50k cells, a random sample of 50k cells will be chosen for visualization purposes in the application.
+#' If the \linkS4class{SingleCellExperiment} object contains over 50k cells, a random sample of 50k cells will be chosen for visualization purposes in the application.
 #' Cell names that the user wants to keep in the visualizations can be specified in the \code{cells2keep} parameter.
-#' Please note that is solely for producing efficient visualizations.
+#' Please note that it is solely for producing efficient visualizations.
 
 #' @return 
 #' A named \linkS4class{List} that serves as input for \code{\link{launch_scX}} which contains the fields:
@@ -97,10 +98,10 @@
 #' \item{\code{SCE}:}{\linkS4class{SingleCellExperiment} object with a computed normalized expression,
 #' dimensional reduction embedding (PCA, UMAP, TSNE, in 2D & 3D) calculated using the list of \code{chosen.hvg} if not \code{NULL} or 
 #' the top \code{nHVGs}. \code{colData} contains the \code{partitionVArs} and \code{metadataVars} if they where specified, if not only
-#' a quick clusterization will be available for preliminar analyisis of the data.}
+#' a quick clusterization will be available for preliminar analysis of the data.}
 #' \item{\code{sce.degs}:}{A named \linkS4class{List} of \linkS4class{DataFrame}s where each DataFrame contains the consolidated marker statistics
 #' for each gene (row) for the cluster of the same name. Statistics are computed using \code{\link[scran]{findMarkers}} and user can choose \code{test.type}
-#' parameters to pass to that function. See \code{\link[scran]{combineMarkers}} for the details of how these dataframes are confectioner.}
+#' parameters to pass to that function. See \code{\link[scran]{combineMarkers}} for the details of how these dataframes are confectioned.}
 #' \item{\code{sce.markers}:}{A \linkS4class{List} of named \linkS4class{List}s of \linkS4class{DataFrame}s. Each one corresponds to the marker genes of every cluster in a partition 
 #' (names of the nested lists). \code{summary.stats:} AUC if \code{test.type=="wilcox"} and -log.FC for \code{test.type=="t"} or \code{test.type=="binom"}.
 #' \code{log.FDR:} -Log.FDR of the most appropriate inter-cluster comparison according to the selected p-value type. See \code{\link[scran]{findMarkers}} for the details of how these metrics are computed.
