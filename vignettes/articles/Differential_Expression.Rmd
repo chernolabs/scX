@@ -13,7 +13,7 @@ knitr::opts_chunk$set(
 
 
 <p align="justify"> 
-In this section, the differentially expressed genes between two clusters can be obtained. The algorithm used is `scran::findMarkers()` from the `scran` package and the test type can be defined in the `createSCEobject()` function (see [Summary](`vignette("Summary")`) section). Different significance levels can be chosen interactively for both the logFC and the FDR. Once the clusters have been chosen, a table will be displayed with the list of differentially expressed genes accompanied by the logFC and the FDR obtained for each of them. This table can be downloaded in different formats: csv, pdf, xlsx. 
+In this section, the differentially expressed genes between two clusters can be obtained. The algorithm used is `scran::findMarkers()` from the `scran` package and the test type can be defined in the `createSCEobject()` function (see the Summary section). Different significance levels can be chosen interactively for both the logFC and the FDR. Once the clusters have been chosen, a table will be displayed with the list of differentially expressed genes accompanied by the logFC and the FDR obtained for each of them. This table can be downloaded in different formats: csv, pdf, xlsx. 
 
 The main figure in this section is a VolcanoPlot in which genes that are down and up expressed are coloured in blue and red, respectively. On the other hand, you can also display ViolinPlots, Spikeplots, Heatmaps and Dotplots of the differentially expressed genes.
 </p>
