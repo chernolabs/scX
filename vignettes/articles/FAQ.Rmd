@@ -43,13 +43,32 @@ cseo <- createSCEobject(xx = sce,
 						metadataVars = c("pseudotime", "sex"))
 ``` 
 
-### How to pass a normalized count matrix as input of `createSCEobject()`?
+### 1.1 How to pass a normalized count matrix as input of `createSCEobject()`?
 
 If you possess the normalized count matrix rather than the raw count matrix, you may transform it into an SCE object before providing it to `createSCEobject()`
 
 ```R
 sce <- SingleCellExperiment(list(logcounts=norm.mat))
 cseo <- createSCEobject(xx = sce)
+```
+## 1.2 How to use Scanpy (.h5ad) or .loom objets?
+
+For this it's necessary to convert them to a SingleCellExperiment or Seurat objects.
+In this tutorial we will explain how to convert them as SingleCellExperiment using the [zellkonverter package](https://bioconductor.org/packages/release/bioc/html/zellkonverter.html).
+
+```R
+sce <- readH5AD(file,
+		reader =  "R"
+#Then run the createSCEobject as in 1)
+)
+```
+		
+From .loom, using the [sceasy package](https://github.com/cellgeni/sceasy)
+
+```R
+sceasy::convertFormat('filename.loom', from="loom", to="sce",
+                       outFile='filename.rds')
+sce <- readRDS('filename.rds')
 ```
 
 ## 2. Is there a maximum input size that *scX* can receive?
@@ -97,7 +116,9 @@ launch_scX(cseo)
 
 **Important note:** All the calculations in the preprocessing stage apply to every cell within the dataset, regardless of the subsampling provided by the `cells2keep` parameter for visualization purposes.
 
-## 3. How to deploy a shiny app in shiny.io?
+## 3. How to deploy a shiny app in shinyapps.io?
+
+One way to deploy an app online is to use the **shinyapps** service. The first step is to create an account at [https://www.shinyapps.io/](https://www.shinyapps.io/). A user guide can be found [here](https://docs.posit.co/shinyapps.io/index.html).
 
 1. Save the SCE object in `/data` folder
 2. Create an app.R script:
@@ -112,25 +133,11 @@ launch_scX(cseo,point.size = 50)
 
 ```R
 library(rsconnect)
+
+rsconnect::setAccountInfo(name="<ACCOUNT>", 
+                          token="<TOKEN>",
+                          secret="<SECRET>")
+
 rsconnect::deployApp('path/to/your/app.R')
 ```
-
-## 4. How to use Scanpy (.h5ad) or .loom objets?
-
-For this it's necessary to convert them to a SingleCellExperiment or Seurat objects.
-In this tutorial we will explain how to convert them as SingleCellExperiment using the [zellkonverter package](https://bioconductor.org/packages/release/bioc/html/zellkonverter.html).
-
-```R
-sce <- readH5AD(file,
-		reader =  "R"
-#Then run the createSCEobject as in 1)
-)
-```
-		
-From .loom, using the [sceasy package](https://github.com/cellgeni/sceasy)
-
-```R
-sceasy::convertFormat('filename.loom', from="loom", to="sce",
-                       outFile='filename.rds')
-sce <- readRDS('filename.rds')
-```
+Another option could be R Shiny Server, for more details please visit the following [link](https://posit.co/download/shiny-server/). Finally, Amazon Web Services (AWS) can also be used. A step-by-step tutorial on how a shiny app can be deployed with AWS can be found [here](https://www.charlesbordet.com/en/guide-shiny-aws/#).
