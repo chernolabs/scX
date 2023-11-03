@@ -4,7 +4,7 @@ Version: 0.2.0
 Authors@R: c(
     person(given = "Tomás",family = "Vega Waichman", email = "tomas.vegawaichman@mail.mcgill.ca", role = c("aut", "cre"),
            comment = c(ORCID = "0009-0000-7002-9413")),
-    person(given = "Maria Luz",family = "Vercesi",  role = c("aut"),
+    person(given = "María Luz",family = "Vercesi",  role = c("aut"),
            comment = c(GitHub = "https://github.com/mluzvercesi")),
     person(given = "Ariel A.",family = "Berardino",  role = c("aut"),
            comment = c(ORCID = "0009-0004-8112")),
