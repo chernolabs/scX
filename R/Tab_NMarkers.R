@@ -144,17 +144,23 @@ N_markersServer <- function(id,sce,point.size = 20) {
     })
     
     observeEvent(c(dimVector(),input$switcher),{
-      updatePickerInput(session,inputId = "DimType", choices = (c("3","2")[c(3,2) %in% dimVector()]))
+      if(any(dimVector() > 3)){
+        opt <- c('3','2')
+      } else{
+        opt <- (c("3","2")[c(3,2) %in% dimVector()])
+      }
+      updatePickerInput(session,inputId = "DimType", choices = opt)
     })
     
     observeEvent(c(input$DimType,input$switcher), {
       req(!is.null(dimVector()))
       req(input$DimType)
-      if(input$DimType == "3"){
-        updatePickerInput(session,inputId = "plotType", choices = rev(names(which(dimVector() == as.numeric(input$DimType)  | dimVector() > 3))))
-      } else if(input$DimType == "2") { 
-        updatePickerInput(session,inputId = "plotType", choices = rev(names(which(dimVector() == as.numeric(input$DimType)  | dimVector() > 3))))
-      }
+      updatePickerInput(session,inputId = "plotType", choices = rev(names(which(dimVector() == as.numeric(input$DimType)  | dimVector() > 3))))
+      # if(input$DimType == "3"){
+      #   updatePickerInput(session,inputId = "plotType", choices = rev(names(which(dimVector() == as.numeric(input$DimType)  | dimVector() > 3))))
+      # } else if(input$DimType == "2") { 
+      #   updatePickerInput(session,inputId = "plotType", choices = rev(names(which(dimVector() == as.numeric(input$DimType)  | dimVector() > 3))))
+      # }
     })
     
     observeEvent(gene_marker_selected(),{
@@ -278,7 +284,7 @@ N_markersServer <- function(id,sce,point.size = 20) {
       
     })
     
-    ExpressionPlot <- eventReactive(c(input$plotType,input$partitionType,input$DTMarkers_rows_selected),{
+    ExpressionPlot <- eventReactive(c(input$DimType,input$plotType,input$partitionType,input$DTMarkers_rows_selected),{
       req(input$DTMarkers_rows_selected)
       #3D
       if(input$DimType == "3"){

@@ -117,7 +117,12 @@ COExpServer <- function(id,sce,point.size=20) {
     })
     
     observeEvent(c(dimVector()),{
-      updatePickerInput(session,inputId = "DimType", choices = (c("3","2")[c(3,2) %in% dimVector()]))
+      if(any(dimVector() > 3)){
+        opt <- c('3','2')
+      } else{
+        opt <- (c("3","2")[c(3,2) %in% dimVector()])
+      }
+      updatePickerInput(session,inputId = "DimType", choices = opt)
     })
     
     observeEvent(c(input$DimType,dimVector()), {
@@ -161,7 +166,7 @@ COExpServer <- function(id,sce,point.size=20) {
     })
     
         #### Scatter ----
-    ClusterPlot <- eventReactive(c(input$plotType,input$partitionType),{
+    ClusterPlot <- eventReactive(c(input$DimType,input$plotType,input$partitionType),{
       #3D
       if(input$DimType == "3"){
         plot_ly(type = "scatter3d", mode = "markers",source = "PlotMix")  %>%
@@ -199,7 +204,7 @@ COExpServer <- function(id,sce,point.size=20) {
     
     
     
-    CoExpressionPlot <- eventReactive(c(input$plotType,CoExpressionL(),input$partitionType),{
+    CoExpressionPlot <- eventReactive(c(input$DimType,input$plotType,CoExpressionL(),input$partitionType),{
       req(!is.null(CoExpressionL()))
       req(input$plotType)
       #3D

@@ -136,7 +136,12 @@ markersServer <- function(id = "markers",sce,sce.markers,point.size = 20) {
     })
     
     observeEvent(c(dimVector()),{
-      updatePickerInput(session,inputId = "DimType", choices = (c("3","2")[c(3,2) %in% dimVector()]))
+      if(any(dimVector() > 3)){
+        opt <- c('3','2')
+      } else{
+        opt <- (c("3","2")[c(3,2) %in% dimVector()])
+      }
+      updatePickerInput(session,inputId = "DimType", choices = opt)
     })
     
     
@@ -234,7 +239,7 @@ markersServer <- function(id = "markers",sce,sce.markers,point.size = 20) {
     })
     
           #### Scatter ----
-    ClusterPlot <- eventReactive(c(input$plotType,input$partitionType),{
+    ClusterPlot <- eventReactive(c(input$DimType,input$plotType,input$partitionType),{
       req(!is.null(input$plotType))
       req(length(input$partitionType)>0)
       #3D
@@ -277,7 +282,7 @@ markersServer <- function(id = "markers",sce,sce.markers,point.size = 20) {
       
     })
     
-    ExpressionPlot <- eventReactive(c(input$plotType,input$partitionType,input$DTMarkers_rows_selected),{
+    ExpressionPlot <- eventReactive(c(input$DimType,input$plotType,input$partitionType,input$DTMarkers_rows_selected),{
       req(input$DTMarkers_rows_selected)
       #3D
       if(input$DimType == "3"){
