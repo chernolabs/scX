@@ -51,7 +51,7 @@ If you possess the normalized count matrix rather than the raw count matrix, you
 sce <- SingleCellExperiment(list(logcounts=norm.mat))
 cseo <- createSCEobject(xx = sce)
 ```
-## 1.2 How to use Scanpy (.h5ad) or .loom objets?
+### 1.2 How to use Scanpy (.h5ad) or .loom objets?
 
 For this it's necessary to convert them to a SingleCellExperiment or Seurat objects.
 In this tutorial we will explain how to convert them as SingleCellExperiment using the [zellkonverter package](https://bioconductor.org/packages/release/bioc/html/zellkonverter.html).
@@ -141,3 +141,28 @@ rsconnect::setAccountInfo(name="<ACCOUNT>",
 rsconnect::deployApp('path/to/your/app.R')
 ```
 Another option could be R Shiny Server, for more details please visit the following [link](https://posit.co/download/shiny-server/). Finally, Amazon Web Services (AWS) can also be used. A step-by-step tutorial on how a shiny app can be deployed with AWS can be found [here](https://www.charlesbordet.com/en/guide-shiny-aws/#).
+
+## 4. If I want to change any preprocessing parameters, do I need to go through all the steps again to relaunch the app?
+
+No! createSCEobject() can take as input the output of the same function, avoiding doing steps like logcounts calculation, dimensionality reductions, etc. again.
+
+```R
+createSCEobject(
+  xx,
+  assay.name.raw = "counts",
+  assay.name.normalization = "logcounts",
+  metadata = NULL,
+  partitionVars = NULL,
+  metadataVars = NULL,
+  chosen.hvg = NULL,
+  nHVGs = 3000,
+  nPCs = 50,
+  calcRedDim = TRUE,
+  paramFindMarkers = list(test.type = "wilcox", pval.type = "all", direction = "any"),
+  calcAllPartitions = FALSE,
+  cells2keep = NULL,
+  descriptionText = NULL,
+  verbose = TRUE
+)
+```
+
