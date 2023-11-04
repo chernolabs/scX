@@ -115,7 +115,7 @@ ExpressionUI <- function(id) {
                          fill = TRUE),
             prettySwitch(NS(id,"mean_heat"),
                          "Mean per group",
-                         value = F,
+                         value = T,
                          status = "primary",
                          fill = TRUE)
             

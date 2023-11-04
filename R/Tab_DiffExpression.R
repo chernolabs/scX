@@ -138,7 +138,7 @@ VolcanoUI <- function(id) {
                     fill = TRUE
                   ),
                   prettySwitch(NS(id, "mean_heat"), "Mean per group",
-                    value = F, status = "primary",
+                    value = T, status = "primary",
                     fill = TRUE
                   ),
                   hr(style = "border-top: 1px solid #0073b7;"),
