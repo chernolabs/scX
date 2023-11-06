@@ -154,7 +154,7 @@ createSCEobject(
   assay.name.raw = "counts",
   assay.name.normalization = "logcounts"
   calcRedDim = FALSE,
-  paramFindMarkers = list(test.type = "t", pval.type = "all", direction = "any"),
+  paramFindMarkers = list(test.type = "t", pval.type = "all", direction = "up"),
   calcAllPartitions = FALSE
 )
 ```
