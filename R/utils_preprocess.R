@@ -18,16 +18,18 @@
 #' @param nHVGs Number of Highly Variable Genes to use if \code{chosen.hvg=NULL}. Defaults to 3000.
 #' @param nPCs Number of Principal Components to use in PCA. Defaults to 50.
 #' @param calcRedDim Logical. Indicates whether to compute reduced dimensions (PCA, UMAP, TSNE, UMAP2D, 
-#'		TSNE2D). Defaults to \code{TRUE}. (Note: If it is set to \code{FALSE} but there is no 2D reduced dimension provided in the input, 2-dim PCA, UMAP and TSNE embeddings will be estimated. The same happens for 3D embeddings).
-
+#'		TSNE2D). Defaults to \code{TRUE}. (Note: If it is set to \code{FALSE} but there is no 2D and >3D reduced dimension provided in the input, PCA embedding will be estimated anyway).
 #' @param paramFindMarkers named List of parameters to pass to \code{\link[scran]{findMarkers}} to compute cluster gene markers. 
-#'Defaults to \code{list(test.type="wilcox", pval.type="all", direction="any")}.
+#'Defaults to \code{list(test.type="wilcox", pval.type="all", direction="up")}.
+#' @param BPPARAM A \linkS4class{BiocParallelParam} object indicating whether and how parallelization should be performed across genes in \code{\link[scran]{findMarkers}} function.
+#' @param minSize Numeric. Minimum cluster size for calculating gene marker statistics.
 #' @param calcAllPartitions Logical. Defaults to \code{FALSE}, meaning that only partitions from \code{partitionVars} with less or equal to 30 levels will be considered for
 #'    markers and DEGs calculations. If TRUE, force the computation of markers and DEGs for
 #'		the entire list of \code{partitionVars}. 
 #' @param cells2keep (Optional) List of cell names to keep in case of subsampling. NOTE: Subsampling is only 
 #'		activated for visual purposes for large datasets,  it does not used for computations. 50k cells will be used for visualization in the app.
 #'    Their indexes are stored in the \code{CELLS2KEEP} element of the CSEO object.
+#' @param nSubCells Numeric. Maximum number of cells to select for subsampling the data set.
 #' @param descriptionText (Optional) Short description of the object being analized. This text will be displayed in the Summary module of the \code{scX} app'.
 #' @param verbose Logical for step by step status while function is running. Defaults to \code{TRUE}.
 
@@ -41,10 +43,12 @@
 #' @section Partitions:
 #' It is recommended to include a curated partition of the data in the input object or in the \code{metadata}.
 #' Marker genes and differential expression analysis automatically will be compute for partitions having less than 31 levels, that are specified as \code{partitionVars}.
-#' If user wants to run the calculations for partitions presenting more than 30 levels \code{calcAllPartitions} must be set to \code{TRUE} (Note that this stepo could be very time consuming). 
+#' If user wants to run the calculations for partitions presenting more than 30 levels \code{calcAllPartitions} must be set to \code{TRUE} (Note that this step could be very time consuming). 
 #' It may be worth coloring some partitions in plots but without having to compute marker genes and DEGs analyses for them. Those partitions
 #' had to be passed through \code{metadataVars}.
-#' If \code{partitionVars} and \code{metadataVars} are both \code{NULL} a quickclustering step(see "Normalization") is used in order to identify markers and DEGs.
+
+#' @section Metadata:
+#' Metadata is passed to \link{createSCEobject} as a \linkS4class{DataFrame} where the rows have to include all the cells present in \code{XX} input. Metadata columns are cell's covariates. All character or numeric covariate passed in \code{metadataVars} with less than 31 unique values are set to factors and they are called "Categories" in the scX app. And Numeric covariates with more than 30 unique values are called "Fields".
 
 #' @section Normalization:
 #' If there is no normalized assay in the \linkS4class{SingleCellExperiment} object or \linkS4class{Seurat} imnput object
@@ -53,7 +57,11 @@
 #' The resulting clusters are stored in \code{colData} as \code{"scx.clust"}.
 #' Then we compute scale factors for the cells using those clusters.
 #' Finally, we calculate the lognormalized expression matrix by applying a log2 transformation to the product of the raw matrix and scale factors considering a pseudocounts of 1.
-#' If a normalized assay exists and "scx.clust" is included in the \code{partitionVars}, the function described before will be applied to compute the clusters, which are stored in \code{colData}.
+
+#' @section Clustering:
+#' If \code{partitionVars} is user-specified, those categories are used for clustering data.
+#' If \code{partitionVars} is \code{NULL}, the quickclustering step (see "Normalization") is used in order to identify markers and DEGs.
+#' Also if a normalized assay exists in the SCE object and "scx.clust" is included in the \code{partitionVars}, the function described before will be applied to compute a clustering, which are stored in \code{colData} as "scx.clust".
 
 #' @section Highly Variable Genes:
 #' If \code{chosen.hvg} is not specified, we will used \code{\link[scran]{modelGeneVar}} to calculate the variance and mean of the lognormalized expression values. 
@@ -61,14 +69,9 @@
 #' We consider the top \code{nHVGs} most variable genes with biological component > 0.
 
 #' @section Reduced Dimensional Analysis Techniques:
-#' \pkg{scX} is a tool that helps visualizing the data properly, so it runs some dimensionality reduction analysis technique (PCA, UMAP2D, TSNE2D, UMAP3D, TSNE3D)
-#' If \code{xx} already has dimensionality reduction embeddings calculated, \code{calcRedDim} can be set to \code{FALSE} but:
-#' - if there is no dimRed calculated in the \linkS4class{SingleCellExperiment} object -> it calculates all
-#' - if there is no 2D or 3D redDim caclulated -> it calculates all
-#' - if there is no 2D -> it calculates only 2D
-#' - if there is no 3D -> it calculates only 3D
-#' Principal Component Analysis is calculated with \code{\link[scater]{runPCA}} using the \code{chosen.hvg} and retaining the first \code{nPCs} components,
-#' for the normalized expression matrix.
+#' \pkg{scX} is a tool that helps visualizing the data properly, so it runs some dimensionality reduction analysis technique (PCA, UMAP2D, TSNE2D, UMAP3D, TSNE3D). \code{xx} has to have at least a 2D dimensional reduction embedding for the app to run.
+#' If \code{xx} already has dimensionality reduction embeddings calculated, \code{calcRedDim} can be set to \code{FALSE}. NOTE: if \code{FALSE} but there is no dimRed calculated in the \linkS4class{SingleCellExperiment} object or none 2D dimensional reduction embedding, a PCA will be calculated.
+#' Principal Component Analysis is calculated with \code{\link[scater]{runPCA}} using the \code{chosen.hvg} and retaining the first \code{nPCs} components, for the normalized expression matrix.
 #' TSNE and UMAP are calculated with \code{\link[scater]{runTSNE}} and \code{\link[scater]{runUMAP}} functions using the PCA matrix.
 
 #' @section Marker Genes Analysis:
@@ -80,6 +83,7 @@
 #' \item{\code{boxcor}:}{The boxcor is the correlation between a gene's expression vector (logcounts) and a binary vector, where only the cells from the selected cluster
 #' mark 1 while the rest of the cells mark 0.}
 #' }
+#' 
 
 #' @section Differential Expression Analysis:
 #' We use the \code{\link[scran]{findMarkers}} function to identify DEGs between clusters specified in \code{partitionVars}.
@@ -87,7 +91,7 @@
 #' The test.type can be specified by the user in \code{paramFindMarkers$test.type}.
 
 #' @section Subsampling cells:
-#' If the \linkS4class{SingleCellExperiment} object contains over than 50k cells, a random sample of 50k cells will be chosen for visualization purposes in the application.
+#' If the \linkS4class{SingleCellExperiment} object contains over than 50k cells (this number can be changed through \code{nSubCells}), a random sample of 50k cells will be chosen for visualization purposes in the application.
 #' Cell names that the user wants to keep in the visualizations can be specified in the \code{cells2keep} parameter.
 #' Please note that is solely for producing efficient visualizations.
 
@@ -145,8 +149,11 @@ createSCEobject <- function(xx,
                             nPCs=50,
                             calcRedDim=TRUE,
                             paramFindMarkers=list(test.type="wilcox", pval.type="all", direction="up"),
+                            BPPARAM=BiocParallel::SerialParam(),
+                            minSize=30,
                             calcAllPartitions=FALSE,
                             cells2keep=NULL,
+                            nSubCells=50000,
                             descriptionText=NULL,
                             verbose=TRUE){
   
@@ -268,15 +275,15 @@ createSCEobject <- function(xx,
     ttoFactors <- "scx.clust"
     colData(xx.sce)[ttoFactors] <- NA
   }else{
-    ##Transforming partitions to factors (in case a partition is numeric or character)
+    ##Transforming partitions to factors
 	  colData(xx.sce)[ttoFactors] <- lapply(colData(xx.sce)[ttoFactors], as.factor)
   }
   
 
   # metadata ----
-  #Transform all the character columns to factor to be able to be selected in the shinyApp if they have less or equal to 30 levels. 
+  #Transform all the character columns to factor to be able to be selected in the shinyApp if they have less or equal to 30 levels or they are characters. 
 
-  cols <- sapply(colData(xx.sce), function(x){(is.character(x) | is.factor(x)) & length(unique(x)) <= 30})
+  cols <- sapply(colData(xx.sce), function(x){(is.character(x) | is.numeric(x)) & length(unique(x)) <= 30})
   if(any(cols)){
     colData(xx.sce)[,cols] <- lapply(colData(xx.sce)[,cols,drop=F], function(x){
         x <- as.factor(x)
@@ -376,24 +383,21 @@ createSCEobject <- function(xx,
   
   
   # Reduced dimensions ----
-  # If user specifies no calcRedDim but:
-  #   there is no dimRed calculated -> it calculates all
-  #   there is no 2D or 3D redDim caclulated -> it calculates all
-  #   there is no 2D -> it calculates only 2D
-  #   there is no 3D -> it calculates only 3D
+  # If calcRedDim = TRUE: it calculates PCA, TSNE, UMAP, TSNE2D, UMAP2D
+  # If calcRedDim = FALSE: 
+  #   if there is no dimRed calculated or none dimRed has more than 3 columns -> it calculates PCA
+  #   except there is a dimRed 2D calculated
   # PCA is calculated with `scater::runPCA()` using the `chosen.hvg` and retaining the first `nPCs` components
   # TSNE and UMAP are calculated with `scater::runTSNE()` and `scater::runUMAP()` functions using the PCA matrix
 
   runDim <- c("PCA", "TSNE", "UMAP", "TSNE2D", "UMAP2D")
   if(!calcRedDim){
-    if(length(reducedDimNames(xx.sce))<1 | all(!(sapply(reducedDims(xx.sce),ncol) %in% c(2,3)))){
-      calcRedDim <- TRUE
-    } else if(all(sapply(reducedDims(xx.sce),ncol) != 2)){
-      calcRedDim <- TRUE
-      runDim <- c("PCA","TSNE2D", "UMAP2D")
-    } else if(all(sapply(reducedDims(xx.sce),ncol) != 3)){
-      calcRedDim <- TRUE
-      runDim <- c("PCA", "TSNE", "UMAP")
+    if(length(reducedDimNames(xx.sce))<1){
+      runDim <- c("PCA")
+      calcRedDim = TRUE
+    } else if( (all(sapply(reducedDims(xx.sce),ncol) < 4)) & (all(sapply(reducedDims(xx.sce),ncol) != 2))){
+      runDim <- c("PCA")
+      calcRedDim = TRUE
     }
   }
   
@@ -469,19 +473,21 @@ createSCEobject <- function(xx,
     sce.degs <- list()
     for(i in ttoFactors){
       tout <- scran::findMarkers(xx.sce, 
-                                  assay.type = "logcounts",
-                                  group = colData(xx.sce)[,i],
-                                  test.type="t",
-                                  direction="any",
-                                  pval.type="all",
-                                  log.p=T,full.stats=T)
+                                 assay.type = "logcounts",
+                                 group = colData(xx.sce)[,i],
+                                 test.type="t",
+                                 direction="any",
+                                 pval.type="all",
+                                 log.p=T,full.stats=T,
+                                 BPPARAM=BPPARAM)
       wout <- scran::findMarkers(xx.sce, 
-                                  assay.type = "logcounts",
-                                  group = colData(xx.sce)[,i],
-                                  test.type="wilcox",
-                                  direction="any",
-                                  pval.type="all",
-                                  log.p=T,full.stats=T)
+                                 assay.type = "logcounts",
+                                 group = colData(xx.sce)[,i],
+                                 test.type="wilcox",
+                                 direction="any",
+                                 pval.type="all",
+                                 log.p=T,full.stats=T,
+                                 BPPARAM=BPPARAM)
       l = length(wout)
       for (ii in 1:l){
         wout[[ii]][rownames(tout[[ii]]),"summary.stats"] = tout[[ii]][,"summary.stats"]
@@ -496,13 +502,14 @@ createSCEobject <- function(xx,
   }else{
     sce.degs <- list()
     for(i in ttoFactors){
-      sce.degs[[i]] <- scran::findMarkers(xx.sce, 
-                                      assay.type = "logcounts",
-                                      group = colData(xx.sce)[,i],
-                                      test.type=paramFindMarkers$test.type,
-                                      direction="any",
-                                      pval.type="all",
-                                      log.p=T,full.stats=T)
+      sce.degs[[i]] <- scran::findMarkers(xx.sce,
+                                          assay.type = "logcounts",
+                                          group = colData(xx.sce)[,i],
+                                          test.type=paramFindMarkers$test.type,
+                                          direction="any",
+                                          pval.type="all",
+                                          log.p=T,full.stats=T,
+                                          BPPARAM = BPPARAM)
     }
   }
   
@@ -520,13 +527,9 @@ createSCEobject <- function(xx,
   # Boxcor:
   #   The boxcor is the correlation between a gene's expression vector (logcounts) and a binary vector, where only the cells from the selected cluster
   #   mark 1 while the rest of the cells mark 0.
-
-  numCores <- max(1, parallel::detectCores() - 2, na.rm = TRUE)
-  if(require("doParallel", quietly = T)) doParallel::registerDoParallel(numCores)
-
   sce.markers <- list()
   for(i in ttoFactors){
-    sce.markers[[i]] <- markers_func(xx.sce, i, paramFindMarkers)
+    sce.markers[[i]] <- markers_func(xx.sce, i, paramFindMarkers, bpparam = BPPARAM, minsize = minSize)
   }
   if(verbose) cat('Finished\n')
   
@@ -552,10 +555,9 @@ createSCEobject <- function(xx,
   # If the SCE object contains over 50,000 cells, a random sample of 50,000 cells will be chosen for visualization in the application. 
   # Please note that all calculations are already completed, and this step is solely for promoting smooth and efficient visualization.
 
-  nmaxcell = 50000
-  if(ncol(xx.sce)>nmaxcell){
+  if(ncol(xx.sce)>nSubCells){
       if(verbose) cat('Subsampling sce object, it exceeds 50k cells\n')
-      csceo$CELLS2KEEP <- subsampling_func(xx.sce, cellsToKeep = cells2keep, nmaxcell = nmaxcell)
+      csceo$CELLS2KEEP <- subsampling_func(xx.sce, cellsToKeep = cells2keep, nmaxcell = nSubCells)
       if(verbose) cat('Finished\n')
   } else {
     csceo$CELLS2KEEP <- "all"
@@ -612,7 +614,7 @@ applyReducedDim <- function(sce, reddimstocalculate, chosen.hvgs, nPCs, assaynam
 # returns: markers, robustness, correlation with a binary vector "turned on" in that cluster
 #' @keywords internal
 #' @noRd
-markers_func <- function(sce, partition, paramFindMarkers, minSize=50){ # previously ldf_func
+markers_func <- function(sce, partition, paramFindMarkers, bpparam, minsize=10){ # previously ldf_func
 
   cat(partition, ":\n", sep = "")
   
@@ -624,7 +626,8 @@ markers_func <- function(sce, partition, paramFindMarkers, minSize=50){ # previo
                                                                test.type=paramFindMarkers$test.type,
                                                                direction=paramFindMarkers$direction,
                                                                pval.type=paramFindMarkers$pval.type,
-                                                               full.stats=TRUE
+                                                               full.stats=TRUE,
+                                                               BPPARAM=bpparam
                                                                )
   
   
@@ -633,7 +636,7 @@ markers_func <- function(sce, partition, paramFindMarkers, minSize=50){ # previo
   
   lab   <- colData(sce)[,partition]
   tt   <- table(lab)
-  labOK <- tt > minSize
+  labOK <- tt > minsize
   labOK <- names(labOK)[labOK]
   
   lfmrk <- lapply(lfmrk,function(x){x[labOK]})
@@ -685,12 +688,14 @@ markers_func <- function(sce, partition, paramFindMarkers, minSize=50){ # previo
 subsampling_func = function(sce, cellsToKeep=NULL, nmaxcell=50000){
 
   if(is.null(cellsToKeep)){
+      set.seed(123457) # seed
       ccells2keep <- sample(colnames(sce), nmaxcell, replace=FALSE)
       ccells2keep <- match(ccells2keep, colnames(sce))
   }else{
-      ccells2keep <- cells2keep[cells2keep%in%colnames(sce)]
+    ccells2keep <- cellsToKeep[cellsToKeep%in%colnames(sce)]
       if(length(ccells2keep)<nmaxcell){
-        naddcells <- nmaxcell-length(cells2keep)
+        naddcells <- nmaxcell-length(ccells2keep)
+        set.seed(123457)
         ccells2keep <- c(ccells2keep, sample(colnames(sce)[!colnames(sce)%in%ccells2keep],naddcells,replace=FALSE))
         ccells2keep <- match(ccells2keep, colnames(sce))
       }

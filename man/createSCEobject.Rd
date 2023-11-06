@@ -16,8 +16,11 @@ createSCEobject(
   nPCs = 50,
   calcRedDim = TRUE,
   paramFindMarkers = list(test.type = "wilcox", pval.type = "all", direction = "up"),
+  BPPARAM = BiocParallel::SerialParam(),
+  minSize = 30,
   calcAllPartitions = FALSE,
   cells2keep = NULL,
+  nSubCells = 50000,
   descriptionText = NULL,
   verbose = TRUE
 )
@@ -46,10 +49,14 @@ this parameter will be set to that list of genes.}
 \item{nPCs}{Number of Principal Components to use in PCA. Defaults to 50.}
 
 \item{calcRedDim}{Logical. Indicates whether to compute reduced dimensions (PCA, UMAP, TSNE, UMAP2D,
-TSNE2D). Defaults to \code{TRUE}. (Note: If it is set to \code{FALSE} but there is no 2D reduced dimension provided in the input, 2-dim PCA, UMAP and TSNE embeddings will be estimated. The same happens for 3D embeddings).}
+TSNE2D). Defaults to \code{TRUE}. (Note: If it is set to \code{FALSE} but there is no 2D and >3D reduced dimension provided in the input, PCA embedding will be estimated anyway).}
 
 \item{paramFindMarkers}{named List of parameters to pass to \code{\link[scran]{findMarkers}} to compute cluster gene markers.
-Defaults to \code{list(test.type="wilcox", pval.type="all", direction="any")}.}
+Defaults to \code{list(test.type="wilcox", pval.type="all", direction="up")}.}
+
+\item{BPPARAM}{A \linkS4class{BiocParallelParam} object indicating whether and how parallelization should be performed across genes in \code{\link[scran]{findMarkers}} function.}
+
+\item{minSize}{Numeric. Minimum cluster size for calculating gene marker statistics.}
 
 \item{calcAllPartitions}{Logical. Defaults to \code{FALSE}, meaning that only partitions from \code{partitionVars} with less or equal to 30 levels will be considered for
 markers and DEGs calculations. If TRUE, force the computation of markers and DEGs for
@@ -58,6 +65,8 @@ the entire list of \code{partitionVars}.}
 \item{cells2keep}{(Optional) List of cell names to keep in case of subsampling. NOTE: Subsampling is only
 activated for visual purposes for large datasets,  it does not used for computations. 50k cells will be used for visualization in the app.
 Their indexes are stored in the \code{CELLS2KEEP} element of the CSEO object.}
+
+\item{nSubCells}{Numeric. Maximum number of cells to select for subsampling the data set.}
 
 \item{descriptionText}{(Optional) Short description of the object being analized. This text will be displayed in the Summary module of the \code{scX} app'.}
 
@@ -97,10 +106,14 @@ For large datasets (number of cells > 50k) a subsampling of the \linkS4class{Sin
 
 It is recommended to include a curated partition of the data in the input object or in the \code{metadata}.
 Marker genes and differential expression analysis automatically will be compute for partitions having less than 31 levels, that are specified as \code{partitionVars}.
-If user wants to run the calculations for partitions presenting more than 30 levels \code{calcAllPartitions} must be set to \code{TRUE} (Note that this stepo could be very time consuming).
+If user wants to run the calculations for partitions presenting more than 30 levels \code{calcAllPartitions} must be set to \code{TRUE} (Note that this step could be very time consuming).
 It may be worth coloring some partitions in plots but without having to compute marker genes and DEGs analyses for them. Those partitions
 had to be passed through \code{metadataVars}.
-If \code{partitionVars} and \code{metadataVars} are both \code{NULL} a quickclustering step(see "Normalization") is used in order to identify markers and DEGs.
+}
+
+\section{Metadata}{
+
+Metadata is passed to \link{createSCEobject} as a \linkS4class{DataFrame} where the rows have to include all the cells present in \code{XX} input. Metadata columns are cell's covariates. All character or numeric covariate passed in \code{metadataVars} with less than 31 unique values are set to factors and they are called "Categories" in the scX app. And Numeric covariates with more than 30 unique values are called "Fields".
 }
 
 \section{Normalization}{
@@ -111,7 +124,13 @@ First, we calculate clusters using the Walktrap community detection algorithm fo
 The resulting clusters are stored in \code{colData} as \code{"scx.clust"}.
 Then we compute scale factors for the cells using those clusters.
 Finally, we calculate the lognormalized expression matrix by applying a log2 transformation to the product of the raw matrix and scale factors considering a pseudocounts of 1.
-If a normalized assay exists and "scx.clust" is included in the \code{partitionVars}, the function described before will be applied to compute the clusters, which are stored in \code{colData}.
+}
+
+\section{Clustering}{
+
+If \code{partitionVars} is user-specified, those categories are used for clustering data.
+If \code{partitionVars} is \code{NULL}, the quickclustering step (see "Normalization") is used in order to identify markers and DEGs.
+Also if a normalized assay exists in the SCE object and "scx.clust" is included in the \code{partitionVars}, the function described before will be applied to compute a clustering, which are stored in \code{colData} as "scx.clust".
 }
 
 \section{Highly Variable Genes}{
@@ -123,17 +142,10 @@ We consider the top \code{nHVGs} most variable genes with biological component >
 
 \section{Reduced Dimensional Analysis Techniques}{
 
-\pkg{scX} is a tool that helps visualizing the data properly, so it runs some dimensionality reduction analysis technique (PCA, UMAP2D, TSNE2D, UMAP3D, TSNE3D)
-If \code{xx} already has dimensionality reduction embeddings calculated, \code{calcRedDim} can be set to \code{FALSE} but:
-\itemize{
-\item if there is no dimRed calculated in the \linkS4class{SingleCellExperiment} object -> it calculates all
-\item if there is no 2D or 3D redDim caclulated -> it calculates all
-\item if there is no 2D -> it calculates only 2D
-\item if there is no 3D -> it calculates only 3D
-Principal Component Analysis is calculated with \code{\link[scater]{runPCA}} using the \code{chosen.hvg} and retaining the first \code{nPCs} components,
-for the normalized expression matrix.
+\pkg{scX} is a tool that helps visualizing the data properly, so it runs some dimensionality reduction analysis technique (PCA, UMAP2D, TSNE2D, UMAP3D, TSNE3D). \code{xx} has to have at least a 2D dimensional reduction embedding for the app to run.
+If \code{xx} already has dimensionality reduction embeddings calculated, \code{calcRedDim} can be set to \code{FALSE}. NOTE: if \code{FALSE} but there is no dimRed calculated in the \linkS4class{SingleCellExperiment} object or none 2D dimensional reduction embedding, a PCA will be calculated.
+Principal Component Analysis is calculated with \code{\link[scater]{runPCA}} using the \code{chosen.hvg} and retaining the first \code{nPCs} components, for the normalized expression matrix.
 TSNE and UMAP are calculated with \code{\link[scater]{runTSNE}} and \code{\link[scater]{runUMAP}} functions using the PCA matrix.
-}
 }
 
 \section{Marker Genes Analysis}{
@@ -157,7 +169,7 @@ The test.type can be specified by the user in \code{paramFindMarkers$test.type}.
 
 \section{Subsampling cells}{
 
-If the \linkS4class{SingleCellExperiment} object contains over than 50k cells, a random sample of 50k cells will be chosen for visualization purposes in the application.
+If the \linkS4class{SingleCellExperiment} object contains over than 50k cells (this number can be changed through \code{nSubCells}), a random sample of 50k cells will be chosen for visualization purposes in the application.
 Cell names that the user wants to keep in the visualizations can be specified in the \code{cells2keep} parameter.
 Please note that is solely for producing efficient visualizations.
 }
