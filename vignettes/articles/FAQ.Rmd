@@ -43,7 +43,7 @@ cseo <- createSCEobject(xx = sce,
 						metadataVars = c("pseudotime", "sex"))
 ``` 
 
-### 1.1 How to pass a normalized count matrix as input of `createSCEobject()`?
+#### 1.1 How to pass a normalized count matrix as input of `createSCEobject()`?
 
 If you possess the normalized count matrix rather than the raw count matrix, you may transform it into an SCE object before providing it to `createSCEobject()`
 
@@ -51,7 +51,7 @@ If you possess the normalized count matrix rather than the raw count matrix, you
 sce <- SingleCellExperiment(list(logcounts=norm.mat))
 cseo <- createSCEobject(xx = sce)
 ```
-### 1.2 How to use Scanpy (.h5ad) or .loom objets?
+#### 1.2 How to use Scanpy (.h5ad) or .loom objets?
 
 For this it's necessary to convert them to a SingleCellExperiment or Seurat objects.
 In this tutorial we will explain how to convert them as SingleCellExperiment using the [zellkonverter package](https://bioconductor.org/packages/release/bioc/html/zellkonverter.html).
@@ -144,25 +144,18 @@ Another option could be R Shiny Server, for more details please visit the follow
 
 ## 4. If I want to change any preprocessing parameters, do I need to go through all the steps again to relaunch the app?
 
-No! createSCEobject() can take as input the output of the same function, avoiding doing steps like logcounts calculation, dimensionality reductions, etc. again.
+No! createSCEobject() can take as input its own output, avoiding doing steps like logcounts calculation, dimensionality reductions, etc., again. 
+
+For instance, if you initiated the application by using test.type = "wilcox" in paramFindMarkers but now intend to re-launch it utilizing a different sort of test, like t-test, just use the createSCEobject() function with the updated parameter, indicating that you do not require the other features to be recalculated.
 
 ```R
 createSCEobject(
-  xx,
+  xx = sce,
   assay.name.raw = "counts",
-  assay.name.normalization = "logcounts",
-  metadata = NULL,
-  partitionVars = NULL,
-  metadataVars = NULL,
-  chosen.hvg = NULL,
-  nHVGs = 3000,
-  nPCs = 50,
-  calcRedDim = TRUE,
-  paramFindMarkers = list(test.type = "wilcox", pval.type = "all", direction = "any"),
-  calcAllPartitions = FALSE,
-  cells2keep = NULL,
-  descriptionText = NULL,
-  verbose = TRUE
+  assay.name.normalization = "logcounts"
+  calcRedDim = FALSE,
+  paramFindMarkers = list(test.type = "t", pval.type = "all", direction = "any"),
+  calcAllPartitions = FALSE
 )
 ```
 
