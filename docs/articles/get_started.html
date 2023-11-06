@@ -111,10 +111,11 @@ version of this dataset in which the original cells have been subsampled
 and a pseudotime has been calculated to demonstrate how scX can
 represent numerical attributes.</p>
 <p>In this example we will use the ‘inferred_cell_type’ covariate to
-explore differential expression patterns (partitionVars parameter). The
-rest of the metadata will be used for visualization purposes
-(metadataVars parameter). While partitionVars should be categorical
-variables, metadataVars can be discrete or continuous covariates</p>
+explore differential expression patterns (<code>partitionVars</code>
+parameter). The rest of the metadata will be used for visualization
+purposes (<code>metadataVars</code> parameter). While
+<code>partitionVars</code> should be categorical variables,
+<code>metadataVars</code> can be discrete or continuous covariates.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://chernolabs.github.io/scX/">scX</a></span><span class="op">)</span></span>
 <span></span>
@@ -131,15 +132,16 @@ variables, metadataVars can be discrete or continuous covariates</p>
 <p align="justify">
 </p>
 <p>The scX app can be created and launched with only two functions.
-<strong><em>createSCEobject()</em></strong> creates the single cell
-experiment object that will be used within the application. This
-function performs a set of preprocessing steps required for the various
-scX functions. Among these steps we can mention:</p>
+<code><a href="../reference/createSCEobject.html">createSCEobject()</a></code> creates the single cell experiment object
+that will be used within the application. This function performs a set
+of preprocessing steps required for the various scX functions. Among
+these steps we can mention:</p>
 <ol style="list-style-type: decimal">
 <li><p>Calculation of quality control metrics.</p></li>
-<li><p>If no partition was declared in the “partitionVars” parameter, a
-preliminary clustering will be calculated with the scran package
-function <em>quickCluster()</em>.</p></li>
+<li><p>If no partition was declared in the <code>partitionVars</code>
+parameter, a preliminary clustering will be calculated with the
+<code>scran</code> package function
+<code><a href="https://rdrr.io/pkg/scran/man/quickCluster.html" class="external-link">scran::quickCluster()</a></code>.</p></li>
 <li><p>Normalization of the gene expression matrix.</p></li>
 <li><p>Determination of the most variable genes (HVG).</p></li>
 <li><p>Calculation of different dimensionality reductions: PCA, tSNE,
@@ -152,10 +154,11 @@ dimensionality reductions that are not already calculated in the
 dataset.</p>
 <p>On the other hand, different options for the calculation of the
 marker genes of the different clusters can be determined. This can be
-done within the parameter “paramFindMarkers” which expects a list of
-parameters taken by scran’s <em>FindMarkers()</em> function.</p>
-<p>Finally with the <strong><em>launch_scX()</em></strong> function the
-application is deployed.</p>
+done within the parameter <code>paramFindMarkers</code> which expects a
+list of parameters taken by the function
+<code><a href="https://rdrr.io/pkg/scran/man/findMarkers.html" class="external-link">scran::findMarkers()</a></code>.</p>
+<p>Finally with the <code><a href="../reference/launch_scX.html">launch_scX()</a></code> function the application
+is deployed.</p>
 
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://chernolabs.github.io/scX/">scX</a></span><span class="op">)</span></span>

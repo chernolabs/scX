@@ -11,93 +11,47 @@ knitr::opts_chunk$set(
 )
 ```
 
-## 1 - What type of input does scX accept?
+## 1. What type of input does scX accept?
 
-scX is an "plug and play" tool that pre-processes the data using only the raw count matrix, allowing the dataset to be explored in depth.
-Nonetheless, it is advisable to input an SCE object when using the 'createSCEobject()' function.
-The function, however, also accepts the raw count matrix (with genes as rows and cells as columns) or a Seurat object.
+scX is a "plug and play" tool that pre-processes the data using only the raw count matrix, allowing the dataset to be explored in depth.
+Nonetheless, it is advisable to input an **SCE object** when using the `createSCEobject()` function.
+The function, however, also accepts the **raw count matrix** (with genes as rows and cells as columns) or a **Seurat object**.
 In the latter two cases, it automatically transforms the inputs into an SCE object.
+
 If you supply cell metadata, it must be contained in a dataframe with the cell names as rownames.
 Typical examples of metadata are cell type, sampleid, percentage of mitochondrial reads.
 
 ```R
 # Input = SingleCellExperiment object (sce)
 cseo <- createSCEobject(xx = sce)
+
 # Input = Seurat object (seu)
 cseo <- createSCEobject(xx = seu)
-# Alternatively, Input = combine a matrix (mat) from one of these classes: c("dgCMatrix", "Matrix", "matrix") and metadata as data.frame (df)
+
+# Alternatively, Input = combine a matrix (mat) from one of these classes:
+# c("dgCMatrix", "Matrix", "matrix") and metadata as data.frame (df)
 cseo <- createSCEobject(xx = mat, metadata = df)
 ```
 
-scX is an extreme valuable tool for visualising and analysing single-cell or single-nuclei RNA sequencing data.
+scX is an extremely valuable tool for visualising and analysing single-cell or single-nuclei RNA sequencing data.
 To maximise its potential, it is important to have a pre-processed object, i.e. one that has already undergone QC filtering for genes and cells, as well as the appropriate normalisation for the type of data.
-If you have already computed partitions, such as a Louvain-Leiden partition to identify cell types or states, you can pass them as input to be visualised in PCA, UMAP, TSNE and obtain markers, DEGs between the different clusters, and so on. In that case use the 'partitionVars' parameter. To visualize any additional information in plots, it must be passed through the 'metadataVars' parameter.
+If you have already computed partitions, such as a Louvain-Leiden partition to identify cell types or states, you can pass them as input to be visualised in PCA, UMAP, TSNE and obtain markers, DEGs between the different clusters, and so on. In that case use the `partitionVars` parameter. To visualize any additional information in plots, it must be passed through the `metadataVars` parameter.
 
 ```R
-cseo <- createSCEobject(xx = sce, partitionVars = c("inferred_cell_type"), metadataVars=c("pseudotime", "sex"))
+cseo <- createSCEobject(xx = sce, 
+						partitionVars = c("inferred_cell_type"), 
+						metadataVars = c("pseudotime", "sex"))
 ``` 
 
-### - How to pass a normalized count matrix as input of 'createSCEobject()'
+#### 1.1 How to pass a normalized count matrix as input of `createSCEobject()`?
 
-If you possess the normalized count matrix rather than the raw count matrix, you may transform it into an SCE object before providing it to 'createSCEobject()'
+If you possess the normalized count matrix rather than the raw count matrix, you may transform it into an SCE object before providing it to `createSCEobject()`
 
 ```R
 sce <- SingleCellExperiment(list(logcounts=norm.mat))
 cseo <- createSCEobject(xx = sce)
 ```
-
-## 2 - Is there a maximum input size that scX can receive?
-
-The limitations of scX are solely dependent on the PC's hardware, such as the RAM and CPU. A 'standard' PC (16gb, i5-8400) can comfortably manage medium-sized datasets of up to 30k cells. However, to ensure smooth application and visualization plots for datasets exceeding 50k cells, the 'createSCEobject()' function subsamples the SCE object with 50k random cells while storing the cell names in the 'CELLS2KEEP' output.
-
-If you have a cluster with only a few cells that you wish to retain, you can pass their names to the 'cells2keep' parameter.
-
-```R
-c2k <- colnames(sce)[sce$inferred_cell_type=="COP"]
-cseo <- createSCEobject(xx = sce, partitionVars = c("inferred_cell_type"), cells2keep = c2k) # Keeping COP cells in case of subsampling data for visualization
-```
-
-If you need to utilize over 50k cells and possess a 200k cell SCE object, implementing a stratified subsampling to preserve half the cells in each cluster is a viable option. This will result in the app exhibiting 100k cells during visualization.
-
-```R
-library(dplyr)
-# sce: SCE object of a dataset with 200k cells
-sce$cellnames <- colnames(sce)
-c2k <- colData(sce) %>% as.data.frame %>% group_by(inferred_cell_type) %>% sample_frac(0.5,replace =  F) # sample half of the cells in every cluster
-cseo <- createSCEobject(xx = sce, partitionVars = c("inferred_cell_type"), metadataVars=c("pseudotime", "sex"))
-cseo$CELLS2KEEP <- c2k$cellnames # Change the output of the subsampling function to be able to use 100k cells
-launch_scX(cseo)
-``` 
-
-If you are willing to attempt to utilize all cells within the application with the potential drawback of running low on memory or experiencing extended waiting periods between the plots, you can modify it to 'all' prior to launching 'launch_scX()'.
-
-```R
-cseo <- createSCEobject(xx = sce, partitionVars = c("inferred_cell_type"), metadataVars=c("pseudotime", "sex"))
-cseo$CELLS2KEEP <- 'all' # Change the output of the subsampling function
-launch_scX(cseo)
-``` 
-
-Nonetheless, all the calculations in the preprocessing stage apply to every cell within the dataset.
-
-## 3 - How to deploy a shiny app in shiny.io:
-
-1 - Save the SCE object in /data folder
-2 - Create an app.R script:
-
-```R
-library(scX)
-# Loading SCE object
-load('data/data.Rdata')
-launch_scX(cseo,point.size = 50)
-```
-3 - Then run:
-
-```R
-library(rsconnect)
-rsconnect::deployApp('path/to/your/app.R')
-```
-
-## 4 - How to use Scanpy (.h5ad) or .loom objets:
+#### 1.2 How to use Scanpy (.h5ad) or .loom objets?
 
 For this it's necessary to convert them to a SingleCellExperiment or Seurat objects.
 In this tutorial we will explain how to convert them as SingleCellExperiment using the [zellkonverter package](https://bioconductor.org/packages/release/bioc/html/zellkonverter.html).
@@ -117,10 +71,91 @@ sceasy::convertFormat('filename.loom', from="loom", to="sce",
 sce <- readRDS('filename.rds')
 ```
 
-## 5 - How to pass a normalized count matrix as input of 'createSCEobject()'
+## 2. Is there a maximum input size that *scX* can receive?
 
-If you have the normalized count matrix instead of raw count matrix, you can convert it to SCE object before passing it to 'createSCEobject()'
+The limitations of scX are solely dependent on the PC's hardware, such as the RAM and CPU. A 'standard' PC (16gb, i5-8400) can comfortably manage medium-sized datasets of up to 30k cells. However, to ensure smooth application and visualization plots for datasets exceeding 50k cells, the `createSCEobject()` function subsamples the SCE object with 50k random cells while storing the cell names in the `CELLS2KEEP` output.
+
+* If you have a cluster with only a few cells that you wish to retain, you can pass their names to the `cells2keep` parameter.
 
 ```R
-sce <- SingleCellExperiment(list(logcounts=norm.mat))
+c2k <- colnames(sce)[sce$inferred_cell_type=="COP"]
+cseo <- createSCEobject(xx = sce, 
+						partitionVars = c("inferred_cell_type"), 
+						cells2keep = c2k) # Keeping COP cells in case of subsampling data for visualization
 ```
+
+* If you need to utilize over 50k cells and possess a 200k cell SCE object, implementing a stratified subsampling to preserve half the cells in each cluster is a viable option. This will result in the app exhibiting 100k cells during visualization.
+
+```R
+library(dplyr)
+# sce: SCE object of a dataset with 200k cells
+sce$cellnames <- colnames(sce)
+c2k <- colData(sce) %>% as.data.frame %>% 
+		group_by(inferred_cell_type) %>% 
+		sample_frac(0.5,replace =  F) # sample half of the cells in every cluster
+cseo <- createSCEobject(xx = sce, 
+						partitionVars = c("inferred_cell_type"), 
+						metadataVars = c("pseudotime", "sex"))
+
+# Change the output of the subsampling function to be able to use 100k cells:
+cseo$CELLS2KEEP <- c2k$cellnames
+launch_scX(cseo)
+``` 
+
+* If you are willing to attempt to utilize all cells within the application with the potential drawback of running low on memory or experiencing extended waiting periods between the plots, you can modify the parameter to `all` prior to launching `launch_scX()`.
+
+```R
+cseo <- createSCEobject(xx = sce, 
+						partitionVars = c("inferred_cell_type"), 
+						metadataVars = c("pseudotime", "sex"))
+
+# Change the output of the subsampling function:
+cseo$CELLS2KEEP <- 'all'
+launch_scX(cseo)
+``` 
+
+**Important note:** All the calculations in the preprocessing stage apply to every cell within the dataset, regardless of the subsampling provided by the `cells2keep` parameter for visualization purposes.
+
+## 3. How to deploy a shiny app in shinyapps.io?
+
+One way to deploy an app online is to use the **shinyapps** service. The first step is to create an account at [https://www.shinyapps.io/](https://www.shinyapps.io/). A user guide can be found [here](https://docs.posit.co/shinyapps.io/index.html).
+
+1. Save the SCE object in `/data` folder
+2. Create an app.R script:
+
+```R
+library(scX)
+# Loading SCE object
+load('data/data.Rdata')
+launch_scX(cseo,point.size = 50)
+```
+3. Then run:
+
+```R
+library(rsconnect)
+
+rsconnect::setAccountInfo(name="<ACCOUNT>", 
+                          token="<TOKEN>",
+                          secret="<SECRET>")
+
+rsconnect::deployApp('path/to/your/app.R')
+```
+Another option could be R Shiny Server, for more details please visit the following [link](https://posit.co/download/shiny-server/). Finally, Amazon Web Services (AWS) can also be used. A step-by-step tutorial on how a shiny app can be deployed with AWS can be found [here](https://www.charlesbordet.com/en/guide-shiny-aws/#).
+
+## 4. If I want to change any preprocessing parameters, do I need to go through all the steps again to relaunch the app?
+
+No! createSCEobject() can take as input its own output, avoiding doing steps like logcounts calculation, dimensionality reductions, etc., again. 
+
+For instance, if you initiated the application by using test.type = "wilcox" in paramFindMarkers but now intend to re-launch it utilizing a different sort of test, like t-test, just use the createSCEobject() function with the updated parameter, indicating that you do not require the other features to be recalculated.
+
+```R
+createSCEobject(
+  xx = sce,
+  assay.name.raw = "counts",
+  assay.name.normalization = "logcounts"
+  calcRedDim = FALSE,
+  paramFindMarkers = list(test.type = "t", pval.type = "all", direction = "up"),
+  calcAllPartitions = FALSE
+)
+```
+

@@ -115,7 +115,7 @@ ExpressionUI <- function(id) {
                          fill = TRUE),
             prettySwitch(NS(id,"mean_heat"),
                          "Mean per group",
-                         value = F,
+                         value = T,
                          status = "primary",
                          fill = TRUE)
             
@@ -307,7 +307,12 @@ ExpressionServer <- function(id,sce,point.size=20) {
     
     observeEvent(c(dimVector()),{
       #req(input$scatter_heatmap == "scatter")
-      updatePickerInput(session,inputId = "DimType", choices = (c("3","2")[c(3,2) %in% dimVector()]))
+      if(any(dimVector() > 3)){
+        opt <- c('3','2')
+      } else{
+        opt <- (c("3","2")[c(3,2) %in% dimVector()])
+      }
+      updatePickerInput(session,inputId = "DimType", choices =opt)
     })
     
     observeEvent(c(input$DimType,dimVector()), {
@@ -433,7 +438,7 @@ ExpressionServer <- function(id,sce,point.size=20) {
     })
     
     ### Scatter ----
-    ClusterPlot <- eventReactive(c(input$plotType,input$partitionType),{
+    ClusterPlot <- eventReactive(c(input$DimType,input$plotType,input$partitionType),{
       #req(input$scatter_heatmap == "scatter")
       #3D
       if(input$DimType == "3"){
@@ -470,7 +475,7 @@ ExpressionServer <- function(id,sce,point.size=20) {
       
     })
     
-    ExpressionPlot <- eventReactive(c(input$plotType,ExpressionF(),input$partitionType),{
+    ExpressionPlot <- eventReactive(c(input$DimType,input$plotType,ExpressionF(),input$partitionType),{
       req(!is.null(ExpressionF()))
       req(input$plotType)
       #3D
