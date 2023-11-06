@@ -71,9 +71,11 @@ sceasy::convertFormat('filename.loom', from="loom", to="sce",
 sce <- readRDS('filename.rds')
 ```
 
-## 2. Is there a maximum input size that *scX* can receive?
+## 2. Is there a maximum size limit for input objects that *scX* is capable of processing?
 
-The limitations of scX are solely dependent on the PC's hardware, such as the RAM and CPU. A 'standard' PC (16gb, i5-8400) can comfortably manage medium-sized datasets of up to 30k cells. However, to ensure smooth application and visualization plots for datasets exceeding 50k cells, the `createSCEobject()` function subsamples the SCE object with 50k random cells while storing the cell names in the `CELLS2KEEP` output.
+The constraints of scX are determined by the hardware of the computer, including the RAM and CPU. A typical PC (16GB, i5-8400) can efficiently handle datasets of medium size, containing up to 30k cells. Be aware that the number of partitions and clusters will also affect the processing time of a dataset.
+
+To ensure smooth application and visualisation plots for datasets with more than 50k cells, the `createSCEobject()` function subsamples the SCE object with 50k random cells, storing the cell names in the `CELLS2KEEP` output.
 
 * If you have a cluster with only a few cells that you wish to retain, you can pass their names to the `cells2keep` parameter.
 
