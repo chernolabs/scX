@@ -146,18 +146,19 @@ Another option could be R Shiny Server, for more details please visit the follow
 
 ## 4. If I want to change any preprocessing parameters, do I need to go through all the steps again to relaunch the app?
 
-No! createSCEobject() can take as input its own output, avoiding doing steps like logcounts calculation, dimensionality reductions, etc., again. 
+No! createSCEobject() can take as input a SingleCellExpression object previously normalized (logcounts assay) and with reduced dim already estimated. In this case normalization and dimensionality reduction steps could be avoided.
 
 For instance, if you initiated the application by using test.type = "wilcox" in paramFindMarkers but now intend to re-launch it utilizing a different sort of test, like t-test, just use the createSCEobject() function with the updated parameter, indicating that you do not require the other features to be recalculated.
 
 ```R
 createSCEobject(
-  xx = sce,
+  xx = scXample,
   assay.name.raw = "counts",
-  assay.name.normalization = "logcounts"
+  assay.name.normalization = "logcounts",
+  partitionVars = "inferred_cell_type", 
+  metadataVars = c("source_name", "age", "sex", "strain", "treatment", "pseudotime"),
   calcRedDim = FALSE,
-  paramFindMarkers = list(test.type = "t", pval.type = "all", direction = "up"),
-  calcAllPartitions = FALSE
+  paramFindMarkers = list(test.type = "t", pval.type = "all", direction = "up")
 )
 ```
 
