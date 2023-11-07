@@ -148,7 +148,44 @@ createSCEobject <- function(xx,
   ##Check if there are colnames and rownames in the objects 
   if(is.null(rownames(xx)) | is.null(colnames(xx))){
     stop('Missing row names or column names.')
+  } 
+  
+  if(!is.null(rownames(xx))) {
+    rnames <- rownames(xx)
+    ##Check empty names
+    if(length(which(rnames==""))>0){
+      warning("Some genes have empty names and will be excluded")
+      rnames <- rnames[!rnames==""]
+    }
+    ##Check repeated names
+    tt <- table(rnames)
+    repnames <- names(tt[tt>1])
+    if(length(repnames)>0){
+      warning("Some rownames are repeated and will be excluded: ", paste0(repnames, collapse = ', '))
+      rnames <- rnames[!rnames%in%repnames]
+    }
+    xx <- xx[rnames,]
+    rm(rnames, repnames, tt)
   }
+  
+  ##Renaming if colnames are repeated
+  if(!is.null(colnames(xx))){
+    cnames <- colnames(xx)
+    tt <- table(cnames)
+    repnames <- names(tt[tt>1])
+    if(length(repnames)>0){
+      warning("Some colnames are repeated and will be renamed sequentially adding a '-' prior to the number")
+      for(cname in repnames){
+        ii <- which(cnames%in%cname)
+        cnames[ii] <- paste0(cname,"-",seq_along(ii))
+      }
+      colnames(xx) <- cnames
+      rm(ii)
+    }
+    rm(cnames, tt, repnames)
+  }
+  
+  
   ##Check for repeated partitions
   partitionVars <- unique(partitionVars)
   
@@ -341,7 +378,7 @@ createSCEobject <- function(xx,
       xx.sce <- scater::logNormCounts(xx.sce, assay.type = assay.name.raw, name="logcounts")
       if(verbose) cat(' Finished\n')
     }
-  } else if ( "scx.clust" %in% partitionVars ) {
+  } else if ( "scx.clust" %in% ttoFactors ) {
       if(verbose) cat('Computing clusters...')
       clust <- scran::quickCluster(xx.sce, assay.type = assay.name.normalization)
       xx.sce$scx.clust <- clust
@@ -421,7 +458,7 @@ createSCEobject <- function(xx,
     coldatanames <- names(colData(xx.sce))
     if(!all(metadataVars%in%coldatanames)) warning(" Can't find '",paste0(metadataVars[!metadataVars%in%coldatanames],collapse = ' & '),"' in coldata.\n '",paste0(metadataVars[metadataVars%in%coldatanames],collapse = ' & '), "' will be available for coloring plots in the app.")
     if(all(!metadataVars%in%coldatanames)) warning(" Can't find 'metadataVars' in coldata.\n Only 'partitionVars' will be available for coloring plots in the app.")
-    coldatanames <- coldatanames[coldatanames%in%c("nCounts", "nFeatures", partitionVars, metadataVars)]
+    coldatanames <- coldatanames[coldatanames%in%c("nCounts", "nFeatures", ttoFactors, metadataVars)]
     colData(xx.sce) <- colData(xx.sce)[,coldatanames]
     # transform to character to factors to be able to plot in shiny app
     colsK <- sapply(colData(xx.sce), function(x){(is.character(x))})
