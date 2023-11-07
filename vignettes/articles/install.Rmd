@@ -16,7 +16,7 @@ knitr::opts_chunk$set(
 scX requires certain packages to be installed. If the user does not have these packages installed, they can execute the following code: 
 
 ```R
-BiocManager::install(c("SingleCellExperiment","scran","scatter","ComplexHeatmap"))
+BiocManager::install(c("SingleCellExperiment","scran","scater","ComplexHeatmap"))
 ```
 
 
