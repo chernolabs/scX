@@ -18,7 +18,7 @@ A Single Cell Experiment object with 2141 cells and 2000 highly variable genes  
 \url{https://bioconductor.org/packages/release/data/experiment/manuals/scRNAseq/man/scRNAseq.pdf#Rfn.SingleCellExperiment.Rdash.class}
 }
 \usage{
-sce
+scXample
 }
 \description{
 A subset of data obtained from \href{https://bioconductor.org/packages/release/data/experiment/html/scRNAseq.html}{scRNAseq package}.
