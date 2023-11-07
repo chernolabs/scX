@@ -1,0 +1,10 @@
+bibentry(
+  bibtype  = "misc",
+  title    = "scX: A user-friendly tool for scRNA-seq exploration",
+  author   = "Tomás Vega Waichman and M. Luz Vercesi and Ariel A. Berardino and Maximiliano S. Beckel and Damiana Giacomini and Natalí B. Rasetto and Magalí Herrero and Daniela J. Di Bella and Paola Arlotta and Alejandro F. Schinder and Ariel Chernomoretz",
+  year     = 2023,
+  eprint = {2311.00012},
+  archivePrefix = "arXiv",
+  primaryClass = "q-bio.GN",
+  url = "https://arxiv.org/abs/2311.00012"
+)

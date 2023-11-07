@@ -135,33 +135,54 @@ the <code>metadataVars</code> parameter.</p>
 <code class="sourceCode R"><span><span class="va">cseo</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createSCEobject.html">createSCEobject</a></span><span class="op">(</span>xx <span class="op">=</span> <span class="va">sce</span>, </span>
 <span>                        partitionVars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"inferred_cell_type"</span><span class="op">)</span>, </span>
 <span>                        metadataVars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"pseudotime"</span>, <span class="st">"sex"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<div class="section level3">
-<h3 id="how-to-pass-a-normalized-count-matrix-as-input-of-createsceobject">How to pass a normalized count matrix as input of
+<div class="section level4">
+<h4 id="how-to-pass-a-normalized-count-matrix-as-input-of-createsceobject">1.1 How to pass a normalized count matrix as input of
 <code>createSCEobject()</code>?<a class="anchor" aria-label="anchor" href="#how-to-pass-a-normalized-count-matrix-as-input-of-createsceobject"></a>
-</h3>
+</h4>
 <p>If you possess the normalized count matrix rather than the raw count
 matrix, you may transform it into an SCE object before providing it to
 <code><a href="../reference/createSCEobject.html">createSCEobject()</a></code></p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu">SingleCellExperiment</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>logcounts<span class="op">=</span><span class="va">norm.mat</span><span class="op">)</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/pkg/SingleCellExperiment/man/SingleCellExperiment.html" class="external-link">SingleCellExperiment</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>logcounts<span class="op">=</span><span class="va">norm.mat</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">cseo</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createSCEobject.html">createSCEobject</a></span><span class="op">(</span>xx <span class="op">=</span> <span class="va">sce</span><span class="op">)</span></span></code></pre></div>
+</div>
+<div class="section level4">
+<h4 id="how-to-use-scanpy--h5ad-or--loom-objets">1.2 How to use Scanpy (.h5ad) or .loom objets?<a class="anchor" aria-label="anchor" href="#how-to-use-scanpy--h5ad-or--loom-objets"></a>
+</h4>
+<p>For this it’s necessary to convert them to a SingleCellExperiment or
+Seurat objects. In this tutorial we will explain how to convert them as
+SingleCellExperiment using the <a href="https://bioconductor.org/packages/release/bioc/html/zellkonverter.html" class="external-link">zellkonverter
+package</a>.</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu">readH5AD</span><span class="op">(</span><span class="va">file</span>,</span>
+<span>        reader <span class="op">=</span>  <span class="st">"R"</span></span>
+<span><span class="co">#Then run the createSCEobject as in 1)</span></span>
+<span><span class="op">)</span></span></code></pre></div>
+<p>From .loom, using the <a href="https://github.com/cellgeni/sceasy" class="external-link">sceasy package</a></p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">sceasy</span><span class="fu">::</span><span class="fu">convertFormat</span><span class="op">(</span><span class="st">'filename.loom'</span>, from<span class="op">=</span><span class="st">"loom"</span>, to<span class="op">=</span><span class="st">"sce"</span>,</span>
+<span>                       outFile<span class="op">=</span><span class="st">'filename.rds'</span><span class="op">)</span></span>
+<span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="st">'filename.rds'</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
 <div class="section level2">
-<h2 id="is-there-a-maximum-input-size-that-scx-can-receive">2. Is there a maximum input size that <em>scX</em> can receive?<a class="anchor" aria-label="anchor" href="#is-there-a-maximum-input-size-that-scx-can-receive"></a>
+<h2 id="is-there-a-maximum-size-limit-for-input-objects-that-scx-is-capable-of-processing">2. Is there a maximum size limit for input objects that <em>scX</em>
+is capable of processing?<a class="anchor" aria-label="anchor" href="#is-there-a-maximum-size-limit-for-input-objects-that-scx-is-capable-of-processing"></a>
 </h2>
-<p>The limitations of scX are solely dependent on the PC’s hardware,
-such as the RAM and CPU. A ‘standard’ PC (16gb, i5-8400) can comfortably
-manage medium-sized datasets of up to 30k cells. However, to ensure
-smooth application and visualization plots for datasets exceeding 50k
-cells, the <code><a href="../reference/createSCEobject.html">createSCEobject()</a></code> function subsamples the SCE
-object with 50k random cells while storing the cell names in the
-<code>CELLS2KEEP</code> output.</p>
+<p>The constraints of scX are determined by the hardware of the
+computer, including the RAM and CPU. A typical PC (16GB, i5-8400) can
+efficiently handle datasets of medium size, containing up to 30k cells.
+Be aware that the number of partitions and clusters will also affect the
+processing time of a dataset.</p>
+<p>To ensure smooth application and visualisation plots for datasets
+with more than 50k cells, the <code><a href="../reference/createSCEobject.html">createSCEobject()</a></code> function
+subsamples the SCE object with 50k random cells, storing the cell names
+in the <code>CELLS2KEEP</code> output.</p>
 <ul>
 <li>If you have a cluster with only a few cells that you wish to retain,
 you can pass their names to the <code>cells2keep</code> parameter.</li>
 </ul>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">c2k</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span><span class="op">[</span><span class="va">sce</span><span class="op">$</span><span class="va">inferred_cell_type</span><span class="op">==</span><span class="st">"COP"</span><span class="op">]</span></span>
 <span><span class="va">cseo</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createSCEobject.html">createSCEobject</a></span><span class="op">(</span>xx <span class="op">=</span> <span class="va">sce</span>, </span>
 <span>                        partitionVars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"inferred_cell_type"</span><span class="op">)</span>, </span>
@@ -172,7 +193,7 @@ object, implementing a stratified subsampling to preserve half the cells
 in each cluster is a viable option. This will result in the app
 exhibiting 100k cells during visualization.</li>
 </ul>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://dplyr.tidyverse.org" class="external-link">dplyr</a></span><span class="op">)</span></span>
 <span><span class="co"># sce: SCE object of a dataset with 200k cells</span></span>
 <span><span class="va">sce</span><span class="op">$</span><span class="va">cellnames</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/colnames.html" class="external-link">colnames</a></span><span class="op">(</span><span class="va">sce</span><span class="op">)</span></span>
@@ -193,7 +214,7 @@ experiencing extended waiting periods between the plots, you can modify
 the parameter to <code>all</code> prior to launching
 <code><a href="../reference/launch_scX.html">launch_scX()</a></code>.</li>
 </ul>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">cseo</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/createSCEobject.html">createSCEobject</a></span><span class="op">(</span>xx <span class="op">=</span> <span class="va">sce</span>, </span>
 <span>                        partitionVars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"inferred_cell_type"</span><span class="op">)</span>, </span>
 <span>                        metadataVars <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"pseudotime"</span>, <span class="st">"sex"</span><span class="op">)</span><span class="op">)</span></span>
@@ -207,13 +228,17 @@ of the subsampling provided by the <code>cells2keep</code> parameter for
 visualization purposes.</p>
 </div>
 <div class="section level2">
-<h2 id="how-to-deploy-a-shiny-app-in-shiny-io">3. How to deploy a shiny app in shiny.io?<a class="anchor" aria-label="anchor" href="#how-to-deploy-a-shiny-app-in-shiny-io"></a>
+<h2 id="how-to-deploy-a-shiny-app-in-shinyapps-io">3. How to deploy a shiny app in shinyapps.io?<a class="anchor" aria-label="anchor" href="#how-to-deploy-a-shiny-app-in-shinyapps-io"></a>
 </h2>
+<p>One way to deploy an app online is to use the
+<strong>shinyapps</strong> service. The first step is to create an
+account at <a href="https://www.shinyapps.io/" class="external-link">https://www.shinyapps.io/</a>. A user
+guide can be found <a href="https://docs.posit.co/shinyapps.io/index.html" class="external-link">here</a>.</p>
 <ol style="list-style-type: decimal">
 <li>Save the SCE object in <code>/data</code> folder</li>
 <li>Create an app.R script:</li>
 </ol>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://chernolabs.github.io/scX/">scX</a></span><span class="op">)</span></span>
 <span><span class="co"># Loading SCE object</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/load.html" class="external-link">load</a></span><span class="op">(</span><span class="st">'data/data.Rdata'</span><span class="op">)</span></span>
@@ -221,27 +246,39 @@ visualization purposes.</p>
 <ol start="3" style="list-style-type: decimal">
 <li>Then run:</li>
 </ol>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/rstudio/rsconnect" class="external-link">rsconnect</a></span><span class="op">)</span></span>
+<span></span>
+<span><span class="fu">rsconnect</span><span class="fu">::</span><span class="fu">setAccountInfo</span><span class="op">(</span>name<span class="op">=</span><span class="st">"&lt;ACCOUNT&gt;"</span>, </span>
+<span>                          token<span class="op">=</span><span class="st">"&lt;TOKEN&gt;"</span>,</span>
+<span>                          secret<span class="op">=</span><span class="st">"&lt;SECRET&gt;"</span><span class="op">)</span></span>
+<span></span>
 <span><span class="fu">rsconnect</span><span class="fu">::</span><span class="fu">deployApp</span><span class="op">(</span><span class="st">'path/to/your/app.R'</span><span class="op">)</span></span></code></pre></div>
+<p>Another option could be R Shiny Server, for more details please visit
+the following <a href="https://posit.co/download/shiny-server/" class="external-link">link</a>. Finally, Amazon
+Web Services (AWS) can also be used. A step-by-step tutorial on how a
+shiny app can be deployed with AWS can be found <a href="https://www.charlesbordet.com/en/guide-shiny-aws/#" class="external-link">here</a>.</p>
 </div>
 <div class="section level2">
-<h2 id="how-to-use-scanpy--h5ad-or--loom-objets">4. How to use Scanpy (.h5ad) or .loom objets?<a class="anchor" aria-label="anchor" href="#how-to-use-scanpy--h5ad-or--loom-objets"></a>
+<h2 id="if-i-want-to-change-any-preprocessing-parameters-do-i-need-to-go-through-all-the-steps-again-to-relaunch-the-app">4. If I want to change any preprocessing parameters, do I need to go
+through all the steps again to relaunch the app?<a class="anchor" aria-label="anchor" href="#if-i-want-to-change-any-preprocessing-parameters-do-i-need-to-go-through-all-the-steps-again-to-relaunch-the-app"></a>
 </h2>
-<p>For this it’s necessary to convert them to a SingleCellExperiment or
-Seurat objects. In this tutorial we will explain how to convert them as
-SingleCellExperiment using the <a href="https://bioconductor.org/packages/release/bioc/html/zellkonverter.html" class="external-link">zellkonverter
-package</a>.</p>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu">readH5AD</span><span class="op">(</span><span class="va">file</span>,</span>
-<span>        reader <span class="op">=</span>  <span class="st">"R"</span></span>
-<span><span class="co">#Then run the createSCEobject as in 1)</span></span>
-<span><span class="op">)</span></span></code></pre></div>
-<p>From .loom, using the <a href="https://github.com/cellgeni/sceasy" class="external-link">sceasy package</a></p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu">sceasy</span><span class="fu">::</span><span class="fu">convertFormat</span><span class="op">(</span><span class="st">'filename.loom'</span>, from<span class="op">=</span><span class="st">"loom"</span>, to<span class="op">=</span><span class="st">"sce"</span>,</span>
-<span>                       outFile<span class="op">=</span><span class="st">'filename.rds'</span><span class="op">)</span></span>
-<span><span class="va">sce</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/readRDS.html" class="external-link">readRDS</a></span><span class="op">(</span><span class="st">'filename.rds'</span><span class="op">)</span></span></code></pre></div>
+<p>No! createSCEobject() can take as input its own output, avoiding
+doing steps like logcounts calculation, dimensionality reductions, etc.,
+again.</p>
+<p>For instance, if you initiated the application by using test.type =
+“wilcox” in paramFindMarkers but now intend to re-launch it utilizing a
+different sort of test, like t-test, just use the createSCEobject()
+function with the updated parameter, indicating that you do not require
+the other features to be recalculated.</p>
+<div class="sourceCode" id="cb11"><pre class="sourceCode r"><code class="sourceCode r"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a><span class="fu">createSCEobject</span>(</span>
+<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>  <span class="at">xx =</span> sce,</span>
+<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a>  <span class="at">assay.name.raw =</span> <span class="st">"counts"</span>,</span>
+<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a>  <span class="at">assay.name.normalization =</span> <span class="st">"logcounts"</span></span>
+<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a>  <span class="at">calcRedDim =</span> <span class="cn">FALSE</span>,</span>
+<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a>  <span class="at">paramFindMarkers =</span> <span class="fu">list</span>(<span class="at">test.type =</span> <span class="st">"t"</span>, <span class="at">pval.type =</span> <span class="st">"all"</span>, <span class="at">direction =</span> <span class="st">"up"</span>),</span>
+<span id="cb11-7"><a href="#cb11-7" tabindex="-1"></a>  <span class="at">calcAllPartitions =</span> <span class="cn">FALSE</span></span>
+<span id="cb11-8"><a href="#cb11-8" tabindex="-1"></a>)</span></code></pre></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc"><h2>On this page</h2>
     </nav></aside>
