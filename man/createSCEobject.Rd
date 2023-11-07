@@ -57,9 +57,9 @@ Defaults to \code{list(test.type="wilcox", pval.type="all", direction="up")}.}
 
 \item{calcAllPartitions}{Logical. Defaults to \code{FALSE}, which means that only partitions from \code{partitionVars} with 30 or fewer levels will be considered for marker and DEG calculations. If set to TRUE, it forces the computation of markers and DEGs for the entire list of \code{partitionVars}.}
 
-\item{cells2keep}{(Optional) A list of cell names to keep in case of subsampling. NOTE: Subsampling is only activated for visualization purposes in the case of large datasets; it is not used for computations. 50k cells will be used for visualization in the app, and their indexes are stored in the \code{CELLS2KEEP} element of the CSEO object.}
+\item{cells2keep}{(Optional) A list of cell names to keep in case of subsampling. NOTE: Subsampling is only activated for visualization purposes in the case of large datasets; it is not used for computations. Only \code{nSubCells} cells will be used for visualization in the app, and their indexes are stored in the \code{CELLS2KEEP} element of the CSEO object.}
 
-\item{nSubCells}{Numeric. The maximum number of cells to select for subsampling the data set.}
+\item{nSubCells}{Numeric. The maximum number of cells for randomly subsampling the data set (just for visualization purposes).}
 
 \item{descriptionText}{(Optional) A short description of the object being analyzed. This text will be displayed in the Summary module of the \code{scX} app.}
 
@@ -84,7 +84,7 @@ reduced dimensions for visualization, and any additional data provided. Also, th
 This function handles the basic preprocessing steps for sc/sn-RNAseq data. It leverages functionality implemented in the \pkg{scran}, \pkg{scater}, and \pkg{SingleCellExperiment} packages.
 The steps include: converting the input to a \linkS4class{SingleCellExperiment} object, estimating QC metrics, normalizing the expression matrix, identifying highly variable genes,
 and computing embeddings for various dimensionality reduction techniques. If no cell partition is provided, a default clustering step is conducted to investigate marker genes and differential expression patterns.
-For large datasets (with more than 50k cells), subsampling of the \linkS4class{SingleCellExperiment} object is considered to reduce waiting times in the \pkg{scX} app. A detailed discussion of the employed preprocessing pipeline can be found in the
+For datasets with more than 50k cells, subsampling of the \linkS4class{SingleCellExperiment} object is suggested to improve smooth interactive visualizations in the \pkg{scX} app. A detailed discussion of the employed preprocessing pipeline can be found in the
 \href{https://bioconductor.org/books/release/OSCA/.}{OSCA} book.
 }
 \section{Partitions}{
@@ -92,7 +92,7 @@ For large datasets (with more than 50k cells), subsampling of the \linkS4class{S
 It is recommended to include a curated partition of the data in the input object or in the \code{metadata}.
 Marker genes and differential expression analysis will be automatically computed for partitions with fewer than 31 levels specified as \code{partitionVars}.
 If the user wishes to run the calculations for partitions with more than 30 levels, \code{calcAllPartitions} must be set to \code{TRUE} (Please note that this step could be very time-consuming).
-You may want to color some partitions in plots without having to compute marker genes and DEGs analyses for them. To do this, pass those partitions through \code{metadataVars}.
+You may want to color some partitions in plots without having to compute marker genes and DEGs analyses for them. To do this, pass those partitions as \code{metadataVars}.
 }
 
 \section{Metadata}{
