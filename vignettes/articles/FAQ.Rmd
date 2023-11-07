@@ -38,7 +38,7 @@ To maximise its potential, it is important to have a pre-processed object, i.e. 
 If you have already computed partitions, such as a Louvain-Leiden partition to identify cell types or states, you can pass them as input to be visualised in PCA, UMAP, TSNE and obtain markers, DEGs between the different clusters, and so on. In that case use the `partitionVars` parameter. To visualize any additional information in plots, it must be passed through the `metadataVars` parameter.
 
 ```R
-cseo <- createSCEobject(xx = sce, 
+cseo <- createSCEobject(xx = scXample, 
 						partitionVars = c("inferred_cell_type"), 
 						metadataVars = c("pseudotime", "sex"))
 ``` 
@@ -80,8 +80,8 @@ To ensure smooth application and visualisation plots for datasets with more than
 * If you have a cluster with only a few cells that you wish to retain, you can pass their names to the `cells2keep` parameter.
 
 ```R
-c2k <- colnames(sce)[sce$inferred_cell_type=="COP"]
-cseo <- createSCEobject(xx = sce, 
+c2k <- colnames(scXample)[scXample$inferred_cell_type=="COP"]
+cseo <- createSCEobject(xx = scXample, 
 						partitionVars = c("inferred_cell_type"), 
 						cells2keep = c2k) # Keeping COP cells in case of subsampling data for visualization
 ```
