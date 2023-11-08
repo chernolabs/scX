@@ -128,7 +128,7 @@ markersServer <- function(id = "markers",sce,sce.markers,point.size = 20) {
     observeEvent(c(input$partitionType,input$resetButton),ignoreInit = TRUE,{
       req(cluster_selected())
       updateTabsetPanel(inputId = "switcher", selected = "panel1")
-      runjs("Shiny.setInputValue('plotly_click-PlotMix', null);")
+      runjs("Shiny.setInputValue('{NS(id)('plotly_click-PlotMix')}', null);")
     })
     
     dimVector <- reactive({
