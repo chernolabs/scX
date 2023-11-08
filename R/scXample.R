@@ -5,11 +5,11 @@
 #' have been identified. This package includes a modified version of this dataset in which the original cells have been subsampled and a pseudotime has been calculated to demonstrate how scX can represent numerical attributes.
 #' Pseudotime was calculated with \href{https://www.bioconductor.org/packages/release/bioc/html/slingshot.html}{slingshot}.
 #'
-#' @format ## `sce`
+#' @format ## `scXample`
 #' A Single Cell Experiment object with 2141 cells and 2000 highly variable genes  (HVG):
 #' \describe{
 #'   \item{assays}{counts}
 #'   \item{colData}{title source_name age inferred_cell_type sex strain treatment pseudotime}
 #' }
 #' @source <https://bioconductor.org/packages/release/data/experiment/manuals/scRNAseq/man/scRNAseq.pdf#Rfn.SingleCellExperiment.Rdash.class>
-"sce"
+"scXample"

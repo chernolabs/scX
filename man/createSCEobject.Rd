@@ -153,7 +153,7 @@ The test.type can be specified by the user in \code{paramFindMarkers$test.type}.
 
 \section{Subsampling cells}{
 
-If the \linkS4class{SingleCellExperiment} object contains over than 50k cells (this number can be changed through \code{nSubCells}), a random sample of 50k cells will be chosen for visualization purposes in the application.
+If the \linkS4class{SingleCellExperiment} object contains over \code{nSubCells} cells (50k by default), a random sample of that size will be chosen for visualization purposes in the application.
 Cell names that the user wants to keep in the visualizations can be specified in the \code{cells2keep} parameter.
 Please note that it is solely for producing efficient visualizations.
 }
