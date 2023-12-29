@@ -209,8 +209,19 @@ createSCEobject <- function(xx,
     warning("Seurat object is detected, 'assay.name.raw' & 'assay.name.normalization' will be set to default.")
     assay.name.raw <- "counts"
     assay.name.normalization <- "logcounts"
+	seurat.nms <- names(xx@assays)
     ##Converts seurat object to sce object
-    xx.sce <- Seurat::as.SingleCellExperiment(xx) 
+    xx.sce <- Seurat::as.SingleCellExperiment(xx)
+	
+	# if Seurat object contains only one matrix, as.SingleCellExperiment duplicates it as both 'counts' and 'logcounts'
+	if(all(assay(xx.sce, "counts")==assay(xx.sce, "logcounts"))){
+		if(any(grep("logcount", seurat.nms))){
+			assay(xx.sce, "counts") <- NULL
+		}else{
+			assay(xx.sce, "logcounts") <- NULL
+		}
+	}
+	
     ##Checking if all partitions from 'partitionVars' are converted into the colData() of the sce object
     if((all(partitionVars!="scx.clust")) & (!all(partitionVars %in% names(colData(xx.sce))))){
       warning('at least one partition is not present in metadata')
