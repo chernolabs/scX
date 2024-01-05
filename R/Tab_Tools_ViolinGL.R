@@ -39,12 +39,10 @@ VT_UI <- function(id) {
             tabPanelBody("panel1",
               fluidRow(
                 column(11, style='padding-left:0px; padding-right:2px;',
-                  selectizeInput(NS(id,"gen_exp"),
+				  selectizeInput(NS(id,"gen_exp"),
                                  label=NULL,
                                  choices = NULL, 
-                                 options = list(maxItems = 10,
-                                 maxOptions = 20,
-                                 placeholder = 'Please select genes to plot'),
+                                 options = list(maxOptions = 20, placeholder = 'Please select genes to plot'),
                                  width = NULL,
                                  multiple=T
                   )

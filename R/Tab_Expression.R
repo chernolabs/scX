@@ -29,8 +29,7 @@ ExpressionUI <- function(id) {
 							selectizeInput(NS(id,"gen_exp"),
 							label=NULL,
 							choices = NULL, 
-							options = list(maxItems = 10,
-								maxOptions = 20,
+							options = list(maxOptions = 20,
 								placeholder = 'Please select genes to plot'),
 							width = NULL,
 							multiple=T)

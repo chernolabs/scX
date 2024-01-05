@@ -116,6 +116,8 @@ ui <- function(){
         tags$style(
           HTML("hr {border-top: 1px solid #000000;}")
         ),
+		# maximum box selection height + scroll (used in multiple gene selection)
+		tags$style(".selectize-input {max-height: 100px; overflow-y:auto;}"),
         ## to not show error message in shiny
         tags$style(
           HTML(".shiny-output-error { visibility: hidden; }")
