@@ -140,73 +140,55 @@ createSCEobject <- function(xx,
                             descriptionText=NULL,
                             verbose=TRUE){
   
-  csceo <- list() # Creating list object to be returned by this function
+  csceo <- sapply(c("SCE", "sce.degs", "sce.markers", "CELLS2KEEP"), function(x) NULL) # Creating list object to be returned by this function
 
   # Managing input ----
-  # First we will ensure that there is a partition to be calculated
-
-  ##Check if there are colnames and rownames in the objects 
+  ## Check for colnames and rownames in the object
   if(is.null(rownames(xx)) | is.null(colnames(xx))){
-    stop('Missing row names or column names.')
-  } 
-  
-  if(!is.null(rownames(xx))) {
-    rnames <- rownames(xx)
+    stop("Object must have rownames 'gene_id' and colnames 'barcodes'")
+  } else {
+	rnames <- rownames(xx)
     ##Check empty names
     if(length(which(rnames==""))>0){
-      warning("Some genes have empty names and will be excluded")
+      message("Some genes have empty names and will be excluded")
       rnames <- rnames[!rnames==""]
     }
     ##Check repeated names
     tt <- table(rnames)
     repnames <- names(tt[tt>1])
     if(length(repnames)>0){
-      warning("Some rownames are repeated and will be excluded: ", paste0(repnames, collapse = ', '))
+      message("Some rownames are repeated and will be excluded: ", paste0(repnames, collapse = ', '))
       rnames <- rnames[!rnames%in%repnames]
     }
     xx <- xx[rnames,]
-    rm(rnames, repnames, tt)
-  }
-  
-  ##Renaming if colnames are repeated
-  if(!is.null(colnames(xx))){
-    cnames <- colnames(xx)
+    
+	##Renaming if colnames are repeated
+	cnames <- colnames(xx)
     tt <- table(cnames)
     repnames <- names(tt[tt>1])
     if(length(repnames)>0){
-      warning("Some colnames are repeated and will be renamed sequentially adding a '-' prior to the number")
+      message("Some colnames are repeated and will be renamed sequentially adding a '-' prior to the number")
       for(cname in repnames){
         ii <- which(cnames%in%cname)
         cnames[ii] <- paste0(cname,"-",seq_along(ii))
       }
       colnames(xx) <- cnames
-      rm(ii)
     }
-    rm(cnames, tt, repnames)
   }
   
-  
-  ##Check for repeated partitions
-  partitionVars <- unique(partitionVars)
-  
-  ##If there is not an specified 'partitionVars' then it sets to "scx.clust"
-  if(is.null(partitionVars)){
-    warning('No partitionVars specified, a quick clusterization will be computed.')
-    partitionVars <- "scx.clust"
+  ## Before anything, stop if there is at least one cell not included in metadata
+  if(!is.null(metadata)){
+	if(!all(colnames(xx) %in% rownames(metadata))){
+		stop("Some cells in data are not present in metadata")
+	}
   }
-
-  ##Also if it isn't a Seurat or SCE object, and metadata is null (metadata could be inside the object) the 'partitionVars' becomes "scx.clust"
-  if(is.null(metadata) & class(xx)[1]!="Seurat" & class(xx)[1]!="SingleCellExperiment"){
-    warning('No metadata specified, a quick clusterization will be computed.')
-    partitionVars <- "scx.clust"
-  }
+  
+  ## Creating SCE
   if(verbose) cat('Creating SCE object...')
-  
   ## Seurat to SCE object ----
-  ##Check if the input class is a Seurat object
   if(class(xx)[1]=="Seurat"){
     ##Changing assay.name parameters because as.SingleCellExperiment fills 'counts' and 'logcounts' assays
-    warning("Seurat object is detected, 'assay.name.raw' & 'assay.name.normalization' will be set to default.")
+    message("Seurat object is detected, 'assay.name.raw' & 'assay.name.normalization' will be set to default.")
     assay.name.raw <- "counts"
     assay.name.normalization <- "logcounts"
 	seurat.nms <- names(xx@assays)
@@ -222,10 +204,6 @@ createSCEobject <- function(xx,
 		}
 	}
 	
-    ##Checking if all partitions from 'partitionVars' are converted into the colData() of the sce object
-    if((all(partitionVars!="scx.clust")) & (!all(partitionVars %in% names(colData(xx.sce))))){
-      warning('at least one partition is not present in metadata')
-    }
     ##Converting seurat feature's metadata to rowData() of the sce object
     if(nrow(xx@assays$RNA@meta.features)>0){
       rowData(xx.sce) <- xx@assays$RNA@meta.features
@@ -235,127 +213,98 @@ createSCEobject <- function(xx,
       if(is.null(chosen.hvg)){
         chosen.hvg <- Seurat::VariableFeatures(xx)
       }
-    }
-  ## Matrix+Metadata to SCE object ----
-  ##Check if the input class is a dense or sparse matrix object
+	}
+  ## Matrix to SCE object ----
   } else if (class(xx)[1] %in% c("dgCMatrix", "Matrix", "matrix")){
-      ##The matrix must contain rownames and colnames for the function to be able to identify genes and cells
-      if(is.null(rownames(xx)) | is.null(colnames(xx))){
-        stop('Matrix must have rownames "gene_id" and colnames "barcodes"')
-      }
-      ##Creating a SCE object from the matrix
-      xx.sce <- SingleCellExperiment(list(counts=xx))
-      ##Checking if metadata was specified
-      if(!is.null(metadata)){
-        if(all(colnames(xx.sce) %in% rownames(metadata))){
-          ##Assing colData() of the sce oject to be the metadata if all the cells have metadata
-          colData(xx.sce) <- cbind(colData(xx.sce), metadata[colnames(xx.sce),,drop=F])
-          ##Checking if partitions from 'partitionVars' are present in the metadata
-          if((!("scx.clust" %in% partitionVars)) & (!all(partitionVars %in% names(colData(xx.sce))))){
-            warning('at least one partition is not present in metadata')
-          }
-        ##Stop if there is at least one cell it is not included in the metadata
-        } else {
-          stop('Some cells in metadata are not present in the matrix colnames.\n')
-        }
-      }
-    ## xx as SCE object ----
-    ##Check if the input class is a SCE object
+	xx.sce <- SingleCellExperiment(list(counts=xx))
+  ## xx as SCE object ----
   } else if (class(xx)[1]=="SingleCellExperiment"){
-    xx.sce <- xx
-    ##Checking if metadata was specified
-    if(!is.null(metadata)){
-      if(all(colnames(xx.sce) %in% rownames(metadata))){
-        ##Adding to colData() of the sce oject the metadata if all the cells have metadata
-        colData(xx.sce) <- cbind(colData(xx.sce), metadata[colnames(xx.sce),,drop=F])
-        ##Checking if partitions from 'partitionVars' are present in the metadata
-        if((partitionVars!="scx.clust") & (!all(partitionVars %in% names(colData(xx.sce))))){
-          warning('at least one partition is not present in metadata')
-        }
-        ##Stop if there is at least one cell it is not included in the metadata
-      } else {
-        stop('Some cells in metadata are not present in the SCE colnames.\n')
-      }
-    } 
-  ##Stop if the `xx` is not an object of the class Seurat, SCE or Matrix
-  } else {
-    stop('xx must be an object of the class Seurat, SingleCellExperiment or Matrix')
+	xx.sce <- xx
+  } else { ##Stop if `xx` is not an object of the class Seurat, SCE or Matrix
+	stop("xx must be an object of the class Seurat, SingleCellExperiment or Matrix")
   }
-  if(verbose) cat(' Finished\n')
   
-
-  # partitionVars to factors ----
-  # Setting which partitions will be transformed to factors
-
-  if(verbose) cat('Changing factors from partitionVars...')
-  ##Check the factors that are in the colData.
+  ## Add metadata to sce if present
+  if(!is.null(metadata)){
+	##Adding metadata to colData() of sce oject (colnames were checked before creating sce object)
+	colData(xx.sce) <- cbind(colData(xx.sce), metadata[colnames(xx.sce),,drop=F])
+  }
+  
+  if(verbose) cat(' Finished\nAnalyzing partitions...')
+  
+  ##Check for repeated partitions
+  partitionVars <- unique(partitionVars)
+  
+  ##Checking if partitions from 'partitionVars' are present in the metadata
+  if(!all(partitionVars %in% names(colData(xx.sce)))){ # Note: if partitionVars is NULL, condition is FALSE
+	warning("At least one element from partitionVars is not present in metadata")
+  }
+  
+  ## partitionVars to factors ----
+  
+  ## Check factors in colData
   tfs <- setNames(nm=partitionVars,object = partitionVars %in% names(colData(xx.sce)))
-  ##Check if columns have more than one level.
-  if(sum(tfs) > 0){
-    vld <- sapply(colData(xx.sce)[,partitionVars[tfs],drop=F],function(x){length(unique(x))>1})   
+  
+  if(any(tfs)){ # Note: if partitionVars is NULL, condition is FALSE
+	## Check if columns have more than one level
+    vld <- sapply(colData(xx.sce)[,partitionVars[tfs],drop=F],function(x){length(unique(x))>1})
+	if(!any(vld)){ # if none of the partitionVars in colData have more than 1 level, quick cluster
+		message("partitionVars in colData only have one level. A quick clusterization will be computed")
+	}
     tfs[names(vld)] <-  tfs[names(vld)] & vld
+  } else { # if partitionVars is NULL or not present in colData, quick cluster
+	message("partitionVars unspecified or not found in colData. A quick clusterization will be computed")
   }
   
-  ttoFactors <- names(tfs)[tfs]
-  ##Warning message if a partition is not found in colData or if it has only one level.
-  if(sum(!tfs)>0) warning("Can't find ",paste0(names(tfs)[!tfs],collapse = ' & ')," in metadata or they have only one level")
+  ttoFactors <- names(tfs)[tfs] # partitions used for DEGs and markers
   ##If no partition passes the above filters
-  if(length(ttoFactors) == 0){
-    warning("No partition passed the controls, a quick clusterization will be computed.")
+  if(length(ttoFactors) == 0){ # when partitionVars is NULL, not present in colData, or only have 1 level
     ##A quick clusterization will be computed in order to calculate gene markers and DEGs
     ttoFactors <- "scx.clust"
     colData(xx.sce)[ttoFactors] <- NA
   }else{
     ##Transforming partitions to factors
-	  colData(xx.sce)[ttoFactors] <- lapply(colData(xx.sce)[ttoFactors], as.factor)
+	colData(xx.sce)[ttoFactors] <- lapply(colData(xx.sce)[ttoFactors], as.factor)
   }
-  
-
-  # metadata ----
-  #Transform all the character columns to factor to be able to be selected in the shinyApp if they have less or equal to 30 levels or they are characters. 
-
-  cols <- sapply(colData(xx.sce), function(x){(is.character(x) | is.numeric(x)) & length(unique(x)) <= 30})
-  if(any(cols)){
-    colData(xx.sce)[,cols] <- lapply(colData(xx.sce)[,cols,drop=F], function(x){
-        x <- as.factor(x)
-        x <- droplevels(x)
-        x
-      })
-	}
-  if(verbose) cat(' Finished\n')
-    
 
   # Checking number of levels of ttoFactors for calculations ---- 
   # When `calcAllPartitions=FALSE`:
-  #   If none of the partitions in `partitionVars` have less than 31 levels, the function will stop.
-  #   However, if there is at least one partition with less than 31 levels, the function will continue by computing gene markers and DEGs only for those partitions while ignoring the rest.
+  #   If none of the partitions in `partitionVars` have less than 31 levels, the function will ask user if continuing or using scx.clust
+  #   If there is at least one partition with less than 31 levels, the function will continue by computing gene markers and DEGs only for those partitions while ignoring the rest.
   # When `calcAllPartitions=TRUE`:
   #   Compute gene markers and differentially expressed genes (DEGs) for all partitions in 'partitionVars' regardless of the maximum number of levels
 
   if(!calcAllPartitions){
     allToFactors <- sapply(ttoFactors, function(x){length(unique(colData(xx.sce)[,x]))})>30
     if(all(allToFactors)){
-      stop(paste0(paste0(names(allToFactors)[allToFactors], collapse =  ' & ')," has more than 30 levels. If you want to compute it anyway set 'calcAllPartitions' as TRUE"))
+		message(paste0(names(allToFactors)[allToFactors], collapse =  ' & '),
+			" have more than 30 levels.\nComputing markers and DEGs in this case could be very time-consuming, do you wish to proceed?")
+		user <- readline("If not, a quick clusterization will be considered instead (y/n): ")
+		# if user input doesn't include letter "y", quick cluster
+		if(length(grep("y", user, ignore.case = T))==0) ttoFactors <- "scx.clust"
     } else if(any(allToFactors)) {
-      warning(paste0(paste0(names(allToFactors)[allToFactors], collapse =  ' & ')," has more than 30 levels. They wont be used to compute markers and DEGs. If you want to compute it anyway set 'calcAllPartitions' as TRUE"))
+      message(paste0(paste0(names(allToFactors)[allToFactors], collapse =  ' & '),
+		" have more than 30 levels. They wont be used to compute markers and DEGs. 
+		If you want to compute it anyway set 'calcAllPartitions' as TRUE"))
       ttoFactors <- ttoFactors[!allToFactors]
     }
   }
+  if(verbose) cat(' Finished\n')
   
 
   # QC ----
-  # Caluclate the number of counts and features per cell
+  # Calculate the number of counts and features per cell
 
   if(verbose) cat('Computing QC metrics...')
   if(!assay.name.raw %in% names(assays(xx.sce))){
     if(assay.name.normalization %in% names(assays(xx.sce))){
-      warning(paste0('Assays ',assay.name.raw,' not found in SCE object'))
+      warning(paste("Assay", assay.name.raw, "not found in SCE object"))
       ## If there is no raw assay but the SCE object has a normalized assay then set `nCounts,nFeatures = NA`
       xx.sce$nCounts   <- NA
       xx.sce$nFeatures <- NA
     } else {
       ## If there is no raw or normalized assay available then the function will end
-      stop(paste0('Assay ',paste(assay.name.raw, assay.name.normalization, sep = ' & '),' not found in SCE object'))
+      stop(paste("Assays", paste(assay.name.raw, assay.name.normalization, sep = ' & '), "not found in SCE object"))
     }
   } else {
       ## If there is a raw assay in the SCE object, calculate the number of counts
@@ -391,6 +340,7 @@ createSCEobject <- function(xx,
     }
   } else if ( "scx.clust" %in% ttoFactors ) {
       if(verbose) cat('Computing clusters...')
+	  set.seed(123457)
       clust <- scran::quickCluster(xx.sce, assay.type = assay.name.normalization)
       xx.sce$scx.clust <- clust
       if(verbose) cat(' Finished\n')
@@ -448,42 +398,53 @@ createSCEobject <- function(xx,
   assayNames(xx.sce)[which(assayNames(xx.sce)==assay.name.normalization)] <- "logcounts"
   ##Compute a row-normalization of the lognormalized expression matrix to be able to compare between gene expression profiles
   ##The row expression values are divided by their maximum value
-  if(verbose) cat('Computing logcounts normalized...')
   if(!"logcounts.norm" %in% names(assays(xx.sce))){
-		sparse_mat <- as(assay(xx.sce, "logcounts"), "sparseMatrix")
-		row_maxs <- qlcMatrix::rowMax(sparse_mat)
-		maxdiag <- Diagonal(x = 1/as.vector(row_maxs))
-		scaled_sparse <- maxdiag %*% sparse_mat
-		rownames(scaled_sparse) <- rownames(sparse_mat)
-    ##Store the row-normalized expression values in `logcounts.norm` assay
-		assays(xx.sce)$logcounts.norm <- scaled_sparse
+	if(verbose) cat('Computing normalized logcounts...')
+	sparse_mat <- as(assay(xx.sce, "logcounts"), "sparseMatrix")
+	row_maxs <- qlcMatrix::rowMax(sparse_mat)
+	maxdiag <- Diagonal(x = 1/as.vector(row_maxs))
+	scaled_sparse <- maxdiag %*% sparse_mat
+	rownames(scaled_sparse) <- rownames(sparse_mat)
+    
+	##Store the row-normalized expression values in `logcounts.norm` assay
+	assays(xx.sce)$logcounts.norm <- scaled_sparse
+	if(verbose) cat(' Finished\n')
   }
-  if(verbose) cat(' Finished\n')
   
 
-  # Subsetting SCE object ----
-  # Keep only names in `partitionVars` and `metadataVars` which are in colData to be used for colouring plots
-  # Transform character to factors to be able to plot in shiny app
-
+  # Transform columns to factors to be available for coloring plots in app
   if(!is.null(metadataVars)){
+	# Keep only names in `partitionVars` and `metadataVars` which are in colData
     coldatanames <- names(colData(xx.sce))
-    if(!all(metadataVars%in%coldatanames)) warning(" Can't find '",paste0(metadataVars[!metadataVars%in%coldatanames],collapse = ' & '),"' in coldata.\n '",paste0(metadataVars[metadataVars%in%coldatanames],collapse = ' & '), "' will be available for coloring plots in the app.")
-    if(all(!metadataVars%in%coldatanames)) warning(" Can't find 'metadataVars' in coldata.\n Only 'partitionVars' will be available for coloring plots in the app.")
-    coldatanames <- coldatanames[coldatanames%in%c("nCounts", "nFeatures", ttoFactors, metadataVars)]
-    colData(xx.sce) <- colData(xx.sce)[,coldatanames]
-    # transform to character to factors to be able to plot in shiny app
-    colsK <- sapply(colData(xx.sce), function(x){(is.character(x))})
+    if(!all(metadataVars%in%coldatanames)) warning("Can't find ",paste0(metadataVars[!metadataVars%in%coldatanames],collapse = ' & ')," in data")
+    
+	# Subsetting SCE object
+    colData(xx.sce) <- colData(xx.sce)[, coldatanames%in%c("nCounts", "nFeatures", ttoFactors, metadataVars)]
+    
+    colsK <- sapply(colData(xx.sce), function(x){(is.character(x) | is.numeric(x))})
+	colsK[c("nCounts", "nFeatures")] <- F # added in QC and shouldn't be considered in any case
     if(any(colsK)){
       colData(xx.sce)[,colsK] <- lapply(colData(xx.sce)[,colsK,drop=F], function(x){
       x <- as.factor(x)
       x <- droplevels(x)
       x})
 	  }
+	if(verbose) message(paste0(names(colData(xx.sce))[sapply(colData(xx.sce), function(x){(is.factor(x))})], collapse = ' & ')," will be available for coloring")
+  } else {
+	# Keep names in `partitionVars` which are in colData and any other column (character or numeric) with less than or equal to 30 levels
+	colsK <- sapply(colData(xx.sce), function(x){(is.character(x) | is.numeric(x)) & length(unique(x)) <= 30})
+	colsK[c("nCounts", "nFeatures")] <- F # added in QC and shouldn't be considered in any case
+	if(any(colsK)){
+		colData(xx.sce)[,colsK] <- lapply(colData(xx.sce)[,colsK,drop=F], function(x){
+			x <- as.factor(x)
+			x <- droplevels(x)
+			x
+		})
+	}
   }
 
 
   # Attaching SCE to output ----
-
   csceo[["SCE"]] <- xx.sce
   
   
@@ -577,7 +538,7 @@ createSCEobject <- function(xx,
     if(class(descriptionText)=="character"){
       csceo[["text"]] <- descriptionText
     } else {
-      warning("'descriptionText' is not a character vector.. setting 'text' to NULL")
+      warning("'descriptionText' is not a character vector")
     }
   }
   
@@ -587,11 +548,11 @@ createSCEobject <- function(xx,
   # Please note that all calculations are already completed, and this step is solely for promoting smooth and efficient visualization.
 
   if(ncol(xx.sce)>nSubCells){
-      if(verbose) cat(paste('Subsampling SCE object, it exceeds',nSubCells,'cells\n'))
-      csceo$CELLS2KEEP <- subsampling_func(xx.sce, cellsToKeep = cells2keep, nmaxcell = nSubCells)
-      if(verbose) cat('Finished\n')
+	if(verbose) cat(paste('Subsampling SCE object because it exceeds',nSubCells,'cells\n'))
+	csceo$CELLS2KEEP <- subsampling_func(xx.sce, cellsToKeep = cells2keep, nmaxcell = nSubCells)
+	if(verbose) cat('Finished\n')
   } else {
-    csceo$CELLS2KEEP <- "all"
+	csceo$CELLS2KEEP <- "all"
   }
 
 
