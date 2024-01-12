@@ -8,3 +8,14 @@
 
 <img src="man/figures/cluster_markers.gif" width="100%" />
 
+<h2>Installation</h2>
+
+<p>scX requires certain packages to be installed. If you do not have these, you can execute the following code:</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">BiocManager</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/BiocManager/man/install.html" class="external-link">install</a></span><span class="op">(</span><span class="fu">c</span><span class="op">(</span><span class="st">"SingleCellExperiment"</span>,<span class="st">"scran"</span>,<span class="st">"scater"</span>,<span class="st">"ComplexHeatmap"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+
+<p>scX can be installed from GitHub as follows:</p>
+<div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"chernolabs/scX"</span><span class="op">)</span></span></code></pre></div>
+
+<p>You can also check the <a href="https://chernolabs.github.io/scX/" class="external-link">detailed explanation</a> of what the app can do using an available example!</p>
