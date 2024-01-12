@@ -43,6 +43,15 @@ ui <- function(){
 			#      )
 			# ),
 			menuItem("Summary", tabName = "smryTab", icon = icon('bookmark', class = 'fa-solid'),selected = T),
+			menuItem("Exploratory Data Analysis", tabName = "EDATab",
+			         icon = icon("circle-nodes"), startExpanded = F,
+			         menuSubItem('Categories', tabName = "clustersTab",
+			                     icon = icon('bars-progress')
+			         ),
+			         menuSubItem('Fields', tabName = "fieldsTab",
+			                     icon = icon('clone')
+			         )
+			),
 			menuItem("Markers", tabName = "markersTab",
 					 icon = icon('location-dot'), startExpanded = F,
 					 menuSubItem('Cluster markers', tabName = "markers_cluster",
@@ -65,15 +74,6 @@ ui <- function(){
 			),
 			menuItem("Differential Expression", tabName = "volcanoTab",
 					 icon = icon("chart-column")
-			),
-			menuItem("Exploratory Data Analysis", tabName = "EDATab",
-			         icon = icon("circle-nodes"), startExpanded = F,
-			         menuSubItem('Categories', tabName = "clustersTab",
-			                     icon = icon('bars-progress')
-			         ),
-			         menuSubItem('Fields', tabName = "fieldsTab",
-			                     icon = icon('clone')
-			         )
 			),
 			menuItem("Visual Tools", tabName = "toolsTab",
 					 icon = icon("toolbox"), startExpanded = F,
@@ -147,6 +147,14 @@ ui <- function(){
         tabItem(tabName = "smryTab",
                 QC_UI(id="qc")
         ),
+        tabItem(tabName = "clustersTab",
+                HTML('<h4><span style="font-family:Trebuchet MS,Helvetica,sans-serif"><strong><span style="color:#4e5f70">Category Analysis</span></strong></span></h4>'),
+                Clusters_UI("cluster")
+        ),
+        tabItem(tabName = "fieldsTab",
+                HTML('<h4><span style="font-family:Trebuchet MS,Helvetica,sans-serif"><strong><span style="color:#4e5f70">Fields Analysis</span></strong></span></h4>'),
+                Fields_UI("fields")
+        ),
         tabItem(tabName = "markers_cluster",
                 HTML('<h4><span style="font-family:Trebuchet MS,Helvetica,sans-serif"><strong><span style="color:#4e5f70">Cluster markers</span></strong></span></h4>'),
                 markersUI(id="markers")
@@ -171,14 +179,6 @@ ui <- function(){
                 HTML('<h4><span style="font-family:Trebuchet MS,Helvetica,sans-serif"><strong><span style="color:#4e5f70">Differential Expression</span></strong></span></h4>'),
                 VolcanoUI(id="volcano")
         ),
-        tabItem(tabName = "clustersTab",
-                HTML('<h4><span style="font-family:Trebuchet MS,Helvetica,sans-serif"><strong><span style="color:#4e5f70">Category Analysis</span></strong></span></h4>'),
-                Clusters_UI("cluster")
-        ),
-        tabItem(tabName = "fieldsTab",
-                HTML('<h4><span style="font-family:Trebuchet MS,Helvetica,sans-serif"><strong><span style="color:#4e5f70">Fields Analysis</span></strong></span></h4>'),
-                Fields_UI("fields")
-        ),
         tabItem(tabName = "t_VGL",
                 HTML('<h4><span style="font-family:Trebuchet MS,Helvetica,sans-serif"><strong><span style="color:#4e5f70">Violin by Category</span></strong></span></h4>'),
                 VT_UI(id = "tools")
@@ -199,14 +199,14 @@ ui <- function(){
 
 server <- function(input, output, session) {
 	QC_Server(id = "qc", sce = cseo$SCE, descriptionText = cseo$text, Npartition = length(cseo$sce.markers))
+	VT_Server(id = "tools", sce = cseo$SCE)
+	MultiPlotsServer(id = "MP", sce=cseo$SCE)
 	markersServer(id="markers", sce=cseo$SCE, sce.markers = cseo$sce.markers, point.size=point.size)
 	N_markersServer(id="n_markers", sce=cseo$SCE, point.size=point.size)
 	ExpressionServer(id="Exp", sce=cseo$SCE, point.size=point.size)
 	Numeric_ExpressionServer(id="numeric_Exp",sce=cseo$SCE,point.size = point.size)
 	COExpServer(id="Co-exp", sce=cseo$SCE, point.size = point.size)
 	VolcanoServer(id="volcano", sce=cseo$SCE, sce.degs=cseo$sce.degs)
-	VT_Server(id = "tools", sce = cseo$SCE)
-	MultiPlotsServer(id = "MP", sce=cseo$SCE)
 	Clusters_Server(id ="cluster", sce=cseo$SCE)
 	Fields_Server("fields",sce = cseo$SCE)                                                                                                                                                                                                     
 }
