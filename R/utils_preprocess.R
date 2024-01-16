@@ -541,7 +541,7 @@ createSCEobject <- function(xx,
   #   mark 1 while the rest of the cells mark 0.
   sce.markers <- list()
   for(i in ttoFactors){
-    sce.markers[[i]] <- markers_func(xx.sce, i, paramFindMarkers, bpparam = BPPARAM, minsize = minSize)
+    sce.markers[[i]] <- markers_func(xx.sce, i, paramFindMarkers, bpparam = BPPARAM, minsize = minSize, verbose = verbose)
   }
   if(verbose) cat('Finished\n')
   
@@ -626,9 +626,9 @@ applyReducedDim <- function(sce, reddimstocalculate, chosen.hvgs, nPCs, assaynam
 # returns: markers, robustness, correlation with a binary vector "turned on" in that cluster
 #' @keywords internal
 #' @noRd
-markers_func <- function(sce, partition, paramFindMarkers, bpparam, minsize=10){ # previously ldf_func
+markers_func <- function(sce, partition, paramFindMarkers, bpparam, minsize=10, verbose = TRUE){ # previously ldf_func
 
-  cat(partition, ":\n", sep = "")
+  if(verbose) cat(partition, ":\n", sep = "")
   
   # calculate lfmrk ----
   lfmrk <- list()
@@ -656,7 +656,7 @@ markers_func <- function(sce, partition, paramFindMarkers, bpparam, minsize=10){
   if(length(lfmrk[[1]])>0){ #At least one group to calculate
     for(ic in seq_along(lfmrk[[1]])){ #acá se podría hacer una paralelizacion
       coi <- names(lfmrk[[1]])[ic]
-      cat('\t', coi,'- ')
+      if(verbose) cat('\t', coi,'- ')
       if(paramFindMarkers$pval.type=="any"){
         u <- rownames(lfmrk[[1]][[coi]])[lfmrk[[1]][[coi]][,'FDR']<0.05 & 
                                                 lfmrk[[1]][[coi]][,'Top']<=10]
@@ -665,7 +665,7 @@ markers_func <- function(sce, partition, paramFindMarkers, bpparam, minsize=10){
       }
       
       # (6.1.1) Boxcor ----
-      cat("Computing correlation\n")
+      if(verbose) cat("Computing correlation\n")
       
       if(length(u) > 0){
         Z   <- assay(sce, "logcounts")[u,,drop=FALSE]  
