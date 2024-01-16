@@ -140,7 +140,24 @@ createSCEobject <- function(xx,
                             descriptionText=NULL,
                             verbose=TRUE){
   
-  csceo <- sapply(c("SCE", "sce.degs", "sce.markers", "CELLS2KEEP"), function(x) NULL) # Creating list object to be returned by this function
+  csceo <- sapply(c("SCE", "sce.degs", "sce.markers", "CELLS2KEEP", "call"), function(x) NULL) # Creating list object to be returned by this function
+  
+  csceo$call <- list(
+	assay.name.raw = assay.name.raw,
+	assay.name.normalization = assay.name.normalization,
+	partitionVars = partitionVars,
+	metadataVars = metadataVars,
+	chosen.hvg = chosen.hvg,
+	nHVGs = nHVGs,
+	nPCs = nPCs,
+	calcRedDim = calcRedDim,
+	paramFindMarkers = paramFindMarkers,
+	BPPARAM = BPPARAM,
+	minSize = minSize,
+	calcAllPartitions = calcAllPartitions,
+	cells2keep = cells2keep,
+	nSubCells = nSubCells,
+	descriptionText = descriptionText)
 
   # Managing input ----
   ## Check for colnames and rownames in the object
@@ -184,13 +201,13 @@ createSCEobject <- function(xx,
   }
   
   ## Creating SCE
-  if(verbose) cat('Creating SCE object...')
+  if(verbose) cat('Creating SCE object... ')
   ## Seurat to SCE object ----
   if(class(xx)[1]=="Seurat"){
     ##Changing assay.name parameters because as.SingleCellExperiment fills 'counts' and 'logcounts' assays
     message("Seurat object is detected, 'assay.name.raw' & 'assay.name.normalization' will be set to default.")
-    assay.name.raw <- "counts"
-    assay.name.normalization <- "logcounts"
+    csceo$call$assay.name.raw <- assay.name.raw <- "counts"
+    csceo$call$assay.name.normalization <- assay.name.normalization <- "logcounts"
 	seurat.nms <- names(xx@assays)
     ##Converts seurat object to sce object
     xx.sce <- Seurat::as.SingleCellExperiment(xx)
@@ -212,6 +229,7 @@ createSCEobject <- function(xx,
     if(length(Seurat::VariableFeatures(xx))>0){
       if(is.null(chosen.hvg)){
         chosen.hvg <- Seurat::VariableFeatures(xx)
+		csceo$call$chosen.hvg <- chosen.hvg
       }
 	}
   ## Matrix to SCE object ----
@@ -230,7 +248,7 @@ createSCEobject <- function(xx,
 	colData(xx.sce) <- cbind(colData(xx.sce), metadata[colnames(xx.sce),,drop=F])
   }
   
-  if(verbose) cat(' Finished\nAnalyzing partitions...')
+  if(verbose) cat('Finished\nAnalyzing partitions... ')
   
   ##Check for repeated partitions
   partitionVars <- unique(partitionVars)
@@ -289,13 +307,14 @@ createSCEobject <- function(xx,
       ttoFactors <- ttoFactors[!allToFactors]
     }
   }
-  if(verbose) cat(' Finished\n')
+  if(verbose) cat('Finished\n')
   
+  csceo$call$partitionVars <- ttoFactors
 
   # QC ----
   # Calculate the number of counts and features per cell
 
-  if(verbose) cat('Computing QC metrics...')
+  if(verbose) cat('Computing QC metrics... ')
   if(!assay.name.raw %in% names(assays(xx.sce))){
     if(assay.name.normalization %in% names(assays(xx.sce))){
       warning(paste("Assay", assay.name.raw, "not found in SCE object"))
@@ -316,7 +335,7 @@ createSCEobject <- function(xx,
           xx.sce$nFeatures <- apply(assay(xx.sce, assay.name.raw),2,function(x){sum(x>0)})
       }
   }
-  if(verbose) cat(' Finished\n')
+  if(verbose) cat('Finished\n')
   
   
   # Normalization ----
@@ -330,20 +349,20 @@ createSCEobject <- function(xx,
 
   if(!assay.name.normalization %in% names(assays(xx.sce))){
     if(assay.name.raw %in% names(assays(xx.sce))){
-      if(verbose) cat('Computing normalization...')
+      if(verbose) cat('Computing normalization... ')
       set.seed(123457)
       clust <- scran::quickCluster(xx.sce, assay.type = assay.name.raw)
       xx.sce$scx.clust <- clust
       xx.sce <- scran::computeSumFactors(xx.sce,cluster=clust,min.mean=0.1, assay.type = assay.name.raw)
       xx.sce <- scater::logNormCounts(xx.sce, assay.type = assay.name.raw, name="logcounts")
-      if(verbose) cat(' Finished\n')
+      if(verbose) cat('Finished\n')
     }
   } else if ( "scx.clust" %in% ttoFactors ) {
-      if(verbose) cat('Computing clusters...')
+      if(verbose) cat('Computing clusters... ')
 	  set.seed(123457)
       clust <- scran::quickCluster(xx.sce, assay.type = assay.name.normalization)
       xx.sce$scx.clust <- clust
-      if(verbose) cat(' Finished\n')
+      if(verbose) cat('Finished\n')
   }
   
   
@@ -354,12 +373,12 @@ createSCEobject <- function(xx,
   # can be assigned as the residual from the trend.
 
   if(is.null(chosen.hvg)){
-    if(verbose) cat('Computing HVGs...')
+    if(verbose) cat('Computing HVGs... ')
     mgv <- scran::modelGeneVar(xx.sce,span=.8, assay.type = assay.name.normalization)
     rowData(xx.sce) <- cbind(rowData(xx.sce), hvg.mvBio=mgv$bio)
     chosen.hvg <- rank(-rowData(xx.sce)$hvg.mvBio) <= nHVGs & rowData(xx.sce)$hvg.mvBio>0
     chosen.hvg <- rownames(xx.sce)[chosen.hvg]
-    if(verbose) cat(' Finished\n')
+    if(verbose) cat('Finished\n')
   }
   
   
@@ -399,7 +418,7 @@ createSCEobject <- function(xx,
   ##Compute a row-normalization of the lognormalized expression matrix to be able to compare between gene expression profiles
   ##The row expression values are divided by their maximum value
   if(!"logcounts.norm" %in% names(assays(xx.sce))){
-	if(verbose) cat('Computing normalized logcounts...')
+	if(verbose) cat('Computing normalized logcounts... ')
 	sparse_mat <- as(assay(xx.sce, "logcounts"), "sparseMatrix")
 	row_maxs <- qlcMatrix::rowMax(sparse_mat)
 	maxdiag <- Diagonal(x = 1/as.vector(row_maxs))
@@ -408,7 +427,7 @@ createSCEobject <- function(xx,
     
 	##Store the row-normalized expression values in `logcounts.norm` assay
 	assays(xx.sce)$logcounts.norm <- scaled_sparse
-	if(verbose) cat(' Finished\n')
+	if(verbose) cat('Finished\n')
   }
   
 
@@ -442,6 +461,7 @@ createSCEobject <- function(xx,
 		})
 	}
   }
+  csceo$call$metadataVars <- names(colData(xx.sce))[sapply(colData(xx.sce), is.factor)]
 
 
   # Attaching SCE to output ----
@@ -459,7 +479,7 @@ createSCEobject <- function(xx,
   if(!'direction'%in%names(paramFindMarkers)) paramFindMarkers$direction <- 'up'
   
   if(verbose) cat('Computing differential expression markers:\n')
-  if(verbose) cat('Computing cluster markers...')
+  if(verbose) cat('Computing cluster markers... ')
   ##If test.type = wilcox, calculate FDR with that test and extract logFC values from t test.
   if (paramFindMarkers$test.type == "wilcox"){
     sce.degs <- list()
@@ -505,7 +525,7 @@ createSCEobject <- function(xx,
     }
   }
   
-  if(verbose) cat(' Finished\n')
+  if(verbose) cat('Finished\n')
 
 
   # Attaching sce.degs to output ----
