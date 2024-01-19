@@ -38,7 +38,6 @@ Imports:
     magrittr,
     Matrix,
     plotly,
-    qlcMatrix,
     RColorBrewer,
     reshape2,
     scales,

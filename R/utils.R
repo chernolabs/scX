@@ -85,7 +85,7 @@ make_box <- function(ssce, selected.cells){
 #' @keywords internal
 #' @noRd
 generar_correlacion <- function(mtx,mtx.cor,ssce, cluster){
-  correlacion <- qlcMatrix::corSparse(t(mtx), mtx.cor[colnames(mtx),])
+  correlacion <- sparseCor(t(mtx), mtx.cor[colnames(mtx),])
   colnames(correlacion) <- names(table(colData(ssce)[,cluster]))
   rownames(correlacion) <- rownames(mtx)
   correlacion[is.na(correlacion)] <- 0
@@ -108,6 +108,57 @@ cajitasdeluz <- function(ssce, selected.cells, corr = 0.7){
   df <- df[order(df$selected, decreasing = TRUE),,drop=F]
   names(df)[1] <- "box.cor"
   return(df)
+}
+
+#' @keywords internal
+#' @noRd
+sparseColMax <- function(X){
+  X <- as(X,"dgCMatrix")
+  sapply(seq(ncol(X)), function(k){
+    p0 <- X@p[k]
+    pf <- X@p[k+1]
+    if(p0==pf){ # column k has no elements
+      0
+    }else{
+      max(X@x[(p0+1):pf])
+    }
+  })
+  # as(*, "sparseVector") unnecessary?
+}
+
+#' @keywords internal
+#' @noRd
+sparseRowMax <- function(X){
+  X <- t(X)
+  sparseColMax(X)
+}
+
+#' @keywords internal
+#' @noRd
+sparseCor <- function(X,Y=NULL){
+  X <- as(X,"dgCMatrix")
+  N <- nrow(X)
+  
+  Xmeans <- colMeans(X)
+  
+  if(!is.null(Y)){
+    if(nrow(Y)!=N) stop("X and Y have different number of rows")
+    Y <- as(Y,"dgCMatrix")
+    Ymeans <- colMeans(Y)
+    
+    # almost standard deviation, (n-1) missing
+    Xsd <- sqrt(colSums(X^2) - N*Xmeans^2)
+    Ysd <- sqrt(colSums(Y^2) - N*Ymeans^2)
+    
+    # almost cov, (n-1) missing, would cancel out with Xsd*Ysd:
+    covn1 <- as.matrix(crossprod(X, Y)) - N*tcrossprod(Xmeans, Ymeans) # # t(X) %*% Y - N * (Xmeans %o% Ymeans)
+    return(covn1/tcrossprod(Xsd, Ysd)) # (Xsd %o% Ysd)
+  } else {
+    # almost cov, (n-1) missing 
+    covn1 <- as.matrix(crossprod(X)) - N*tcrossprod(Xmeans) # t(X) %*% X - N * (Xmeans %o% Xmeans) 
+    Xsd <- sqrt(diag(covn1)) # almost standard dev, (n-1) missing, would cancel out with cov
+    return(covn1/tcrossprod(Xsd)) # (Xsd %o% Xsd)
+  }
 }
 
 #CoExpression DF ----

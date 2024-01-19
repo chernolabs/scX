@@ -420,7 +420,7 @@ createSCEobject <- function(xx,
   if(!"logcounts.norm" %in% names(assays(xx.sce))){
 	if(verbose) cat('Computing normalized logcounts... ')
 	sparse_mat <- as(assay(xx.sce, "logcounts"), "sparseMatrix")
-	row_maxs <- qlcMatrix::rowMax(sparse_mat)
+	row_maxs <- sparseRowMax(sparse_mat)
 	maxdiag <- Diagonal(x = 1/as.vector(row_maxs))
 	scaled_sparse <- maxdiag %*% sparse_mat
 	rownames(scaled_sparse) <- rownames(sparse_mat)
