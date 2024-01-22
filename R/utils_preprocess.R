@@ -232,12 +232,19 @@ createSCEobject <- function(xx,
 		csceo$call$chosen.hvg <- chosen.hvg
       }
 	}
+	
+	for(nm in assayNames(xx.sce)){ # make every assay sparse
+		assay(xx.sce, nm) <- as(assay(xx.sce, nm),"dgCMatrix")
+	}
   ## Matrix to SCE object ----
   } else if (class(xx)[1] %in% c("dgCMatrix", "Matrix", "matrix")){
-	xx.sce <- SingleCellExperiment(list(counts=xx))
+	xx.sce <- SingleCellExperiment(list(counts=as(xx,"dgCMatrix")))
   ## xx as SCE object ----
   } else if (class(xx)[1]=="SingleCellExperiment"){
 	xx.sce <- xx
+	for(nm in assayNames(xx.sce)){ # make every assay sparse
+		assay(xx.sce, nm) <- as(assay(xx.sce, nm),"dgCMatrix")
+	}
   } else { ##Stop if `xx` is not an object of the class Seurat, SCE or Matrix
 	stop("xx must be an object of the class Seurat, SingleCellExperiment or Matrix")
   }
@@ -298,7 +305,7 @@ createSCEobject <- function(xx,
 		message(paste0(names(allToFactors)[allToFactors], collapse =  ' & '),
 			" have more than 30 levels.\nComputing markers and DEGs in this case could be very time-consuming, do you wish to proceed?")
 		user <- readline("If not, a quick clusterization will be considered instead (y/n): ")
-		# if user input doesn't include letter "y", quick cluster
+		# if user input does not include the letter 'y', it is interpreted as 'no' and considers a quick cluster
 		if(length(grep("y", user, ignore.case = T))==0) ttoFactors <- "scx.clust"
     } else if(any(allToFactors)) {
       message(paste0(paste0(names(allToFactors)[allToFactors], collapse =  ' & '),
@@ -315,8 +322,8 @@ createSCEobject <- function(xx,
   # Calculate the number of counts and features per cell
 
   if(verbose) cat('Computing QC metrics... ')
-  if(!assay.name.raw %in% names(assays(xx.sce))){
-    if(assay.name.normalization %in% names(assays(xx.sce))){
+  if(!assay.name.raw %in% assayNames(xx.sce)){
+    if(assay.name.normalization %in% assayNames(xx.sce)){
       warning(paste("Assay", assay.name.raw, "not found in SCE object"))
       ## If there is no raw assay but the SCE object has a normalized assay then set `nCounts,nFeatures = NA`
       xx.sce$nCounts   <- NA
@@ -347,8 +354,8 @@ createSCEobject <- function(xx,
   #   Finally, calculate the lognormalized expression matrix by applying a log2 transformation to the product of the raw matrix and scale factors, with the addition of 1.
   # If a normalized assay exists and "scx.clust" is included in the `partitionVars`, the function described before will be applied to compute the clusters, which are stored in colData()
 
-  if(!assay.name.normalization %in% names(assays(xx.sce))){
-    if(assay.name.raw %in% names(assays(xx.sce))){
+  if(!assay.name.normalization %in% assayNames(xx.sce)){
+    if(assay.name.raw %in% assayNames(xx.sce)){
       if(verbose) cat('Computing normalization... ')
       set.seed(123457)
       clust <- scran::quickCluster(xx.sce, assay.type = assay.name.raw)
@@ -417,7 +424,7 @@ createSCEobject <- function(xx,
   assayNames(xx.sce)[which(assayNames(xx.sce)==assay.name.normalization)] <- "logcounts"
   ##Compute a row-normalization of the lognormalized expression matrix to be able to compare between gene expression profiles
   ##The row expression values are divided by their maximum value
-  if(!"logcounts.norm" %in% names(assays(xx.sce))){
+  if(!"logcounts.norm" %in% assayNames(xx.sce)){
 	if(verbose) cat('Computing normalized logcounts... ')
 	sparse_mat <- as(assay(xx.sce, "logcounts"), "sparseMatrix")
 	row_maxs <- sparseRowMax(sparse_mat)
@@ -462,7 +469,6 @@ createSCEobject <- function(xx,
 	}
   }
   csceo$call$metadataVars <- names(colData(xx.sce))[sapply(colData(xx.sce), is.factor)]
-
 
   # Attaching SCE to output ----
   csceo[["SCE"]] <- xx.sce
@@ -527,7 +533,6 @@ createSCEobject <- function(xx,
   
   if(verbose) cat('Finished\n')
 
-
   # Attaching sce.degs to output ----
   csceo[["sce.degs"]] <- sce.degs
   
@@ -545,9 +550,7 @@ createSCEobject <- function(xx,
   }
   if(verbose) cat('Finished\n')
   
-  
   # Attaching sce.markers to output ----
-
   csceo[["sce.markers"]] <- sce.markers
   
 
