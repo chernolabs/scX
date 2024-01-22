@@ -217,7 +217,7 @@ N_markersServer <- function(id,sce,point.size = 20) {
     
     MarkersDT <- reactive({
       if(!is.null(cells_selected())){
-      a <- cajitasdeluz(ssce = sce,selected.cells =cells_selected(),corr = 0.3)  
+      a <- box_correlation(ssce = sce,selected.cells =cells_selected(),corr = 0.3)  
       a
       } 
       else { NULL }
