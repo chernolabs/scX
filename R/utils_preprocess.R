@@ -484,8 +484,7 @@ createSCEobject <- function(xx,
   if(!'pval.type'%in%names(paramFindMarkers)) paramFindMarkers$pval.type <- 'all'
   if(!'direction'%in%names(paramFindMarkers)) paramFindMarkers$direction <- 'up'
   
-  if(verbose) cat('Computing differential expression markers:\n')
-  if(verbose) cat('Computing cluster markers... ')
+  if(verbose) cat('Computing differential expression markers... ')
   ##If test.type = wilcox, calculate FDR with that test and extract logFC values from t test.
   if (paramFindMarkers$test.type == "wilcox"){
     sce.degs <- list()
@@ -531,12 +530,11 @@ createSCEobject <- function(xx,
     }
   }
   
-  if(verbose) cat('Finished\n')
-
   # Attaching sce.degs to output ----
   csceo[["sce.degs"]] <- sce.degs
   
-  
+  if(verbose) cat('Finished\nComputing cluster markers...\n')
+
   # Markers ----
   # `sce.markers` is a list of lists of dataframes for every cluster in all partitions in `partitionVars` used by the shiny app to be able to identify gene markers for clusters.
   # Every element in the list is a list of data The list is constructed using the output of `scran::findMarkers' with parameters specified by the user in `paramFindMarkers'.
@@ -631,7 +629,7 @@ applyReducedDim <- function(sce, reddimstocalculate, chosen.hvgs, nPCs, assaynam
 #' @noRd
 markers_func <- function(sce, partition, paramFindMarkers, bpparam, minsize=10, verbose = TRUE){ # previously ldf_func
 
-  if(verbose) cat(partition, ":\n", sep = "")
+  if(verbose) cat(" ", partition, ":\n", sep = "")
   
   # calculate lfmrk ----
   lfmrk <- list()
