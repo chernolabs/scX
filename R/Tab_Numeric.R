@@ -477,10 +477,10 @@ Fields_Server <- function(id,sce) {
       if(input$ord_stackVln & length(feature()) >1){ #Define the order if the input is selected and the is not a heatmap of 1 row, received the order vector
         dta <- apply(t(as.matrix(colData(sce)[,feature(),drop=F])),1,FUN =  function(x){
           tapply(X = x,
-                 INDEX = if(partitionColor == "None"){
+                 INDEX = if(input$partitionColor == "None"){
                           rep("All",ncol(sce))
                          } else{
-                           colData(sce)[,partitionColor]
+                           colData(sce)[,input$partitionColor]
                          },
                  FUN=mean)
         }
