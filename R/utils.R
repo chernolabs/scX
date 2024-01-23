@@ -87,22 +87,16 @@ make_box <- function(ssce, selected.cells){
 
 #' @keywords internal
 #' @noRd
-generar_correlacion <- function(mtx,mtx.cor){
-  correlacion <- sparseCor(t(mtx), mtx.cor[colnames(mtx),])
-  correlacion[is.na(correlacion)] <- 0
-  return(correlacion)
-}
-
-#' @keywords internal
-#' @noRd
 box_correlation <- function(ssce, selected.cells, corr = 0.7){
   if(!("logcounts" %in% names(assays(ssce)))){
     stop("No 'logcounts' in the sce object")
   }
   lista <- make_box(ssce, selected.cells)
   
-  correlationMarker <- generar_correlacion(mtx = logcounts(lista[["sce"]]),
-                                           mtx.cor = lista[["boxes"]])
+  correlationMarker <- sparseCor(t(logcounts(lista[["sce"]])),
+								lista[["boxes"]])
+  correlationMarker[is.na(correlationMarker)] <- 0
+  
   correlationMarker <- data.frame(correlationMarker)
   df <- correlationMarker[correlationMarker$selected > corr,1,drop=F]
   df <- df[order(df$selected, decreasing = TRUE),,drop=F]
