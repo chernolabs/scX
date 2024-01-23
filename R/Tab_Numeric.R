@@ -233,16 +233,21 @@ Fields_Server <- function(id,sce) {
     updatePickerInput(session,inputId = "partitionType1", 
                       choices = names(colData(sce))[sapply(colData(sce), is.numeric)])
     
-    updatePickerInput(session,inputId = "partitionType1", 
-                        choices = names(colData(sce))[sapply(colData(sce), is.numeric)])
-    
     observeEvent(input$partitionType1,ignoreInit = T,{
-      req(input$partitionType1)
       prt <- names(colData(sce))[sapply(colData(sce), is.numeric)]
       
-      updatePickerInput(session,inputId = "partitionType2", 
-                        choices = c("None",prt[-(match(input$partitionType1,prt))])
+      updatePickerInput(session,inputId = "partitionType2",
+			selected = input$partitionType2,
+			choices = c("None",prt[-(match(input$partitionType1,prt))])
       )
+    })
+	
+	observeEvent(input$partitionType2,ignoreInit = T,{
+		prt <- names(colData(sce))[sapply(colData(sce), is.numeric)]
+		updatePickerInput(session,inputId = "partitionType1", 
+			selected = input$partitionType1,
+			choices = prt[!prt %in% input$partitionType2]
+		)
     })
     
     updateSelectizeInput(session, 'numeric_columns', choices =names(colData(sce))[sapply(colData(sce), is.numeric)], server = TRUE)
