@@ -205,7 +205,7 @@ createSCEobject <- function(xx,
   ## Seurat to SCE object ----
   if(class(xx)[1]=="Seurat"){
     ##Changing assay.name parameters because as.SingleCellExperiment fills 'counts' and 'logcounts' assays
-    message("Seurat object is detected, 'assay.name.raw' & 'assay.name.normalization' will be set to default.")
+    message("\nSeurat object is detected, 'assay.name.raw' & 'assay.name.normalization' will be set to default 'counts' & 'logcounts'")
     csceo$call$assay.name.raw <- assay.name.raw <- "counts"
     csceo$call$assay.name.normalization <- assay.name.normalization <- "logcounts"
 	seurat.nms <- names(xx@assays)
@@ -274,11 +274,11 @@ createSCEobject <- function(xx,
 	## Check if columns have more than one level
     vld <- sapply(colData(xx.sce)[,partitionVars[tfs],drop=F],function(x){length(unique(x))>1})
 	if(!any(vld)){ # if none of the partitionVars in colData have more than 1 level, quick cluster
-		message("partitionVars in colData only have one level. A quick clusterization will be computed")
+		message("\npartitionVars in colData only have one level. A quick clusterization will be computed")
 	}
     tfs[names(vld)] <-  tfs[names(vld)] & vld
   } else { # if partitionVars is NULL or not present in colData, quick cluster
-	message("partitionVars unspecified or not found in colData. A quick clusterization will be computed")
+	message("\npartitionVars unspecified or not found in colData. A quick clusterization will be computed")
   }
   
   ttoFactors <- names(tfs)[tfs] # partitions used for DEGs and markers
@@ -302,13 +302,13 @@ createSCEobject <- function(xx,
   if(!calcAllPartitions){
     allToFactors <- sapply(ttoFactors, function(x){length(unique(colData(xx.sce)[,x]))})>30
     if(all(allToFactors)){
-		message(paste0(names(allToFactors)[allToFactors], collapse =  ' & '),
+		message("\n", paste0(names(allToFactors)[allToFactors], collapse =  ' & '),
 			" have more than 30 levels.\nComputing markers and DEGs in this case could be very time-consuming, do you wish to proceed?")
 		user <- readline("If not, a quick clusterization will be considered instead (y/n): ")
 		# if user input does not include the letter 'y', it is interpreted as 'no' and considers a quick cluster
 		if(length(grep("y", user, ignore.case = T))==0) ttoFactors <- "scx.clust"
     } else if(any(allToFactors)) {
-      message(paste0(paste0(names(allToFactors)[allToFactors], collapse =  ' & '),
+      message("\n", paste0(paste0(names(allToFactors)[allToFactors], collapse =  ' & '),
 		" have more than 30 levels. They wont be used to compute markers and DEGs. 
 		If you want to compute it anyway set 'calcAllPartitions' as TRUE"))
       ttoFactors <- ttoFactors[!allToFactors]
@@ -409,9 +409,7 @@ createSCEobject <- function(xx,
   }
   
   if(calcRedDim){
-    if(verbose) cat('Computing the following reduced dims:',paste(runDim, collapse = ' '),'\n')
     xx.sce <- applyReducedDim(xx.sce, runDim, chosen.hvg, nPCs, assay.name.normalization, prefix.name="SCX_", verbose)
-    if(verbose) cat('Finished\n')
   }
   
 
@@ -588,38 +586,39 @@ createSCEobject <- function(xx,
 #' @keywords internal
 #' @noRd
 applyReducedDim <- function(sce, reddimstocalculate, chosen.hvgs, nPCs, assayname, prefix.name="SCX_",verbose=TRUE){
+  if(verbose) cat('Computing the following reduced dims:',paste(reddimstocalculate, collapse = ' '),'\n')
   namepca <- paste0(prefix.name,"PCA")
   if("PCA"%in%reddimstocalculate){
-    if(verbose) cat("\t PCA...")
+    if(verbose) cat("\tPCA... ")
     set.seed(12534)
     sce <- scater::runPCA(sce, subset_row=chosen.hvgs, ncomponents=nPCs, name=namepca, exprs_values=assayname)
-    if(verbose) cat(' Finished','\n')
+    if(verbose) cat('Finished\n')
   }
   if("TSNE"%in%reddimstocalculate){
-    if(verbose) cat("\t TSNE...")
+    if(verbose) cat("\tTSNE... ")
     set.seed(1111011)
     sce <- scater::runTSNE(sce,dimred=namepca,n_dimred=20,ncomponents=3,name=paste0(prefix.name,"TSNE"),exprs_values=assayname)
-    if(verbose) cat(' Finished','\n')
+    if(verbose) cat('Finished\n')
   }
   if("UMAP"%in%reddimstocalculate){
-    if(verbose) cat("\t UMAP...")
+    if(verbose) cat("\tUMAP... ")
     set.seed(1111011)
     sce <- scater::runUMAP(sce,dimred=namepca,n_dimred=20,ncomponents=3,name=paste0(prefix.name,"UMAP"),exprs_values=assayname)
-    if(verbose) cat(' Finished','\n')
+    if(verbose) cat('Finished\n')
   }
   if("TSNE2D"%in%reddimstocalculate){
-    if(verbose) cat("\t TSNE2D...")
+    if(verbose) cat("\tTSNE2D... ")
     set.seed(1111011)
     sce <- scater::runTSNE(sce,dimred=namepca,name=paste0(prefix.name,"TSNE2D"),exprs_values=assayname)
-    if(verbose) cat(' Finished','\n')
+    if(verbose) cat('Finished\n')
   }
   if("UMAP2D"%in%reddimstocalculate){
-    if(verbose) cat("\t UMAP2D...")
+    if(verbose) cat("\tUMAP2D... ")
     set.seed(1111011)
     sce <- scater::runUMAP(sce,dimred=namepca,name=paste0(prefix.name,"UMAP2D"),exprs_values=assayname)
-    if(verbose) cat(' Finished','\n')
+    if(verbose) cat('Finished\n')
   }
-  
+  if(verbose) cat('Finished\n')
   return(sce)
 }
 

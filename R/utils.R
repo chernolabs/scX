@@ -88,7 +88,7 @@ make_box <- function(ssce, selected.cells){
 #' @keywords internal
 #' @noRd
 box_correlation <- function(ssce, selected.cells, corr = 0.7){
-  if(!("logcounts" %in% names(assays(ssce)))){
+  if(!("logcounts" %in% assayNames(ssce))){
     stop("No 'logcounts' in the sce object")
   }
   lista <- make_box(ssce, selected.cells)
