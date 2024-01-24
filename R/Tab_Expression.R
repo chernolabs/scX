@@ -281,7 +281,7 @@ ExpressionServer <- function(id,sce,point.size=20) {
     ### Observe Events ----
     observeEvent(ignoreInit = T,input$GL_T,{
       if(input$GL_T) {
-      updateTabsetPanel(inputId = "switcher", selected = "panel2")
+		updateTabsetPanel(inputId = "switcher", selected = "panel2")
       } else{
         updateTabsetPanel(inputId = "switcher", selected = "panel1")
       }
@@ -300,25 +300,13 @@ ExpressionServer <- function(id,sce,point.size=20) {
     
     updateSelectizeInput(session, 'gen_exp', choices = rownames(sce), server = TRUE)
     
-    dimVector <- reactive({
-        sapply(reducedDims(x = sce),FUN = ncol) 
-    })
+    dimVector <- sapply(reducedDims(x = sce),FUN = ncol)
+	opt <- c('3','2')
+	if(!any(dimVector > 3)) opt<-opt[c(3,2) %in% dimVector]
+    updatePickerInput(session,inputId = "DimType", choices = opt)
     
-    observeEvent(c(dimVector()),{
-      #req(input$scatter_heatmap == "scatter")
-      if(any(dimVector() > 3)){
-        opt <- c('3','2')
-      } else{
-        opt <- (c("3","2")[c(3,2) %in% dimVector()])
-      }
-      updatePickerInput(session,inputId = "DimType", choices =opt)
-    })
-    
-    observeEvent(c(input$DimType,dimVector()), {
-      #req(input$scatter_heatmap == "scatter")
-      req(!is.null(dimVector()))
-      req(input$DimType)
-	    updatePickerInput(session,inputId = "plotType", choices = rev(names(which(dimVector() == as.numeric(input$DimType)  | dimVector() > 3))))
+    observeEvent(input$DimType, {
+	    updatePickerInput(session,inputId = "plotType", choices = rev(names(which(dimVector == as.numeric(input$DimType) | dimVector > 3))))
     })
     
     observeEvent(input$Cell_Exp,{
@@ -330,115 +318,56 @@ ExpressionServer <- function(id,sce,point.size=20) {
     })
     
     ### Gen selected & data preparation ----
-        #### Selected Gene -----
-    genes.L <- eventReactive(input$action,{
-      req(input$GL_T == F)
-      req(input$gen_exp)
-      input$gen_exp
-    })
-    
-    ExpressionL <- eventReactive(genes.L(),{
-      #req(input$scatter_heatmap == "scatter")
-      req(input$GL_T == F)
-      req(!is.null(genes.L()))
-      if(length(genes.L()) > 1) {
-        exp_vtor <- apply(logcounts(sce)[genes.L(),],2,mean)
-      } else {
-        exp_vtor <- logcounts(sce)[genes.L(),]
-      }
-      list(Exp = exp_vtor,Genes=genes.L()) #these because i dont want to change the gene.L object.
-    })
-    
-    HeatmapL <- eventReactive(c(genes.L(),input$norm_heat),{
-      #req(input$scatter_heatmap == "heatmap")
-      req(input$GL_T == F)
-      req(!is.null(genes.L()))
-      value <- ifelse(input$norm_heat,yes = "logcounts.norm",no = "logcounts") #To swtich between norm ot not normalize expression gene.
-      exp_mtx <-as.matrix(assay(sce,value)[genes.L(),])
-      if(length(genes.L()) == 1) {
-        exp_mtx <- t(exp_mtx)
-      }
-      rownames(exp_mtx) <- genes.L()
-      
-      exp_mtx
-    })
-    
-    #### Gene List Uploaded  -----
-    genes.GL <- eventReactive(input$listGenes,{
-      req(input$listGenes)
-      GL <- genesList(dataPath = input$listGenes)
-      no.genes <- GL[!(GL %in% rownames(sce))] #Keep the missing values
-      genes <- GL[(GL %in% rownames(sce))]
-      
-      list(genes = genes,miss= no.genes)
+    genes.L <- eventReactive(c(input$action, input$listGenes),{
+      if(input$GL_T){
+		req(input$listGenes)
+		GL <- genesList(dataPath = input$listGenes)
+		no.genes <- GL[!(GL %in% rownames(sce))] #Keep the missing values
+		genes <- GL[(GL %in% rownames(sce))]
+		list(genes = genes, miss = no.genes)
+	  } else {
+		list(genes = input$gen_exp, miss=NULL)
+	  }
     })
     
     output$missingGenes <- renderText({
-      req(length(genes.GL()$miss)>0)
+      req(length(genes.L()$miss)>0)
       paste('<b style="color:red;">The following genes were not found in the dataset:<b><br>', 
-            paste(genes.GL()$miss,
+            paste(genes.L()$miss,
                   collapse = ", ")
       )
     })
-    
-    ExpressionGL <- eventReactive(genes.GL(),{
-      #req(input$scatter_heatmap == "scatter")
-      req(input$GL_T == T)
-      req(length(genes.GL()$genes) > 0)
-      
-      if(length(genes.GL()$genes) > 1) {
-        exp_vtor <- apply(logcounts(sce)[genes.GL()$genes,],2,mean)
+	
+    ExpressionF <- eventReactive(genes.L(),{
+      req(length(genes.L()$genes) > 0)
+      if(length(genes.L()$genes) > 1) {
+        exp_vtor <- colSums(logcounts(sce)[genes.L()$genes,])/length(genes.L()$genes) # mean
       } else {
-        exp_vtor <- logcounts(sce)[genes.GL()$genes,]
+        exp_vtor <- logcounts(sce)[genes.L()$genes,]
       }
-      
-      list(Exp = exp_vtor,Genes=genes.GL()$genes)
+      list(Exp = exp_vtor,Genes=genes.L()$genes) #these because i dont want to change the gene.L object.
     })
     
-    HeatmapGL <- eventReactive(c(genes.GL(),input$norm_heat),{
-      #req(input$scatter_heatmap == "heatmap")
-      req(input$GL_T == T)
-      req(length(genes.GL()$genes) > 0)
+	HeatmapF <- eventReactive(c(genes.L(),input$norm_heat),{
+      req(length(genes.L()$genes) > 0)
       value <- ifelse(input$norm_heat,yes = "logcounts.norm",no = "logcounts") #To swtich between norm ot not normalize expression gene.
-      exp_mtx <-as.matrix(assay(sce,value)[genes.GL()$genes,])
-      if(length(genes.GL()$genes) == 1) {
+      exp_mtx <-as.matrix(assay(sce,value)[genes.L()$genes,])
+      if(length(genes.L()$genes) == 1) {
         exp_mtx <- t(exp_mtx)
       }
-      rownames(exp_mtx) <- genes.GL()$genes
+      rownames(exp_mtx) <- genes.L()$genes
       
       exp_mtx
     })
     
-    #### Selecting ----
-    #I do that because if it change, it haven't to calculated everything again, just change the dataframe
-    HeatmapF <- reactive({
-      #req(input$scatter_heatmap == "heatmap")
-      if(input$GL_T){
-        HeatmapGL()    
-      } else { 
-        HeatmapL()
-      }
-    })
-    
-    ExpressionF <- reactive({
-      if(input$GL_T){
-        ExpressionGL()    
-      } else { 
-        ExpressionL()
-      }
-    })
-    
-    
     #### Plots ----
-    
     OrderPartReact <- eventReactive(input$partitionType,{
-      req(input$partitionType)
       Col.and.Order(partition = input$partitionType, sce=sce)
     })
     
     ### Scatter ----
-    ClusterPlot <- eventReactive(c(input$DimType,input$plotType,input$partitionType),{
-      #req(input$scatter_heatmap == "scatter")
+    #ClusterPlot <- eventReactive(c(input$DimType,input$plotType,input$partitionType),{
+	output$plot_cluster <- renderPlotly({
       #3D
       if(input$DimType == "3"){
         plot_ly(type = "scatter3d", mode = "markers",source = "PlotMix")  %>%
@@ -474,9 +403,9 @@ ExpressionServer <- function(id,sce,point.size=20) {
       
     })
     
-    ExpressionPlot <- eventReactive(c(input$DimType,input$plotType,ExpressionF(),input$partitionType),{
+    #ExpressionPlot <- eventReactive(c(input$DimType,input$plotType,ExpressionF(),input$partitionType),{
+	output$plot_expression <- renderPlotly({
       req(!is.null(ExpressionF()))
-      req(input$plotType)
       #3D
       if(input$DimType == "3"){
         plot_ly(type = "scatter3d", mode = "markers")  %>%
@@ -521,16 +450,15 @@ ExpressionServer <- function(id,sce,point.size=20) {
       
     })
     
-    output$plot_cluster <- renderPlotly({
-      req(!is.null(ClusterPlot()))
-        ClusterPlot()
-    })
+    # output$plot_cluster <- renderPlotly({
+      # req(!is.null(ClusterPlot()))
+        # ClusterPlot()
+    # })
     
-    output$plot_expression <- renderPlotly({
-      req(!is.null(ExpressionPlot()))
-      ExpressionPlot()
-    })
-    
+    # output$plot_expression <- renderPlotly({
+      # req(!is.null(ExpressionPlot()))
+      # ExpressionPlot()
+    # })
     
     
     ### Heatmaps ----
@@ -614,7 +542,6 @@ ExpressionServer <- function(id,sce,point.size=20) {
     })
 
     output$plot_heatmap <- renderPlot({
-      #req(input$scatter_heatmap == "heatmap")
       req(!is.null(Heatmap_Plot()))
       Heatmap_Plot()
     })
@@ -632,12 +559,7 @@ ExpressionServer <- function(id,sce,point.size=20) {
                   X=factor(colData(sce)[,input$partitionType]))
      })
      
-     ViolinReact_Cell <- reactive({
-       ViolinReact() %>% group_by(X) %>% summarise(n=n(),Ymax = (max(Y)+0.5))
-     })
-     
      ViolinPlot <-reactive({
-       #req(input$scatter_heatmap == "scatter")
        req(!is.null(ExpressionF()))
        ggplot(ViolinReact()) + 
          geom_violin(aes(y = Y, 
@@ -650,7 +572,8 @@ ExpressionServer <- function(id,sce,point.size=20) {
          ylab("log(counts)") +
          ggtitle(ifelse(length(ExpressionF()$Genes)>1,"mean expression","expression")) +
          scale_fill_manual(values=OrderPartReact()$colPart) +
-         geom_text(aes(label = n,x=X, y=Ymax), data = ViolinReact_Cell()) 
+         geom_text(aes(label = n,x=X, y=Ymax),
+			data = ViolinReact() %>% group_by(X) %>% summarise(n=n(),Ymax = (max(Y)+0.5)))
      })
      
      
@@ -676,7 +599,7 @@ ExpressionServer <- function(id,sce,point.size=20) {
      
      output$plot_Violin <- renderPlot({
        req(!is.null(ViolinPlot()))
-         ViolinPlot() %>% plot()
+       ViolinPlot() %>% plot()
      })
      
      output$plot_SpikePlot <- renderPlot({
@@ -688,14 +611,9 @@ ExpressionServer <- function(id,sce,point.size=20) {
      #### Dotplots ----
      DotPlot  <- reactive({
         #req(input$scatter_heatmap == "dotplot")
-        req(input$partitionType)
-        if(input$GL_T){
-          req(length(genes.GL()$genes) > 0)
-          feature <- genes.GL()$genes
-        } else { 
-          req(!is.null(genes.L()))
-          feature <- genes.L() 
-        }
+        #req(input$partitionType)
+        req(length(genes.L()$genes) > 0)
+        feature <- genes.L()$genes
         
         g  <- scater::plotDots(object = sce,features = feature,group = input$partitionType,
                        scale = input$scale_dotplot,center = input$center_dotplot) + 
@@ -710,11 +628,8 @@ ExpressionServer <- function(id,sce,point.size=20) {
           vtor <- rev(feature)
         }
         
-         g$data$Feature <- factor(g$data$Feature,levels = vtor)
-         g
-         
-         
-
+        g$data$Feature <- factor(g$data$Feature,levels = vtor)
+        g
      })
      
      output$plot_DotPlot <- renderPlotly({
@@ -726,13 +641,9 @@ ExpressionServer <- function(id,sce,point.size=20) {
      stackVln <- reactive({
        #req(input$scatter_heatmap == "stackVln")
        req(input$partitionType)
-       if(input$GL_T){
-         req(length(genes.GL()$genes) > 0)
-         feature <- genes.GL()$genes
-       } else { 
-         req(!is.null(genes.L()))
-         feature <- genes.L() 
-       }
+       req(length(genes.L()$genes) > 0)
+       feature <- genes.L()$genes
+
        #Adaptated from https://github.com/ycl6/StackedVlnPlot
        df_plot <- assay(sce,"logcounts")[feature,,drop=F] %>% as.matrix %>% t %>% as.data.frame
        # Add cell ID and identity classes
