@@ -342,7 +342,7 @@ ExpressionServer <- function(id,sce,point.size=20) {
       req(input$GL_T == F)
       req(!is.null(genes.L()))
       if(length(genes.L()) > 1) {
-        exp_vtor <- apply(logcounts(sce)[genes.L(),],2,mean)
+        exp_vtor <- colSums(logcounts(sce)[genes.L(),])/length(genes.L())
       } else {
         exp_vtor <- logcounts(sce)[genes.L(),]
       }
@@ -387,7 +387,7 @@ ExpressionServer <- function(id,sce,point.size=20) {
       req(length(genes.GL()$genes) > 0)
       
       if(length(genes.GL()$genes) > 1) {
-        exp_vtor <- apply(logcounts(sce)[genes.GL()$genes,],2,mean)
+        exp_vtor <- colSums(logcounts(sce)[genes.GL()$genes,])/length(genes.GL()$genes)
       } else {
         exp_vtor <- logcounts(sce)[genes.GL()$genes,]
       }
@@ -437,7 +437,8 @@ ExpressionServer <- function(id,sce,point.size=20) {
     })
     
     ### Scatter ----
-    ClusterPlot <- eventReactive(c(input$DimType,input$plotType,input$partitionType),{
+    #ClusterPlot <- eventReactive(c(input$DimType,input$plotType,input$partitionType),{
+	output$plot_cluster <- renderPlotly({
       #req(input$scatter_heatmap == "scatter")
       #3D
       if(input$DimType == "3"){
@@ -474,7 +475,8 @@ ExpressionServer <- function(id,sce,point.size=20) {
       
     })
     
-    ExpressionPlot <- eventReactive(c(input$DimType,input$plotType,ExpressionF(),input$partitionType),{
+    #ExpressionPlot <- eventReactive(c(input$DimType,input$plotType,ExpressionF(),input$partitionType),{
+	output$plot_expression <- renderPlotly({
       req(!is.null(ExpressionF()))
       req(input$plotType)
       #3D
@@ -521,15 +523,15 @@ ExpressionServer <- function(id,sce,point.size=20) {
       
     })
     
-    output$plot_cluster <- renderPlotly({
-      req(!is.null(ClusterPlot()))
-        ClusterPlot()
-    })
+    # output$plot_cluster <- renderPlotly({
+      # req(!is.null(ClusterPlot()))
+        # ClusterPlot()
+    # })
     
-    output$plot_expression <- renderPlotly({
-      req(!is.null(ExpressionPlot()))
-      ExpressionPlot()
-    })
+    # output$plot_expression <- renderPlotly({
+      # req(!is.null(ExpressionPlot()))
+      # ExpressionPlot()
+    # })
     
     
     

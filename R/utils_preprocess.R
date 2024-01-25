@@ -339,7 +339,7 @@ createSCEobject <- function(xx,
       if(class(assay(xx.sce, assay.name.raw))[1]%in%c("dgCMatrix")){
           xx.sce$nFeatures <- diff(assay(xx.sce, assay.name.raw)@p)
       } else {
-          xx.sce$nFeatures <- apply(assay(xx.sce, assay.name.raw),2,function(x){sum(x>0)})
+          xx.sce$nFeatures <- colSums(assay(xx.sce, assay.name.raw)>0)
       }
   }
   if(verbose) cat('Finished\n')
