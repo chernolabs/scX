@@ -158,6 +158,10 @@ createSCEobject <- function(xx,
 	cells2keep = cells2keep,
 	nSubCells = nSubCells,
 	descriptionText = descriptionText)
+  
+  # on.exit(sink())
+  # logfile <- paste0("scX_", format(Sys.time(), "%Y-%m-%d_%H-%M-%S"), ".log")
+  # sink(logfile)
 
   # Managing input ----
   ## Check for colnames and rownames in the object
@@ -201,7 +205,7 @@ createSCEobject <- function(xx,
   }
   
   ## Creating SCE
-  if(verbose) cat('Creating SCE object... ')
+  if(verbose) message('Creating SCE object... ', appendLF = F)
   ## Seurat to SCE object ----
   if(class(xx)[1]=="Seurat"){
     ##Changing assay.name parameters because as.SingleCellExperiment fills 'counts' and 'logcounts' assays
@@ -255,7 +259,7 @@ createSCEobject <- function(xx,
 	colData(xx.sce) <- cbind(colData(xx.sce), metadata[colnames(xx.sce),,drop=F])
   }
   
-  if(verbose) cat('Finished\nAnalyzing partitions... ')
+  if(verbose) message('Finished\nAnalyzing partitions... ', appendLF = F)
   
   ##Check for repeated partitions
   partitionVars <- unique(partitionVars)
@@ -314,23 +318,23 @@ createSCEobject <- function(xx,
       ttoFactors <- ttoFactors[!allToFactors]
     }
   }
-  if(verbose) cat('Finished\n')
+  if(verbose) message('Finished')
   
   csceo$call$partitionVars <- ttoFactors
 
   # QC ----
   # Calculate the number of counts and features per cell
 
-  if(verbose) cat('Computing QC metrics... ')
+  if(verbose) message('Computing QC metrics... ', appendLF = F)
   if(!assay.name.raw %in% assayNames(xx.sce)){
     if(assay.name.normalization %in% assayNames(xx.sce)){
-      warning(paste("Assay", assay.name.raw, "not found in SCE object"))
+      warning("Assay ", assay.name.raw, " not found in SCE object")
       ## If there is no raw assay but the SCE object has a normalized assay then set `nCounts,nFeatures = NA`
       xx.sce$nCounts   <- NA
       xx.sce$nFeatures <- NA
     } else {
       ## If there is no raw or normalized assay available then the function will end
-      stop(paste("Assays", paste(assay.name.raw, assay.name.normalization, sep = ' & '), "not found in SCE object"))
+      stop("Assays ", paste(assay.name.raw, assay.name.normalization, sep = ' & '), " not found in SCE object")
     }
   } else {
       ## If there is a raw assay in the SCE object, calculate the number of counts
@@ -342,7 +346,7 @@ createSCEobject <- function(xx,
           xx.sce$nFeatures <- colSums(assay(xx.sce, assay.name.raw)>0)
       }
   }
-  if(verbose) cat('Finished\n')
+  if(verbose) message('Finished')
   
   
   # Normalization ----
@@ -356,20 +360,20 @@ createSCEobject <- function(xx,
 
   if(!assay.name.normalization %in% assayNames(xx.sce)){
     if(assay.name.raw %in% assayNames(xx.sce)){
-      if(verbose) cat('Computing normalization... ')
+      if(verbose) message('Computing normalization... ', appendLF = F)
       set.seed(123457)
       clust <- scran::quickCluster(xx.sce, assay.type = assay.name.raw)
       xx.sce$scx.clust <- clust
       xx.sce <- scran::computeSumFactors(xx.sce,cluster=clust,min.mean=0.1, assay.type = assay.name.raw)
       xx.sce <- scater::logNormCounts(xx.sce, assay.type = assay.name.raw, name="logcounts")
-      if(verbose) cat('Finished\n')
+      if(verbose) message('Finished')
     }
   } else if ( "scx.clust" %in% ttoFactors ) {
-      if(verbose) cat('Computing clusters... ')
+      if(verbose) message('Computing clusters... ', appendLF = F)
 	  set.seed(123457)
       clust <- scran::quickCluster(xx.sce, assay.type = assay.name.normalization)
       xx.sce$scx.clust <- clust
-      if(verbose) cat('Finished\n')
+      if(verbose) message('Finished')
   }
   
   
@@ -380,12 +384,12 @@ createSCEobject <- function(xx,
   # can be assigned as the residual from the trend.
 
   if(is.null(chosen.hvg)){
-    if(verbose) cat('Computing HVGs... ')
+    if(verbose) message('Computing HVGs... ', appendLF = F)
     mgv <- scran::modelGeneVar(xx.sce,span=.8, assay.type = assay.name.normalization)
     rowData(xx.sce) <- cbind(rowData(xx.sce), hvg.mvBio=mgv$bio)
     chosen.hvg <- rank(-rowData(xx.sce)$hvg.mvBio) <= nHVGs & rowData(xx.sce)$hvg.mvBio>0
     chosen.hvg <- rownames(xx.sce)[chosen.hvg]
-    if(verbose) cat('Finished\n')
+    if(verbose) message('Finished')
   }
   
   
@@ -423,7 +427,7 @@ createSCEobject <- function(xx,
   ##Compute a row-normalization of the lognormalized expression matrix to be able to compare between gene expression profiles
   ##The row expression values are divided by their maximum value
   if(!"logcounts.norm" %in% assayNames(xx.sce)){
-	if(verbose) cat('Computing normalized logcounts... ')
+	if(verbose) message('Computing normalized logcounts... ', appendLF = F)
 	sparse_mat <- as(assay(xx.sce, "logcounts"), "sparseMatrix")
 	row_maxs <- sparseRowMax(sparse_mat)
 	maxdiag <- Diagonal(x = 1/as.vector(row_maxs))
@@ -432,7 +436,7 @@ createSCEobject <- function(xx,
     
 	##Store the row-normalized expression values in `logcounts.norm` assay
 	assays(xx.sce)$logcounts.norm <- scaled_sparse
-	if(verbose) cat('Finished\n')
+	if(verbose) message('Finished')
   }
   
 
@@ -482,7 +486,7 @@ createSCEobject <- function(xx,
   if(!'pval.type'%in%names(paramFindMarkers)) paramFindMarkers$pval.type <- 'all'
   if(!'direction'%in%names(paramFindMarkers)) paramFindMarkers$direction <- 'up'
   
-  if(verbose) cat('Computing differential expression markers... ')
+  if(verbose) message('Computing differential expression markers... ', appendLF = F)
   ##If test.type = wilcox, calculate FDR with that test and extract logFC values from t test.
   if (paramFindMarkers$test.type == "wilcox"){
     sce.degs <- list()
@@ -531,7 +535,7 @@ createSCEobject <- function(xx,
   # Attaching sce.degs to output ----
   csceo[["sce.degs"]] <- sce.degs
   
-  if(verbose) cat('Finished\nComputing cluster markers...\n')
+  if(verbose) message('Finished\nComputing cluster markers...')
 
   # Markers ----
   # `sce.markers` is a list of lists of dataframes for every cluster in all partitions in `partitionVars` used by the shiny app to be able to identify gene markers for clusters.
@@ -544,7 +548,7 @@ createSCEobject <- function(xx,
   for(i in ttoFactors){
     sce.markers[[i]] <- markers_func(xx.sce, i, paramFindMarkers, bpparam = BPPARAM, minsize = minSize, verbose = verbose)
   }
-  if(verbose) cat('Finished\n')
+  if(verbose) message('Finished')
   
   # Attaching sce.markers to output ----
   csceo[["sce.markers"]] <- sce.markers
@@ -567,9 +571,9 @@ createSCEobject <- function(xx,
   # Please note that all calculations are already completed, and this step is solely for promoting smooth and efficient visualization.
 
   if(ncol(xx.sce)>nSubCells){
-	if(verbose) cat(paste('Subsampling SCE object because it exceeds',nSubCells,'cells\n'))
+	if(verbose) message('Subsampling SCE object because it exceeds ', nSubCells, ' cells')
 	csceo$CELLS2KEEP <- subsampling_func(xx.sce, cellsToKeep = cells2keep, nmaxcell = nSubCells)
-	if(verbose) cat('Finished\n')
+	if(verbose) message('Finished')
   } else {
 	csceo$CELLS2KEEP <- "all"
   }
@@ -586,39 +590,39 @@ createSCEobject <- function(xx,
 #' @keywords internal
 #' @noRd
 applyReducedDim <- function(sce, reddimstocalculate, chosen.hvgs, nPCs, assayname, prefix.name="SCX_",verbose=TRUE){
-  if(verbose) cat('Computing the following reduced dims:',paste(reddimstocalculate, collapse = ' '),'\n')
+  if(verbose) message('Computing the following reduced dims: ',paste(reddimstocalculate, collapse = ' '))
   namepca <- paste0(prefix.name,"PCA")
   if("PCA"%in%reddimstocalculate){
-    if(verbose) cat("\tPCA... ")
+    if(verbose) message("\tPCA... ", appendLF = F)
     set.seed(12534)
     sce <- scater::runPCA(sce, subset_row=chosen.hvgs, ncomponents=nPCs, name=namepca, exprs_values=assayname)
-    if(verbose) cat('Finished\n')
+    if(verbose) message('Finished')
   }
   if("TSNE"%in%reddimstocalculate){
-    if(verbose) cat("\tTSNE... ")
+    if(verbose) message("\tTSNE... ", appendLF = F)
     set.seed(1111011)
     sce <- scater::runTSNE(sce,dimred=namepca,n_dimred=20,ncomponents=3,name=paste0(prefix.name,"TSNE"),exprs_values=assayname)
-    if(verbose) cat('Finished\n')
+    if(verbose) message('Finished')
   }
   if("UMAP"%in%reddimstocalculate){
-    if(verbose) cat("\tUMAP... ")
+    if(verbose) message("\tUMAP... ", appendLF = F)
     set.seed(1111011)
     sce <- scater::runUMAP(sce,dimred=namepca,n_dimred=20,ncomponents=3,name=paste0(prefix.name,"UMAP"),exprs_values=assayname)
-    if(verbose) cat('Finished\n')
+    if(verbose) message('Finished')
   }
   if("TSNE2D"%in%reddimstocalculate){
-    if(verbose) cat("\tTSNE2D... ")
+    if(verbose) message("\tTSNE2D... ", appendLF = F)
     set.seed(1111011)
     sce <- scater::runTSNE(sce,dimred=namepca,name=paste0(prefix.name,"TSNE2D"),exprs_values=assayname)
-    if(verbose) cat('Finished\n')
+    if(verbose) message('Finished')
   }
   if("UMAP2D"%in%reddimstocalculate){
-    if(verbose) cat("\tUMAP2D... ")
+    if(verbose) message("\tUMAP2D... ", appendLF = F)
     set.seed(1111011)
     sce <- scater::runUMAP(sce,dimred=namepca,name=paste0(prefix.name,"UMAP2D"),exprs_values=assayname)
-    if(verbose) cat('Finished\n')
+    if(verbose) message('Finished')
   }
-  if(verbose) cat('Finished\n')
+  if(verbose) message('Finished')
   return(sce)
 }
 
@@ -628,7 +632,7 @@ applyReducedDim <- function(sce, reddimstocalculate, chosen.hvgs, nPCs, assaynam
 #' @noRd
 markers_func <- function(sce, partition, paramFindMarkers, bpparam, minsize=10, verbose = TRUE){ # previously ldf_func
 
-  if(verbose) cat(" ", partition, ":\n", sep = "")
+  if(verbose) message(" ", partition, ":")
   
   # calculate lfmrk ----
   lfmrk <- list()
@@ -656,7 +660,7 @@ markers_func <- function(sce, partition, paramFindMarkers, bpparam, minsize=10, 
   if(length(lfmrk[[1]])>0){ #At least one group to calculate
     for(ic in seq_along(lfmrk[[1]])){ #acá se podría hacer una paralelizacion
       coi <- names(lfmrk[[1]])[ic]
-      if(verbose) cat('\t', coi,'- ')
+      if(verbose) message('\t', coi,' - ', appendLF = F)
       if(paramFindMarkers$pval.type=="any"){
         u <- rownames(lfmrk[[1]][[coi]])[lfmrk[[1]][[coi]][,'FDR']<0.05 & 
                                                 lfmrk[[1]][[coi]][,'Top']<=10]
@@ -665,7 +669,7 @@ markers_func <- function(sce, partition, paramFindMarkers, bpparam, minsize=10, 
       }
       
       # (6.1.1) Boxcor ----
-      if(verbose) cat("Computing correlation\n")
+      if(verbose) message("Computing correlation")
       
       if(length(u) > 0){
         Z   <- assay(sce, "logcounts")[u,,drop=FALSE]  
