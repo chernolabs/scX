@@ -299,7 +299,7 @@ N_markersServer <- function(id,sce,point.size = 20) {
                       color = ~logcounts(sce)[gene_marker_selected(),],
                       size = I(point.size),span=I(0),text=~colData(sce)[,input$partitionType],hoverinfo='text') %>% 
           colorbar(title = "log(counts)",x=0,y=1) %>% 
-          toWebGL()
+          suppressWarnings(toWebGL())
       } else { #2D
         plot_ly(type = "scatter", mode = "markers")  %>%
           layout(dragmode = "select",

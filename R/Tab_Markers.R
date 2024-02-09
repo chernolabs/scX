@@ -253,7 +253,7 @@ markersServer <- function(id = "markers",sce,sce.markers,point.size = 20) {
                       customdata= ~colData(sce)[,input$partitionType],
                       size = I(point.size),span=I(0),text=~colData(sce)[,input$partitionType],hoverinfo='text') %>% 
           event_register("plotly_selecting") %>% 
-          toWebGL()
+          suppressWarnings(toWebGL())
       } else { #2D
         plot_ly(type = "scatter", mode = "markers",source="PlotMix")  %>%
           layout(dragmode = "select",
@@ -297,7 +297,7 @@ markersServer <- function(id = "markers",sce,sce.markers,point.size = 20) {
                       size = I(point.size),span=I(0),
                       name = ~colData(sce)[,input$partitionType]) %>% 
           colorbar(title = "log(counts)",x=0,y=1) %>% 
-          toWebGL()
+          suppressWarnings(toWebGL())
       } else { #2D
         plot_ly(type = "scatter", mode = "markers")  %>%
           layout(dragmode = "select",

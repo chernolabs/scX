@@ -307,7 +307,7 @@ Fields_Server <- function(id,sce) {
     
     output$plot_numeric <- renderPlotly({
       req(!is.null(PlotNumeric()))
-      PlotNumeric() %>% ggplotly() %>% toWebGL()
+      PlotNumeric() %>% ggplotly() %>% suppressWarnings(toWebGL())
       })
     
     feature <- eventReactive(input$action,{

@@ -426,7 +426,7 @@ Numeric_ExpressionServer <- function(id,sce,point.size=20) {
                       size = I(point.size),
                       span=I(0)) %>% 
           colorbar(title =input$numericType,x=0,y=1) %>% 
-          toWebGL()
+          suppressWarnings(toWebGL())
       } else { #2D
         plot_ly(type = "scatter", mode = "markers",source="PlotMix",colors = 'YlOrRd')  %>%
           layout(dragmode = "select",
@@ -473,8 +473,7 @@ Numeric_ExpressionServer <- function(id,sce,point.size=20) {
                       name = if(input$partitionType == 'None') {NULL} else {~colData(sce)[,input$partitionType]},
                       size = I(point.size),span=I(0)) %>% 
           colorbar(title = "log(counts)",x=0,y=1) %>% 
-          toWebGL()
-        
+          suppressWarnings(toWebGL())
       } else { #2D
         plot_ly(type = "scatter", mode = "markers")  %>%
           layout(dragmode = "select",

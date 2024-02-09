@@ -447,7 +447,7 @@ ExpressionServer <- function(id,sce,point.size=20) {
                       name = ~colData(sce)[,input$partitionType],
                       # customdata= ~colData(sce)[,input$partitionType],
                       size = I(point.size),span=I(0),text=~colData(sce)[,input$partitionType],hoverinfo='text') %>% 
-          toWebGL()
+          suppressWarnings(toWebGL())
       } else { #2D
         plot_ly(type = "scatter", mode = "markers",source="PlotMix")  %>%
           layout(dragmode = "select",
@@ -490,8 +490,7 @@ ExpressionServer <- function(id,sce,point.size=20) {
                       name = ~colData(sce)[,input$partitionType],
                       size = I(point.size),span=I(0)) %>% 
           colorbar(title = "log(counts)",x=0,y=1) %>% 
-          toWebGL()
-        
+          suppressWarnings(toWebGL())
       } else { #2D
         plot_ly(type = "scatter", mode = "markers")  %>%
           layout(dragmode = "select",
