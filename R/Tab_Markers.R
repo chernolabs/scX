@@ -22,7 +22,15 @@ markersUI <- function(id = "markers") {
             )
           )
         ),
-        uiOutput(NS(id,"box_DT")) %>% withLoader(type='html',loader = 'loader6')
+        uiOutput(NS(id,"box_DT")) %>% withLoader(type='html',loader = 'loader6'),
+		fluidRow(column=12,align = "right",style='padding-left:12px; padding-right:12px;',
+            actionBttn(
+              inputId = NS(id,"resetButton"),
+              label = "Reset", 
+              style = "stretch",
+              color = "primary"
+            )
+          )
       ),
       column(8,
         tabsetPanel(
@@ -91,7 +99,6 @@ markersUI <- function(id = "markers") {
                                            )
                                )
               )
-              
             )
           )
         )
@@ -113,8 +120,16 @@ markersUI <- function(id = "markers") {
 ##### Marker Server Module ----
 markersServer <- function(id = "markers",sce,sce.markers,point.size = 20) {
   moduleServer(id, function(input,output,session) {
+    # Hacky solution to plotly click not registered: creating click event before plot renders
+	plotlyevents <- function(events, sources){
+		session <- shiny::getDefaultReactiveDomain()
+		session$userData$plotlyShinyEventIDs <- unique(c(
+		  session$userData$plotlyShinyEventIDs,
+		  paste(events,sources, sep = "-")
+		))}
+	plotlyevents("plotly_click", "PlotMix")
     
-    ### Observe Events ----
+	### Observe Events ----
     
     updatePickerInput(session, 'partitionType', 
                       choices = names(sce.markers)
@@ -122,13 +137,6 @@ markersServer <- function(id = "markers",sce,sce.markers,point.size = 20) {
     
     observeEvent(input$DTMarkers_rows_selected,{
       updateTabsetPanel(inputId = "switcher", selected = "panel2")
-    })
-    
-    #When I change the partition if I had selected a cluster, it deleted the previous selection.
-    observeEvent(c(input$partitionType,input$resetButton),ignoreInit = TRUE,{
-      req(cluster_selected())
-      updateTabsetPanel(inputId = "switcher", selected = "panel1")
-      runjs("Shiny.setInputValue('{NS(id)('plotly_click-PlotMix')}', null);")
     })
     
     dimVector <- reactive({
@@ -144,63 +152,49 @@ markersServer <- function(id = "markers",sce,sce.markers,point.size = 20) {
       updatePickerInput(session,inputId = "DimType", choices = opt)
     })
     
-    
-    observeEvent(c(input$DimType,dimVector()), {
-      req(!is.null(dimVector()))
+    observeEvent(input$DimType, {
       req(input$DimType)
 	  updatePickerInput(session,inputId = "plotType", choices = rev(names(which(dimVector() == as.numeric(input$DimType)  | dimVector() > 3))))
-      # if(input$DimType == "3"){
-        # updatePickerInput(session,inputId = "plotType", choices = rev(names(which(dimVector() == as.numeric(input$DimType)  | dimVector() > 3))))
-      # } else if(input$DimType == "2") { 
-        # updatePickerInput(session,inputId = "plotType", choices = rev(names(which(dimVector() == as.numeric(input$DimType)  | dimVector() > 3))))
-      # }
     })
     
     observeEvent(input$Cell_Exp,{
-      req(input$Cell_Exp)
       switch(input$Cell_Exp,
              'Violin'    = updateTabsetPanel(inputId = "switcher2",  selected = "Violin_panel"),
              'SpikePlot' = updateTabsetPanel(inputId = "switcher2", selected = "SpikePlot_panel")
       )
     })
+	
+	#When I change the partition if I had selected a cluster, it deleted the previous selection.
+    observeEvent(c(input$partitionType,input$resetButton),ignoreInit = TRUE, {
+      updateTabsetPanel(inputId = "switcher", selected = "panel1")
+      runjs("Shiny.setInputValue('plotly_click-PlotMix', null);")
+    })
     
     ### Cluster and Gen selected ----
-    
+	
+    cluster_selected <- reactive({
+		event_data("plotly_click",source = "PlotMix")[,"customdata"]
+	})
+	
     output$box_DT <- renderUI({
-      if(!is.null(cluster_selected())){
-        tagList(
+      if(!is.null(cluster_selected()) && cluster_selected() %in% levels(colData(sce)[[input$partitionType]])){
+        shinyjs::show("resetButton")
+		tagList(
           box(title="Cluster marker list", width = NULL, solidHeader = F,collapsible = T,
 			fluidRow(column=12, align="center", style='padding-left:12px; padding-right:12px;', "Click on a gene to see its expression plots"),
 			br(),
-              DTOutput(NS(id,"DTMarkers"))
-          ),
-          fluidRow(column=12,align = "right",style='padding-left:12px; padding-right:12px;',
-            actionBttn(
-              inputId = NS(id,"resetButton"),
-              label = "Reset", 
-              style = "stretch",
-              color = "primary"
-            )
+            DTOutput(NS(id,"DTMarkers"))
           )
         )
-      } 
-      else{
+      }else{
+		shinyjs::hide("resetButton")
         HTML('<p style="text-align: center;"><strong>Click on a cluster to analyze its markers</strong></p>')
       }
     })
     
-    cluster_selected <- reactive({
-      req(!is.null(input$plotType))
-      req(length(input$partitionType)>0) # same req as ClusterPLot to avoid plotly click warnings
-      if(!is.null(event_data("plotly_click",source = "PlotMix"))){
-        event_data("plotly_click",source = "PlotMix")[,"customdata"]
-      } else{ NULL }
-    })
-    
     #DT markers of cluster
     output$DTMarkers <- renderDT(server = FALSE,datatable({
-      req(!is.null(cluster_selected()))
-      # sce.markers[[input$partitionType]][[cluster_selected()]][,c("robustness","boxcor","selectivity","meanX")]
+      req(cluster_selected() %in% levels(colData(sce)[[input$partitionType]]))
       df <- sce.markers[[input$partitionType]][[cluster_selected()]]
       #Check if it is a cluster without any markers, if it is create a null data.frame
       if(is.null(df)){
@@ -208,7 +202,6 @@ markersServer <- function(id = "markers",sce,sce.markers,point.size = 20) {
         colnames(df) <- c('summary.stats','log.FDR','boxcor')
       }
       df
-      
     }, selection = 'single',
     extensions = 'Buttons',
     options = list(language = list(zeroRecords = "No markers found for this cluster or criterion"),
@@ -234,12 +227,11 @@ markersServer <- function(id = "markers",sce,sce.markers,point.size = 20) {
     ###Plots ----
     
     OrderPartReact <- eventReactive(input$partitionType,{
-      req(input$partitionType)
       Col.and.Order(partition = input$partitionType, sce=sce)
     })
     
           #### Scatter ----
-    ClusterPlot <- eventReactive(c(input$DimType,input$plotType,input$partitionType),{
+    ClusterPlot <- eventReactive(c(input$plotType,input$partitionType),{
       req(!is.null(input$plotType))
       req(length(input$partitionType)>0)
       #3D
@@ -263,8 +255,6 @@ markersServer <- function(id = "markers",sce,sce.markers,point.size = 20) {
           event_register("plotly_selecting") %>% 
           toWebGL()
       } else { #2D
-        req(!is.null(input$plotType))
-        req(!is.null(input$partitionType))
         plot_ly(type = "scatter", mode = "markers",source="PlotMix")  %>%
           layout(dragmode = "select",
                  xaxis = list(title = 'Dim1',zeroline=F),
@@ -282,10 +272,9 @@ markersServer <- function(id = "markers",sce,sce.markers,point.size = 20) {
       
     })
     
-    ExpressionPlot <- eventReactive(c(input$DimType,input$plotType,input$partitionType,input$DTMarkers_rows_selected),{
-      req(input$DTMarkers_rows_selected)
-      #3D
-      if(input$DimType == "3"){
+    output$plot2 <- renderPlotly({ #ExpressionPlot
+	  #3D
+      if(isolate(input$DimType) == "3"){
         plot_ly(type = "scatter3d", mode = "markers")  %>%
           layout(dragmode = "select",
                  scene = list(xaxis = list(title = 'Dim1',showgrid=F,visible=F),
@@ -324,19 +313,13 @@ markersServer <- function(id = "markers",sce,sce.markers,point.size = 20) {
 		  config(modeBarButtonsToRemove = c("select2d", "lasso2d", "hoverCompareCartesian")) %>% 
           toWebGL()
       }
-      
     })
     
     output$plot <- renderPlotly(ClusterPlot())
     
     output$plot1 <- renderPlotly({
       ClusterPlot() %>% layout(showlegend = FALSE)})
-    
-    output$plot2 <- renderPlotly({
-      req(input$DTMarkers_rows_selected)
-      ExpressionPlot()
-    })
-    
+
     
           ####  Violin&SpikePlots ----
     
@@ -425,4 +408,3 @@ markersServer <- function(id = "markers",sce,sce.markers,point.size = 20) {
       })
   })
 }
-
