@@ -170,6 +170,7 @@ defPartitions <- function(csceo, verbose){
   if(verbose) message('Finished')
   
   csceo$usage$partitionVars <- ttoFactors
+  if("scx.clust" %in% csceo$usage$partitionVars) csceo$usage$scx.clust = TRUE # if a quick clusterization is requierd or requested
   
   return(csceo)
 }
@@ -256,8 +257,11 @@ defHVG <- function(csceo, verbose){
 #' @keywords internal
 #' @noRd
 scXcluster <- function(csceo, blusparam, verbose){
-  if("scx.clust" %in% csceo$usage$partitionVars){
+  if(csceo$usage$scx.clust){
     if(verbose) message('Computing clusters... ', appendLF = F)
+    if(is.null(blusparam)){ # if BLUSPARAM=NULL then it will use k and method from scx.graph.k/.method
+      blusparam=bluster::NNGraphParam(k = csceo$usage$scx.graph.k, cluster.fun=csceo$usage$scx.graph.cluster.method)
+    }
     if("SCX_PCA" %in% reducedDimNames(csceo$SCE)){
       csceo$SCE$scx.clust <- scran::clusterCells(csceo$SCE, use.dimred = "SCX_PCA", BLUSPARAM = blusparam)
     } else {
@@ -306,7 +310,7 @@ colPlotShiny <- function(csceo, verbose){
     if(!all(csceo$usage$metadataVars%in%coldatanames)) warning("Can't find ",paste0(csceo$usage$metadataVars[!csceo$usage$metadataVars%in%coldatanames],collapse = ' & ')," in data")
     
   # Subsetting SCE object
-    colData(csceo$SCE) <- colData(csceo$SCE)[, coldatanames%in%c("nCounts", "nFeatures", csceo$usage$partitionVars, csceo$usage$metadataVars)]
+    colData(csceo$SCE) <- colData(csceo$SCE)[, coldatanames%in%c("nCounts", "nFeatures", "scx.clust", csceo$usage$partitionVars, csceo$usage$metadataVars)]
     
     colsK <- sapply(colData(csceo$SCE), function(x){(is.character(x) | is.numeric(x))})
     colsK[c("nCounts", "nFeatures")] <- F # added in QC and shouldn't be considered in any case
@@ -341,7 +345,7 @@ degs <- function(csceo, verbose){
   ##If test.type = wilcox, calculate FDR with that test and extract logFC values from t test.
   if (csceo$usage$paramFindMarkers$test.type == "wilcox"){
     sce.degs <- list()
-    for(i in csceo$usage$partitionVars){
+    for(i in c(csceo$usage$partitionVars,"scx.clust")[c(csceo$usage$partitionVars,"scx.clust")%in%names(colData(csceo$SCE))]){
       tout <- scran::findMarkers(csceo$SCE, 
                                  assay.type = "logcounts",
                                  group = colData(csceo$SCE)[,i],
@@ -371,7 +375,7 @@ degs <- function(csceo, verbose){
     }
   }else{
     sce.degs <- list()
-    for(i in csceo$usage$partitionVars){
+    for(i in c(csceo$usage$partitionVars,"scx.clust")[c(csceo$usage$partitionVars,"scx.clust")%in%names(colData(csceo$SCE))]){
       sce.degs[[i]] <- scran::findMarkers(csceo$SCE,
                                           assay.type = "logcounts",
                                           group = colData(csceo$SCE)[,i],
@@ -398,7 +402,7 @@ degs <- function(csceo, verbose){
 #' @noRd
 markers <- function(csceo, verbose){
   sce.markers <- list()
-  for(i in csceo$usage$partitionVars){
+  for(i in c(csceo$usage$partitionVars,"scx.clust")[c(csceo$usage$partitionVars,"scx.clust")%in%names(colData(csceo$SCE))]){
     sce.markers[[i]] <- markers_func(csceo$SCE, i, csceo$usage$paramFindMarkers, bpparam = csceo$usage$BPPARAM, minsize = csceo$usage$minSize, verbose = verbose)
   }
   if(verbose) message('Finished')
