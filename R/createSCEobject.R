@@ -169,9 +169,11 @@ createSCEobject <- function(xx,
   
   csceo$usage <- csceo$call
   
-  # on.exit(sink())
-  # logfile <- paste0("scX_", format(Sys.time(), "%Y-%m-%d_%H-%M-%S"), ".log")
-  # sink(logfile)
+  on.exit(sink())
+  xxname <- deparse(substitute(xx))
+  logfile <- paste0("scX-", xxname, "_", format(Sys.time(), "%Y-%m-%d_%H-%M-%S"), ".log")
+  sink(logfile)
+  cat("scX preprocessing steps for object:", xxname, "\n*---------------------------------*\n")
   
   # Managing input ----
   csceo$SCE <- inputManager(xx, metadata)

@@ -10,6 +10,7 @@ inputManager <- function(xx, metadata){
   
   ## Check for colnames and rownames in the object
   if(is.null(rownames(xx)) | is.null(colnames(xx))){
+	cat("! Error: object must have rownames 'gene_id' and colnames 'barcodes'")
     stop("Object must have rownames 'gene_id' and colnames 'barcodes'")
   } else {
   rnames <- rownames(xx)
@@ -17,6 +18,7 @@ inputManager <- function(xx, metadata){
     if(length(which(rnames==""))>0){
       message("Some genes have empty names and will be excluded")
       rnames <- rnames[!rnames==""]
+	  cat("* Genes with empty names are excluded\n")
     }
     ##Check repeated names
     tt <- table(rnames)
@@ -24,6 +26,7 @@ inputManager <- function(xx, metadata){
     if(length(repnames)>0){
       message("Some rownames are repeated and will be excluded: ", paste0(repnames, collapse = ', '))
       rnames <- rnames[!rnames%in%repnames]
+	  cat("* Repeated gene names are excluded\n")
     }
     xx <- xx[rnames,]
     
@@ -38,12 +41,14 @@ inputManager <- function(xx, metadata){
         cnames[ii] <- paste0(cname,"-",seq_along(ii))
       }
       colnames(xx) <- cnames
+	  cat("* Repeated column names are numbered\n")
     }
   }
   
   ## Before anything, stop if there is at least one cell not included in metadata
   if(!is.null(metadata)){
     if(!all(colnames(xx) %in% rownames(metadata))){
+		cat("! Error: Some cells in data are not present in metadata")
     	stop("Some cells in data are not present in metadata")
     }
   }
@@ -59,18 +64,21 @@ sceConverter <- function(csceo, metadata, verbose){
   if(class(csceo$SCE)[1]=="Seurat"){
     ##Changing assay.name parameters because as.SingleCellExperiment fills 'counts' and 'logcounts' assays
     message("\nSeurat object is detected, 'assay.name.raw' & 'assay.name.normalization' will be set to default 'counts' & 'logcounts'")
-    csceo$usage$assay.name.raw <- assay.name.raw <- "counts"
+	csceo$usage$assay.name.raw <- assay.name.raw <- "counts"
     csceo$usage$assay.name.normalization <- assay.name.normalization <- "logcounts"
     seurat.nms <- names(csceo$SCE@assays)
     ##Converts seurat object to sce object
     xx.sce <- Seurat::as.SingleCellExperiment(csceo$SCE)
+	cat("* SingleCellExperiment created from Seurat object, with 'counts' and 'logcounts'\n")
   
     # if Seurat object contains only one matrix, as.SingleCellExperiment duplicates it as both 'counts' and 'logcounts'
     if(all(assay(xx.sce, "counts")==assay(xx.sce, "logcounts"))){
     	if(any(grep("logcount", seurat.nms))){
     		assay(xx.sce, "counts") <- NULL
+			cat("* Data is set as 'logcounts'\n")
     	}else{
     		assay(xx.sce, "logcounts") <- NULL
+			cat("* Data is set as 'counts'\n")
     	}
      }
     ##Converting seurat feature's metadata to rowData() of the sce object
@@ -81,6 +89,7 @@ sceConverter <- function(csceo, metadata, verbose){
     if(length(Seurat::VariableFeatures(csceo$SCE))>0){
       if(is.null(csceo$call$chosen.hvg)){
         csceo$usage$chosen.hvg <- Seurat::VariableFeatures(csceo$SCE)
+		cat("* Seurat Variable Features are set as HVGs\n")
       }
     }
     
@@ -91,6 +100,7 @@ sceConverter <- function(csceo, metadata, verbose){
   ## Matrix to SCE object
   } else if (class(csceo$SCE)[1] %in% c("dgCMatrix", "Matrix", "matrix")){
    xx.sce <- SingleCellExperiment(list(counts=as(csceo$SCE,"dgCMatrix")))
+   cat("* SingleCellExperiment created from matrix\n")
   
   ## xx as SCE object
   } else if (class(csceo$SCE)[1]=="SingleCellExperiment"){
@@ -99,7 +109,8 @@ sceConverter <- function(csceo, metadata, verbose){
       	assay(xx.sce, nm) <- as(assay(xx.sce, nm),"dgCMatrix")
       }
   } else { ##Stop if `xx` is not an object of the class Seurat, SCE or Matrix
-  stop("xx must be an object of the class Seurat, SingleCellExperiment or Matrix")
+  cat("! Error: Object must be a matrix, a SingleCellExperiment or a Seurat object")
+  stop("xx must be a matrix, a SingleCellExperiment or a Seurat object")
   }
   
   ## Add metadata to sce if present
@@ -108,7 +119,7 @@ sceConverter <- function(csceo, metadata, verbose){
     colData(xx.sce) <- cbind(colData(xx.sce), metadata[colnames(xx.sce),,drop=F])
   }
   
-  if(verbose) message('Finished\nAnalyzing partitions... ', appendLF = F)
+  if(verbose) message('Finished')
   return(xx.sce)
 }
 
@@ -116,6 +127,7 @@ sceConverter <- function(csceo, metadata, verbose){
 #' @keywords internal
 #' @noRd
 defPartitions <- function(csceo, verbose){
+	if(verbose) message('Analyzing partitions... ', appendLF = F)
   ##Check for repeated partitions
   csceo$usage$partitionVars <- unique(csceo$call$partitionVars)
   
@@ -133,9 +145,9 @@ defPartitions <- function(csceo, verbose){
   	  message("\npartitionVars in colData only have one level. A quick clusterization will be computed")
     }
     tfs[names(vld)] <-  tfs[names(vld)] & vld
-    } else { # if partitionVars is NULL or not present in colData, quick cluster
-        message("\npartitionVars unspecified or not found in colData. A quick clusterization will be computed")
-    }
+  } else { # if partitionVars is NULL or not present in colData, quick cluster
+      message("\npartitionVars unspecified or not found in colData. A quick clusterization will be computed")
+  }
   
   ttoFactors <- names(tfs)[tfs] # partitions used for DEGs and markers
   ##If no partition passes the above filters
@@ -170,6 +182,8 @@ defPartitions <- function(csceo, verbose){
   if(verbose) message('Finished')
   
   csceo$usage$partitionVars <- ttoFactors
+  cat("* Partitions used for DEGs and markers analysis:\n\t", ttoFactors,"\n")
+  
   if("scx.clust" %in% csceo$usage$partitionVars) csceo$usage$scx.clust = TRUE # if a quick clusterization is requierd or requested
   
   return(csceo)
@@ -184,15 +198,18 @@ qcMetrics <- function(csceo, verbose){
   if(!csceo$usage$assay.name.raw %in% assayNames(csceo$SCE)){
     if(csceo$usage$assay.name.normalization %in% assayNames(csceo$SCE)){
       warning("Assay ", csceo$usage$assay.name.raw, " not found in SCE object")
+	  cat("* nCounts and nFeatures are not available, since the assay is normalized\n")
       ## If there is no raw assay but the SCE object has a normalized assay then set `nCounts,nFeatures = NA`
       csceo$SCE$nCounts   <- NA
       csceo$SCE$nFeatures <- NA
     } else {
       ## If there is no raw or normalized assay available then the function will end
+	  cat("! Error: Assays", paste(csceo$usage$assay.name.raw, csceo$usage$assay.name.normalization, sep = ' & '), "not found in SCE object")
       stop("Assays ", paste(csceo$usage$assay.name.raw, csceo$usage$assay.name.normalization, sep = ' & '), " not found in SCE object")
     }
   } else {
       ## If there is a raw assay in the SCE object, calculate the number of counts
+	  cat("* nCounts and nFeatures are computed\n")
     csceo$SCE$nCounts <- colSums(assay(csceo$SCE, csceo$usage$assay.name.raw))
       ## 'Apply()' converts a sparse matrix to dense, forcing us to calculate the number of features per cell in an alternate manner
       if(class(assay(csceo$SCE, csceo$usage$assay.name.raw))[1]%in%c("dgCMatrix")){
@@ -226,6 +243,7 @@ expNormalization <- function(csceo, verbose){
       csceo$SCE <- scran::computeSumFactors(csceo$SCE,cluster=clust,min.mean=0.1, assay.type = csceo$usage$assay.name.raw)
       csceo$SCE <- scater::logNormCounts(csceo$SCE, assay.type = csceo$usage$assay.name.raw, name="logcounts")
       if(verbose) message('Finished')
+	  cat("* Normalized assay is computed from", csceo$usage$assay.name.raw,"using a quick cluster method\n")
     }
   } 
   
@@ -242,6 +260,7 @@ expNormalization <- function(csceo, verbose){
 #' @noRd
 defHVG <- function(csceo, verbose){
     if(verbose) message('Computing HVGs... ', appendLF = F)
+	cat("* HVGs are computed from", csceo$usage$assay.name.normalization,"\n")
     mgv <- scran::modelGeneVar(csceo$SCE,span=.8, assay.type = csceo$usage$assay.name.normalization)
     rowData(csceo$SCE) <- cbind(rowData(csceo$SCE), hvg.mvBio=mgv$bio)
     chosen.hvg <- rank(-rowData(csceo$SCE)$hvg.mvBio) <= csceo$usage$nHVGs & rowData(csceo$SCE)$hvg.mvBio>0
@@ -387,7 +406,7 @@ degs <- function(csceo, verbose){
     }
   }
   
-  if(verbose) message('Finished\nComputing cluster markers...')
+  if(verbose) message('Finished')
   return(sce.degs)
 }
 
@@ -401,6 +420,7 @@ degs <- function(csceo, verbose){
 #' @keywords internal
 #' @noRd
 markers <- function(csceo, verbose){
+	if(verbose) message('Computing cluster markers...')
   sce.markers <- list()
   for(i in c(csceo$usage$partitionVars,"scx.clust")[c(csceo$usage$partitionVars,"scx.clust")%in%names(colData(csceo$SCE))]){
     sce.markers[[i]] <- markers_func(csceo$SCE, i, csceo$usage$paramFindMarkers, bpparam = csceo$usage$BPPARAM, minsize = csceo$usage$minSize, verbose = verbose)
@@ -528,12 +548,13 @@ markers_func <- function(sce, partition, paramFindMarkers, bpparam, minsize=10, 
 #' @keywords internal
 #' @noRd
 subsampling_func <- function(sce, cellsToKeep=NULL, nmaxcell=50000){
-
+	cat("* SCE is subsampled because it exceeds", nmaxcell, "cells\n")
   if(is.null(cellsToKeep)){
       set.seed(123457) # seed
       ccells2keep <- sample(colnames(sce), nmaxcell, replace=FALSE)
       ccells2keep <- match(ccells2keep, colnames(sce))
   }else{
+	cat("  maintaining the user-defined cells to keep\n")
     ccells2keep <- cellsToKeep[cellsToKeep%in%colnames(sce)]
       if(length(ccells2keep)<nmaxcell){
         naddcells <- nmaxcell-length(ccells2keep)
