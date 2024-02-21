@@ -171,6 +171,7 @@ defPartitions <- function(csceo, verbose){
   
   csceo$usage$partitionVars <- ttoFactors
   if("scx.clust" %in% csceo$usage$partitionVars) csceo$usage$scx.clust = TRUE # if a quick clusterization is requierd or requested
+  if("")
   
   return(csceo)
 }
@@ -401,9 +402,27 @@ degs <- function(csceo, verbose){
 #' @keywords internal
 #' @noRd
 markers <- function(csceo, verbose){
+  
+  # if marker list
+  if(!is.null(csceo$usage$markerList)){
+    partitions <- unique(csceo$usage$markerList$Partition)
+    if(!all(partitions %in% csceo$usage$partitionVars)){
+      message(paste0(paste(partitions[!partitions %in% csceo$usage$partitionVars], collapse = ", ")," not present in 'partitionVars' and will be ignored.\n"), appendLF = F)
+    }
+  }
+  
+  # run marker_fun
   sce.markers <- list()
   for(i in c(csceo$usage$partitionVars,"scx.clust")[c(csceo$usage$partitionVars,"scx.clust")%in%names(colData(csceo$SCE))]){
-    sce.markers[[i]] <- markers_func(csceo$SCE, i, csceo$usage$paramFindMarkers, bpparam = csceo$usage$BPPARAM, minsize = csceo$usage$minSize, verbose = verbose)
+    if(!is.null(csceo$usage$markerList)){
+      if(i %in% partitions){
+        sce.markers[[i]] <- markers_func(csceo$SCE, i, csceo$usage$markerList[csceo$usage$markerList$Partition==i,2:3], csceo$usage$paramFindMarkers, bpparam = csceo$usage$BPPARAM, minsize = csceo$usage$minSize, verbose = verbose)
+      } else {
+        sce.markers[[i]] <- markers_func(csceo$SCE, i, markerList = NULL, csceo$usage$paramFindMarkers, bpparam = csceo$usage$BPPARAM, minsize = csceo$usage$minSize, verbose = verbose)
+      }
+    } else { 
+        sce.markers[[i]] <- markers_func(csceo$SCE, i, markerList = NULL, csceo$usage$paramFindMarkers, bpparam = csceo$usage$BPPARAM, minsize = csceo$usage$minSize, verbose = verbose)
+    }
   }
   if(verbose) message('Finished')
   
@@ -456,7 +475,7 @@ applyReducedDim <- function(sce, reddimstocalculate, chosen.hvgs, nPCs, assaynam
 # returns: markers, robustness, correlation with a binary vector "turned on" in that cluster
 #' @keywords internal
 #' @noRd
-markers_func <- function(sce, partition, paramFindMarkers, bpparam, minsize=10, verbose = TRUE){ # previously ldf_func
+markers_func <- function(sce, partition, markerList, paramFindMarkers, bpparam, minsize=10, verbose = TRUE){ # previously ldf_func
 
   if(verbose) message(" ", partition, ":")
   
@@ -487,11 +506,19 @@ markers_func <- function(sce, partition, paramFindMarkers, bpparam, minsize=10, 
     for(ic in seq_along(lfmrk[[1]])){ #acá se podría hacer una paralelizacion
       coi <- names(lfmrk[[1]])[ic]
       if(verbose) message('\t', coi,' - ', appendLF = F)
+      
       if(paramFindMarkers$pval.type=="any"){
         u <- rownames(lfmrk[[1]][[coi]])[lfmrk[[1]][[coi]][,'FDR']<0.05 & 
                                                 lfmrk[[1]][[coi]][,'Top']<=10]
       } else {
         u <- rownames(lfmrk[[1]][[coi]])[lfmrk[[1]][[coi]][,'FDR']<0.05]
+      }
+      if(!is.null(markerList)){
+        u <- markerList[markerList$Cluster==coi, "Gene"]
+        if(!all(u%in%rownames(sce))){
+          message(paste0(paste(u[!u%in%rownames(sce)], collapse = ", "))," ignored because not in sce rownames.\n")
+          u <- u[u%in%rownames(sce)]
+        }
       }
       
       # (6.1.1) Boxcor 
