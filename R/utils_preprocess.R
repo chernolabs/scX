@@ -185,7 +185,6 @@ defPartitions <- function(csceo, verbose){
   cat("* Partitions used for DEGs and markers analysis:\n\t", ttoFactors,"\n")
   
   if("scx.clust" %in% csceo$usage$partitionVars) csceo$usage$scx.clust = TRUE # if a quick clusterization is requierd or requested
-  if("")
   
   return(csceo)
 }
