@@ -13,7 +13,7 @@ inputManager <- function(xx, metadata){
 	cat("! Error: object must have rownames 'gene_id' and colnames 'barcodes'")
     stop("Object must have rownames 'gene_id' and colnames 'barcodes'")
   } else {
-  rnames <- rownames(xx)
+	rnames <- rownames(xx)
     ##Check empty names
     if(length(which(rnames==""))>0){
       message("Some genes have empty names and will be excluded")
@@ -31,7 +31,7 @@ inputManager <- function(xx, metadata){
     xx <- xx[rnames,]
     
   ##Renaming if colnames are repeated
-  cnames <- colnames(xx)
+	cnames <- colnames(xx)
     tt <- table(cnames)
     repnames <- names(tt[tt>1])
     if(length(repnames)>0){
@@ -47,6 +47,17 @@ inputManager <- function(xx, metadata){
   
   ## Before anything, stop if there is at least one cell not included in metadata
   if(!is.null(metadata)){
+	# If cells are repeated in data and renamed with numbers, they won't be found on metadata. Do the same here? uncomment following:
+	# rnames <- rownames(metadata)
+    # tt <- table(rnames)
+	# repnames <- names(tt[tt>1])
+	# if(length(repnames)>0){
+      # for(cname in repnames){
+        # ii <- which(cnames%in%cname)
+        # cnames[ii] <- paste0(cname,"-",seq_along(ii))
+      # }
+      # rownames(metadata) <- cnames
+    # }
     if(!all(colnames(xx) %in% rownames(metadata))){
 		cat("! Error: Some cells in data are not present in metadata")
     	stop("Some cells in data are not present in metadata")
@@ -286,7 +297,7 @@ scXcluster <- function(csceo, blusparam, verbose){
     } else {
       csceo$SCE$scx.clust <- scran::clusterCells(csceo$SCE, assay.type = csceo$usage$assay.name.normalization, BLUSPARAM = blusparam)
     }
-    if(verbose) message(' Finished\n')
+    if(verbose) message(' Finished')
   }
     
   return(csceo)
@@ -331,7 +342,7 @@ colPlotShiny <- function(csceo, verbose){
   # Subsetting SCE object
     colData(csceo$SCE) <- colData(csceo$SCE)[, coldatanames%in%c("nCounts", "nFeatures", "scx.clust", csceo$usage$partitionVars, csceo$usage$metadataVars)]
     
-    colsK <- sapply(colData(csceo$SCE), function(x){(is.character(x) | is.numeric(x))})
+    colsK <- sapply(colData(csceo$SCE), function(x){(is.character(x) | is.numeric(x)) & length(unique(x)) <= 30})
     colsK[c("nCounts", "nFeatures")] <- F # added in QC and shouldn't be considered in any case
     if(any(colsK)){
       colData(csceo$SCE)[,colsK] <- lapply(colData(csceo$SCE)[,colsK,drop=F], function(x){
@@ -361,10 +372,12 @@ colPlotShiny <- function(csceo, verbose){
 #' @noRd
 degs <- function(csceo, verbose){
   if(verbose) message('Computing differential expression markers... ', appendLF = F)
+  sce.degs <- list()
+  partitionNames <- c(csceo$usage$partitionVars,"scx.clust")[c(csceo$usage$partitionVars,"scx.clust")%in%names(colData(csceo$SCE))]
+  partitionNames <- unique(partitionNames)
   ##If test.type = wilcox, calculate FDR with that test and extract logFC values from t test.
   if (csceo$usage$paramFindMarkers$test.type == "wilcox"){
-    sce.degs <- list()
-    for(i in c(csceo$usage$partitionVars,"scx.clust")[c(csceo$usage$partitionVars,"scx.clust")%in%names(colData(csceo$SCE))]){
+    for(i in partitionNames){
       tout <- scran::findMarkers(csceo$SCE, 
                                  assay.type = "logcounts",
                                  group = colData(csceo$SCE)[,i],
@@ -393,8 +406,7 @@ degs <- function(csceo, verbose){
       sce.degs[[i]] = wout
     }
   }else{
-    sce.degs <- list()
-    for(i in c(csceo$usage$partitionVars,"scx.clust")[c(csceo$usage$partitionVars,"scx.clust")%in%names(colData(csceo$SCE))]){
+    for(i in partitionNames){
       sce.degs[[i]] <- scran::findMarkers(csceo$SCE,
                                           assay.type = "logcounts",
                                           group = colData(csceo$SCE)[,i],
@@ -431,7 +443,9 @@ markers <- function(csceo, verbose){
   
   # run marker_fun
   sce.markers <- list()
-  for(i in c(csceo$usage$partitionVars,"scx.clust")[c(csceo$usage$partitionVars,"scx.clust")%in%names(colData(csceo$SCE))]){
+  partitionNames <- c(csceo$usage$partitionVars,"scx.clust")[c(csceo$usage$partitionVars,"scx.clust")%in%names(colData(csceo$SCE))]
+  partitionNames <- unique(partitionNames)
+  for(i in partitionNames){
     if(!is.null(csceo$usage$markerList)){
       if(i %in% partitions){
         sce.markers[[i]] <- markers_func(csceo$SCE, i, csceo$usage$markerList[csceo$usage$markerList$Partition==i,2:3], csceo$usage$paramFindMarkers, bpparam = csceo$usage$BPPARAM, minsize = csceo$usage$minSize, verbose = verbose)
