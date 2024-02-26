@@ -335,34 +335,25 @@ lcNorm <- function(csceo, verbose){
 colPlotShiny <- function(csceo, verbose){
   # Transform columns to factors to be available for coloring plots in app
   if(!is.null(csceo$usage$metadataVars)){
-  # Keep only names in `partitionVars` and `metadataVars` which are in colData
+	# Keep only names in `partitionVars` and `metadataVars` which are in colData
     coldatanames <- names(colData(csceo$SCE))
     if(!all(csceo$usage$metadataVars%in%coldatanames)) warning("Can't find ",paste0(csceo$usage$metadataVars[!csceo$usage$metadataVars%in%coldatanames],collapse = ' & ')," in data")
     
-  # Subsetting SCE object
+	# Subsetting SCE object
     colData(csceo$SCE) <- colData(csceo$SCE)[, coldatanames%in%c("nCounts", "nFeatures", "scx.clust", csceo$usage$partitionVars, csceo$usage$metadataVars)]
-    
-    colsK <- sapply(colData(csceo$SCE), function(x){(is.character(x) | is.numeric(x)) & length(unique(x)) <= 30})
-    colsK[c("nCounts", "nFeatures")] <- F # added in QC and shouldn't be considered in any case
-    if(any(colsK)){
-      colData(csceo$SCE)[,colsK] <- lapply(colData(csceo$SCE)[,colsK,drop=F], function(x){
-      x <- as.factor(x)
-      x <- droplevels(x)
-      x})
-    }
-  if(verbose) message(paste0(names(colData(csceo$SCE))[sapply(colData(csceo$SCE), function(x){(is.factor(x))})], collapse = ' & ')," will be available for coloring")
-  } else {
+  }
+  
   # Keep names in `partitionVars` which are in colData and any other column (character or numeric) with less than or equal to 30 levels
   colsK <- sapply(colData(csceo$SCE), function(x){(is.character(x) | is.numeric(x)) & length(unique(x)) <= 30})
   colsK[c("nCounts", "nFeatures")] <- F # added in QC and shouldn't be considered in any case
   if(any(colsK)){
-  	colData(csceo$SCE)[,colsK] <- lapply(colData(csceo$SCE)[,colsK,drop=F], function(x){
-  		x <- as.factor(x)
-  		x <- droplevels(x)
-  		x
-  	})
+    colData(csceo$SCE)[,colsK] <- lapply(colData(csceo$SCE)[,colsK,drop=F], function(x){
+		x <- as.factor(x)
+		x <- droplevels(x)
+		x
+	})
   }
-  }
+  if(verbose) message(paste0(names(colData(csceo$SCE))[sapply(colData(csceo$SCE), function(x){(is.factor(x))})], collapse = ' & ')," will be available for coloring")
   
   return(csceo)
 }
