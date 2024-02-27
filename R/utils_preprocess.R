@@ -1,524 +1,390 @@
-#' Creates an object ready for use in the scX app
-#' 
-#' @description 
-#' \code{\link{createSCEobject}} creates the input object (a \linkS4class{List}) for the function \code{\link{launch_scX}}. This list includes a \linkS4class{SingleCellExperiment} object with normalized expression, 
-#' reduced dimensions for visualization, and any additional data provided. Also, this object includes identified gene markers and differential expression analysis for each user-specified partition (if no partition was selected, a quick clusterization is computed and considered)
-#' 
-#' @param xx Either a numeric count matrix object (with genes as rows and cells as columns), a \linkS4class{SingleCellExperiment} object or a \linkS4class{Seurat} object.
-#' @param assay.name.raw Assay name for the raw counts matrix if the input object is a \linkS4class{SingleCellExperiment}. Defaults to \code{counts}.
-#' @param assay.name.normalization Assay name for the normalized matrix if present in the \linkS4class{SingleCellExperiment}. If not present, it computes \code{logcounts} by default.
-#' @param metadata (Optional) A \linkS4class{DataFrame} containing cell metadata. The row names of the metadata data frame must include all cell names that appear as columns in \code{xx}.
-#' @param partitionVars (Optional) Names of metadata or \code{colData} columns to be used for gene markers and differential
-#' expression analysis. If set to \code{NULL} (default), a quick clustering step will be performed using \code{\link[scran]{quickCluster}} from the \pkg{scran} package.
-#' @param metadataVars (Optional) Names of additional metadata or \code{colData} columns to be used for coloring in plots.
-#' If set to \code{NULL} (default), only \code{partitionVars} columns will be available for coloring plots.
-#' @param chosen.hvg (Optional) A list of Highly Variable Genes. NOTE: If \code{chosen.hvg=NULL} and \code{xx} is a \linkS4class{Seurat} object with computed \code{\link[Seurat]{VariableFeatures}}, then this parameter will be set to that list of genes.
-#' @param nHVGs Number of Highly Variable Genes to use if \code{chosen.hvg=NULL}. Defaults to 3000.
-#' @param nPCs Number of Principal Components to use in PCA. Defaults to 50.
-#' @param calcRedDim Logical. Indicates whether to compute reduced dimensions (PCA, UMAP, t-SNE, UMAP2D, t-SNE2D). Defaults to \code{TRUE}. (Note: If set to \code{FALSE}, but there are no 2D and >3D reduced dimensions provided in the input, PCA embedding will be estimated anyway).
-#' @param paramFindMarkers A named list of parameters to pass to \code{\link[scran]{findMarkers}} to compute cluster gene markers. 
-#' Defaults to \code{list(test.type="wilcox", pval.type="all", direction="up")}.
-#' @param BPPARAM A \linkS4class{BiocParallelParam} object indicating whether and how parallelization should be performed across genes in the \code{\link[scran]{findMarkers}} function.
-#' @param minSize Numeric. The minimum cluster size for calculating gene marker statistics.
-#' @param calcAllPartitions Logical. Defaults to \code{FALSE}, which means that only partitions from \code{partitionVars} with 30 or fewer levels will be considered for marker and DEG calculations. If set to TRUE, it forces the computation of markers and DEGs for the entire list of \code{partitionVars}.
-#' @param cells2keep (Optional) A list of cell names to keep in case of subsampling. NOTE: Subsampling is only activated for visualization purposes in the case of large datasets; it is not used for computations. Only \code{nSubCells} cells will be used for visualization in the app, and their indexes are stored in the \code{CELLS2KEEP} element of the CSEO object.
-#' @param nSubCells Numeric. The maximum number of cells for randomly subsampling the data set (just for visualization purposes).
-#' @param descriptionText (Optional) A short description of the object being analyzed. This text will be displayed in the Summary module of the \code{scX} app.
-#' @param verbose Logical. Indicates whether to show step-by-step status while the function is running. Defaults to \code{TRUE}.
-
-#' @details 
-#' This function handles the basic preprocessing steps for sc/sn-RNAseq data. It leverages functionality implemented in the \pkg{scran}, \pkg{scater}, and \pkg{SingleCellExperiment} packages.
-#' The steps include: converting the input to a \linkS4class{SingleCellExperiment} object, estimating QC metrics, normalizing the expression matrix, identifying highly variable genes,
-#' and computing embeddings for various dimensionality reduction techniques. If no cell partition is provided, a default clustering step is conducted to investigate marker genes and differential expression patterns.
-#' For datasets with more than 50k cells, subsampling of the \linkS4class{SingleCellExperiment} object is suggested to improve smooth interactive visualizations in the \pkg{scX} app. A detailed discussion of the employed preprocessing pipeline can be found in the
-#' \href{https://bioconductor.org/books/release/OSCA/.}{OSCA} book.
-
-#' @section Partitions:
-#' It is recommended to include a curated partition of the data in the input object or in the \code{metadata}.
-#' Marker genes and differential expression analysis will be automatically computed for partitions with fewer than 31 levels specified as \code{partitionVars}.
-#' If the user wishes to run the calculations for partitions with more than 30 levels, \code{calcAllPartitions} must be set to \code{TRUE} (Please note that this step could be very time-consuming).
-#' You may want to color some partitions in plots without having to compute marker genes and DEGs analyses for them. To do this, pass those partitions as \code{metadataVars}.
-
-#' @section Metadata:
-#' Metadata is passed to \link{createSCEobject} as a \linkS4class{DataFrame} where the rows must include all the cells present in the \code{XX} input. Metadata columns represent cell covariates. All character or numeric covariates passed in \code{metadataVars} with fewer than 31 unique values are set to factors and are referred to as "Categories" in the scX app. Numeric covariates with more than 30 unique values are called "Fields."
-
-#' @section Normalization:
-#' If there is no normalized assay in the \linkS4class{SingleCellExperiment} object or \linkS4class{Seurat} input object
-#' a \href{https://bioconductor.org/books/3.17/OSCA.basic/normalization.html#normalization-by-deconvolution}{Normalization by deconvolution} is performed as proposed in the OSCA book.
-#' First, we calculate clusters using the Walktrap community detection algorithm for graph-based clustering (default parameters from \code{\link[scran]{quickCluster}}).
-#' The resulting clusters are stored in \code{colData} as \code{"scx.clust"}.
-#' Then we compute scale factors for the cells using those clusters.
-#' Finally, we calculate the lognormalized expression matrix by applying a log2 transformation to the product of the raw matrix and scale factors considering a pseudocounts of 1.
-
-#' @section Clustering:
-#' If \code{partitionVars} is user-specified, those categories are used for clustering the data.
-#' If \code{partitionVars} is \code{NULL}, the quick clustering step (see "Normalization") is used to identify markers and DEGs.
-#' Additionally, if a normalized assay exists in the SCE object and "scx.clust" is included in the \code{partitionVars}, the previously described function will be applied to compute clustering, which is stored in \code{colData} as "scx.clust."
-
-#' @section Highly Variable Genes:
-#' If \code{chosen.hvg} is not specified, we will use \code{\link[scran]{modelGeneVar}} to calculate the variance and mean of the lognormalized expression values. 
-#' By fitting a trend of the variance against the mean, a biological component of variation for each gene can be assigned as the residual from the trend (see \pkg{scran} documentation for more details).
-#' We consider the top \code{nHVGs} most variable genes with a biological component greater than 0.
-
-#' @section Reduced Dimensional Analysis Techniques:
-#' \pkg{scX} is a tool that helps visualize the data properly by running several dimensionality reduction analysis techniques (PCA, UMAP2D, TSNE2D, UMAP3D, TSNE3D). To use the app, \code{xx} must have at least a 2D dimensional reduction embedding.
-#' If \code{xx} already has dimensionality reduction embeddings calculated, you can set \code{calcRedDim} to \code{FALSE}. NOTE: If set to \code{FALSE}, but there are no dimension reductions calculated in the \linkS4class{SingleCellExperiment} object, or if they all have less than 4 dimensions with none of them having 2D, a PCA will be calculated.
-#' Principal Component Analysis is calculated with \code{\link[scater]{runPCA}} using the \code{chosen.hvg} and retaining the first \code{nPCs} components for the normalized expression matrix.
-#' TSNE and UMAP are calculated with \code{\link[scater]{runTSNE}} and \code{\link[scater]{runUMAP}} functions using the PCA matrix.
-
-#' @section Marker Genes Analysis:
-#' \link{createSCEobject} computes statistics to identify marker genes for every cluster
-#' for all partitions in \code{partitionVars}  
-#' using \code{\link[scran]{findMarkers}} functions (with parameters specified by the user in \code{paramFindMarkers}).
-#' Only genes with FDR < 0.05 are selected for each cluster. The boxcor score is calculated for those genes as follows:
-#' \describe{
-#' \item{\code{boxcor}:}{The boxcor is the correlation between a gene's expression vector (logcounts) and a binary vector, where only the cells from the selected cluster
-#' mark 1 while the rest of the cells mark 0.}
-#' }
-
-#' @section Differential Expression Analysis:
-#' We use the \code{\link[scran]{findMarkers}} function to identify DEGs between clusters specified in \code{partitionVars}
-#' (\code{direction="any"},\code{pval.type="all"}).
-#' The test.type can be specified by the user in \code{paramFindMarkers$test.type}.
-
-#' @section Subsampling cells:
-#' If the \linkS4class{SingleCellExperiment} object contains over \code{nSubCells} cells (50k by default), a random sample of that size will be chosen for visualization purposes in the application.
-#' Cell names that the user wants to keep in the visualizations can be specified in the \code{cells2keep} parameter.
-#' Please note that it is solely for producing efficient visualizations.
-
-#' @return 
-#' A named \linkS4class{List} that serves as input for \code{\link{launch_scX}}, which contains the following fields:
-#' \describe{
-#' \item{\code{SCE}:}{A \linkS4class{SingleCellExperiment} object with computed normalized expression and dimensional reduction embeddings (PCA, UMAP, t-SNE, in 2D & 3D). These are calculated using the list of \code{chosen.hvg} if not \code{NULL}, or the top \code{nHVGs}. \code{colData} contains the \code{partitionVArs} and \code{metadataVars} if they were specified; otherwise, only a quick clusterization will be available for preliminary analysis of the data.}
-#' \item{\code{sce.degs}:}{A named \linkS4class{List} of \linkS4class{DataFrame}s where each DataFrame contains the consolidated marker statistics for each gene (row) for the cluster of the same name. Statistics are computed using \code{\link[scran]{findMarkers}}, and the user can choose the \code{test.type} parameters to pass to that function. See \code{\link[scran]{combineMarkers}} for the details of how these dataframes are created.}
-#' \item{\code{sce.markers}:}{A \linkS4class{List} of named \linkS4class{List}s of \linkS4class{DataFrame}s. Each one corresponds to the marker genes of every cluster in a partition (names of the nested lists). \code{summary.stats:} AUC if \code{test.type=="wilcox"} and -log.FC for \code{test.type=="t"} or \code{test.type=="binom"}. \code{log.FDR:} -Log.FDR of the most appropriate inter-cluster comparison according to the selected p-value type. See \code{\link[scran]{findMarkers}} for the details of how these metrics are computed. \code{boxcor:} Correlation scores between the normalized gene expression profiles and a binary vector of cells, in which cells of the selected cluster have a value of 1.}
-#' \item{(optional) \code{text}:}{String if \code{descriptionText} not \code{NULL}.}
-#' \item{\code{CELLS2KEEP}:}{Numeric, the indices of the selected cells chosen for visualization in the \code{scX} application. 
-#' (Alternatively) Character, if 'all' no subsampling will be performed for visualization purposes.}
-#' }
-
-#' @author 
-#' Tomás Vega Waichman, Maria Luz Vercesi, Ariel A. Berardino, Maximiliano S. Beckel, Chernomoretz Lab and Collaborators
-
-#' @seealso 
-#' Related functions from \pkg{scran} and \pkg{scater} packages as suggested in the \href{https://bioconductor.org/books/release/OSCA/.}{OSCA} book for:
-#' \itemize{
-#' \item{Preprocessing steps: }{\code{\link[scran]{quickCluster}}, \code{\link[scran]{computeSumFactors}} and \code{\link[scater]{logNormCounts}}.}
-#' \item{HVGs: }{\code{\link[scran]{modelGeneVar}}.}
-#' \item{Dimensionality Reduction Techniques: }{\code{\link[scater]{runPCA}}, \code{\link[scater]{runTSNE}} and \code{\link[scater]{runUMAP}}.}
-#' \item{Marker genes and DEGs analyses: }{\code{\link[scran]{findMarkers}}, \code{\link[scran]{combineMarkers}}.}
-#' }
-
-#' @examples 
-#' \dontrun{
-#' # Quick start guide example:
-#' library(scX)
-#' cseo <- createSCEobject(xx = sce, 
-#'                         partitionVars = "inferred_cell_type", 
-#'                         metadataVars = c("source_name", "age", "sex", "strain", "treatment", "pseudotime"),
-#'                         descriptionText = "Quick Start Guide")
-#' launch_scX(cseo)
-#' }
-
-#' @export
-createSCEobject <- function(xx,
-                            assay.name.raw="counts",
-                            assay.name.normalization="logcounts",
-                            metadata=NULL,
-                            partitionVars=NULL,
-                            metadataVars=NULL,
-                            chosen.hvg=NULL,
-                            nHVGs=3000,
-                            nPCs=50,
-                            calcRedDim=TRUE,
-                            paramFindMarkers=list(test.type="wilcox", pval.type="all", direction="up"),
-                            BPPARAM=BiocParallel::SerialParam(),
-                            minSize=30,
-                            calcAllPartitions=FALSE,
-                            cells2keep=NULL,
-                            nSubCells=50000,
-                            descriptionText=NULL,
-                            verbose=TRUE){
+# Managing input
+#' @keywords internal
+#' @noRd
+inputManager <- function(xx, metadata){
   
-  csceo <- list() # Creating list object to be returned by this function
-
-  # Managing input ----
-  # First we will ensure that there is a partition to be calculated
-
-  ##Check if there are colnames and rownames in the objects 
+  if(class(xx)[1]=="character"){
+    xx <- DropletUtils::read10xCounts(samples = xx)
+    colnames(xx) <- xx$Barcode
+  }
+  
+  ## Check for colnames and rownames in the object
   if(is.null(rownames(xx)) | is.null(colnames(xx))){
-    stop('Missing row names or column names.')
-  } 
-  
-  if(!is.null(rownames(xx))) {
-    rnames <- rownames(xx)
+	cat("! Error: object must have rownames 'gene_id' and colnames 'barcodes'")
+    stop("Object must have rownames 'gene_id' and colnames 'barcodes'")
+  } else {
+	rnames <- rownames(xx)
     ##Check empty names
     if(length(which(rnames==""))>0){
-      warning("Some genes have empty names and will be excluded")
+      message("Some genes have empty names and will be excluded")
       rnames <- rnames[!rnames==""]
+	  cat("* Genes with empty names are excluded\n")
     }
     ##Check repeated names
     tt <- table(rnames)
     repnames <- names(tt[tt>1])
     if(length(repnames)>0){
-      warning("Some rownames are repeated and will be excluded: ", paste0(repnames, collapse = ', '))
+      message("Some rownames are repeated and will be excluded: ", paste0(repnames, collapse = ', '))
       rnames <- rnames[!rnames%in%repnames]
+	  cat("* Repeated gene names are excluded\n")
     }
     xx <- xx[rnames,]
-    rm(rnames, repnames, tt)
-  }
-  
+    
   ##Renaming if colnames are repeated
-  if(!is.null(colnames(xx))){
-    cnames <- colnames(xx)
+	cnames <- colnames(xx)
     tt <- table(cnames)
     repnames <- names(tt[tt>1])
     if(length(repnames)>0){
-      warning("Some colnames are repeated and will be renamed sequentially adding a '-' prior to the number")
+      message("Some colnames are repeated and will be renamed sequentially adding a '-' prior to the number")
       for(cname in repnames){
         ii <- which(cnames%in%cname)
         cnames[ii] <- paste0(cname,"-",seq_along(ii))
       }
       colnames(xx) <- cnames
-      rm(ii)
+	  cat("* Repeated column names are numbered\n")
     }
-    rm(cnames, tt, repnames)
   }
   
-  
-  ##Check for repeated partitions
-  partitionVars <- unique(partitionVars)
-  
-  ##If there is not an specified 'partitionVars' then it sets to "scx.clust"
-  if(is.null(partitionVars)){
-    warning('No partitionVars specified, a quick clusterization will be computed.')
-    partitionVars <- "scx.clust"
+  ## Before anything, stop if there is at least one cell not included in metadata
+  if(!is.null(metadata)){
+	# If cells are repeated in data and renamed with numbers, they won't be found on metadata. Do the same here? uncomment following:
+	# rnames <- rownames(metadata)
+    # tt <- table(rnames)
+	# repnames <- names(tt[tt>1])
+	# if(length(repnames)>0){
+      # for(cname in repnames){
+        # ii <- which(cnames%in%cname)
+        # cnames[ii] <- paste0(cname,"-",seq_along(ii))
+      # }
+      # rownames(metadata) <- cnames
+    # }
+    if(!all(colnames(xx) %in% rownames(metadata))){
+		cat("! Error: Some cells in data are not present in metadata")
+    	stop("Some cells in data are not present in metadata")
+    }
   }
+  return(xx)
+}
 
-  ##Also if it isn't a Seurat or SCE object, and metadata is null (metadata could be inside the object) the 'partitionVars' becomes "scx.clust"
-  if(is.null(metadata) & class(xx)[1]!="Seurat" & class(xx)[1]!="SingleCellExperiment"){
-    warning('No metadata specified, a quick clusterization will be computed.')
-    partitionVars <- "scx.clust"
-  }
-  if(verbose) cat('Creating SCE object...')
-  
-  ## Seurat to SCE object ----
-  ##Check if the input class is a Seurat object
-  if(class(xx)[1]=="Seurat"){
+## Creating SCE
+#' @keywords internal
+#' @noRd
+sceConverter <- function(csceo, metadata, verbose){
+  if(verbose) message('Creating SCE object... ', appendLF = F)
+  ## Seurat to SCE object
+  if(class(csceo$SCE)[1]=="Seurat"){
     ##Changing assay.name parameters because as.SingleCellExperiment fills 'counts' and 'logcounts' assays
-    warning("Seurat object is detected, 'assay.name.raw' & 'assay.name.normalization' will be set to default.")
-    assay.name.raw <- "counts"
-    assay.name.normalization <- "logcounts"
-	seurat.nms <- names(xx@assays)
+    message("\nSeurat object is detected, 'assay.name.raw' & 'assay.name.normalization' will be set to default 'counts' & 'logcounts'")
+	csceo$usage$assay.name.raw <- assay.name.raw <- "counts"
+    csceo$usage$assay.name.normalization <- assay.name.normalization <- "logcounts"
+    seurat.nms <- names(csceo$SCE@assays)
     ##Converts seurat object to sce object
-    xx.sce <- Seurat::as.SingleCellExperiment(xx)
-	
-	# if Seurat object contains only one matrix, as.SingleCellExperiment duplicates it as both 'counts' and 'logcounts'
-	if(all(assay(xx.sce, "counts")==assay(xx.sce, "logcounts"))){
-		if(any(grep("logcount", seurat.nms))){
-			assay(xx.sce, "counts") <- NULL
-		}else{
-			assay(xx.sce, "logcounts") <- NULL
-		}
-	}
-	
-    ##Checking if all partitions from 'partitionVars' are converted into the colData() of the sce object
-    if((all(partitionVars!="scx.clust")) & (!all(partitionVars %in% names(colData(xx.sce))))){
-      warning('at least one partition is not present in metadata')
-    }
+    xx.sce <- Seurat::as.SingleCellExperiment(csceo$SCE)
+	cat("* SingleCellExperiment created from Seurat object, with 'counts' and 'logcounts'\n")
+  
+    # if Seurat object contains only one matrix, as.SingleCellExperiment duplicates it as both 'counts' and 'logcounts'
+    if(all(assay(xx.sce, "counts")==assay(xx.sce, "logcounts"))){
+    	if(any(grep("logcount", seurat.nms))){
+    		assay(xx.sce, "counts") <- NULL
+			cat("* Data is set as 'logcounts'\n")
+    	}else{
+    		assay(xx.sce, "logcounts") <- NULL
+			cat("* Data is set as 'counts'\n")
+    	}
+     }
     ##Converting seurat feature's metadata to rowData() of the sce object
-    if(nrow(xx@assays$RNA@meta.features)>0){
-      rowData(xx.sce) <- xx@assays$RNA@meta.features
+    if(nrow(csceo$SCE@assays$RNA@meta.features)>0){
+      rowData(xx.sce) <- csceo$SCE@assays$RNA@meta.features
     }
     ##If seurat object has variable features calculated and `chosen.hvg`=NULL then it will set to the variable features list
-    if(length(Seurat::VariableFeatures(xx))>0){
-      if(is.null(chosen.hvg)){
-        chosen.hvg <- Seurat::VariableFeatures(xx)
+    if(length(Seurat::VariableFeatures(csceo$SCE))>0){
+      if(is.null(csceo$call$chosen.hvg)){
+        csceo$usage$chosen.hvg <- Seurat::VariableFeatures(csceo$SCE)
+		cat("* Seurat Variable Features are set as HVGs\n")
       }
     }
-  ## Matrix+Metadata to SCE object ----
-  ##Check if the input class is a dense or sparse matrix object
-  } else if (class(xx)[1] %in% c("dgCMatrix", "Matrix", "matrix")){
-      ##The matrix must contain rownames and colnames for the function to be able to identify genes and cells
-      if(is.null(rownames(xx)) | is.null(colnames(xx))){
-        stop('Matrix must have rownames "gene_id" and colnames "barcodes"')
-      }
-      ##Creating a SCE object from the matrix
-      xx.sce <- SingleCellExperiment(list(counts=xx))
-      ##Checking if metadata was specified
-      if(!is.null(metadata)){
-        if(all(colnames(xx.sce) %in% rownames(metadata))){
-          ##Assing colData() of the sce oject to be the metadata if all the cells have metadata
-          colData(xx.sce) <- cbind(colData(xx.sce), metadata[colnames(xx.sce),,drop=F])
-          ##Checking if partitions from 'partitionVars' are present in the metadata
-          if((!("scx.clust" %in% partitionVars)) & (!all(partitionVars %in% names(colData(xx.sce))))){
-            warning('at least one partition is not present in metadata')
-          }
-        ##Stop if there is at least one cell it is not included in the metadata
-        } else {
-          stop('Some cells in metadata are not present in the matrix colnames.\n')
-        }
-      }
-    ## xx as SCE object ----
-    ##Check if the input class is a SCE object
-  } else if (class(xx)[1]=="SingleCellExperiment"){
-    xx.sce <- xx
-    ##Checking if metadata was specified
-    if(!is.null(metadata)){
-      if(all(colnames(xx.sce) %in% rownames(metadata))){
-        ##Adding to colData() of the sce oject the metadata if all the cells have metadata
-        colData(xx.sce) <- cbind(colData(xx.sce), metadata[colnames(xx.sce),,drop=F])
-        ##Checking if partitions from 'partitionVars' are present in the metadata
-        if((partitionVars!="scx.clust") & (!all(partitionVars %in% names(colData(xx.sce))))){
-          warning('at least one partition is not present in metadata')
-        }
-        ##Stop if there is at least one cell it is not included in the metadata
-      } else {
-        stop('Some cells in metadata are not present in the SCE colnames.\n')
-      }
-    } 
-  ##Stop if the `xx` is not an object of the class Seurat, SCE or Matrix
-  } else {
-    stop('xx must be an object of the class Seurat, SingleCellExperiment or Matrix')
-  }
-  if(verbose) cat(' Finished\n')
+    
+    for(nm in assayNames(xx.sce)){ # make every assay sparse
+    	assay(xx.sce, nm) <- as(assay(xx.sce, nm),"dgCMatrix")
+    }
   
+  ## Matrix to SCE object
+  } else if (class(csceo$SCE)[1] %in% c("dgCMatrix", "Matrix", "matrix")){
+   xx.sce <- SingleCellExperiment(list(counts=as(csceo$SCE,"dgCMatrix")))
+   cat("* SingleCellExperiment created from matrix\n")
+  
+  ## xx as SCE object
+  } else if (class(csceo$SCE)[1]=="SingleCellExperiment"){
+      xx.sce <- csceo$SCE
+      for(nm in assayNames(xx.sce)){ # make every assay sparse
+      	assay(xx.sce, nm) <- as(assay(xx.sce, nm),"dgCMatrix")
+      }
+  } else { ##Stop if `xx` is not an object of the class Seurat, SCE or Matrix
+  cat("! Error: Object must be a matrix, a SingleCellExperiment or a Seurat object")
+  stop("xx must be a matrix, a SingleCellExperiment or a Seurat object")
+  }
+  
+  ## Add metadata to sce if present
+  if(!is.null(metadata)){
+    ##Adding metadata to colData() of sce oject (colnames were checked before creating sce object)
+    colData(xx.sce) <- cbind(colData(xx.sce), metadata[colnames(xx.sce),,drop=F])
+  }
+  
+  if(verbose) message('Finished')
+  return(xx.sce)
+}
 
-  # partitionVars to factors ----
-  # Setting which partitions will be transformed to factors
-
-  if(verbose) cat('Changing factors from partitionVars...')
-  ##Check the factors that are in the colData.
-  tfs <- setNames(nm=partitionVars,object = partitionVars %in% names(colData(xx.sce)))
-  ##Check if columns have more than one level.
-  if(sum(tfs) > 0){
-    vld <- sapply(colData(xx.sce)[,partitionVars[tfs],drop=F],function(x){length(unique(x))>1})   
+# partitionVars to factors
+#' @keywords internal
+#' @noRd
+defPartitions <- function(csceo, verbose){
+	if(verbose) message('Analyzing partitions... ', appendLF = F)
+  ##Check for repeated partitions
+  csceo$usage$partitionVars <- unique(csceo$call$partitionVars)
+  
+  ##Checking if partitions from 'partitionVars' are present in the metadata
+  if(!all(csceo$usage$partitionVars %in% names(colData(csceo$SCE)))){ # Note: if partitionVars is NULL, condition is FALSE
+    warning("At least one element from partitionVars is not present in metadata")
+  }
+  ## Check factors in colData
+  tfs <- setNames(nm=csceo$usage$partitionVars,object = csceo$usage$partitionVars %in% names(colData(csceo$SCE)))
+  
+  if(any(tfs)){ # Note: if partitionVars is NULL, condition is FALSE
+    ## Check if columns have more than one level
+    vld <- sapply(colData(csceo$SCE)[,csceo$usage$partitionVars[tfs],drop=F],function(x){length(unique(x))>1})
+    if(!any(vld)){ # if none of the partitionVars in colData have more than 1 level, quick cluster
+  	  message("\npartitionVars in colData only have one level. A quick clusterization will be computed")
+    }
     tfs[names(vld)] <-  tfs[names(vld)] & vld
+  } else { # if partitionVars is NULL or not present in colData, quick cluster
+      message("\npartitionVars unspecified or not found in colData. A quick clusterization will be computed")
   }
   
-  ttoFactors <- names(tfs)[tfs]
-  ##Warning message if a partition is not found in colData or if it has only one level.
-  if(sum(!tfs)>0) warning("Can't find ",paste0(names(tfs)[!tfs],collapse = ' & ')," in metadata or they have only one level")
+  ttoFactors <- names(tfs)[tfs] # partitions used for DEGs and markers
   ##If no partition passes the above filters
-  if(length(ttoFactors) == 0){
-    warning("No partition passed the controls, a quick clusterization will be computed.")
+  if(length(ttoFactors) == 0){ # when partitionVars is NULL, not present in colData, or only have 1 level
     ##A quick clusterization will be computed in order to calculate gene markers and DEGs
     ttoFactors <- "scx.clust"
-    colData(xx.sce)[ttoFactors] <- NA
+    colData(csceo$SCE)[ttoFactors] <- NA
   }else{
     ##Transforming partitions to factors
-	  colData(xx.sce)[ttoFactors] <- lapply(colData(xx.sce)[ttoFactors], as.factor)
+    colData(csceo$SCE)[ttoFactors] <- lapply(colData(csceo$SCE)[ttoFactors], as.factor)
   }
   
-
-  # metadata ----
-  #Transform all the character columns to factor to be able to be selected in the shinyApp if they have less or equal to 30 levels or they are characters. 
-
-  cols <- sapply(colData(xx.sce), function(x){(is.character(x) | is.numeric(x)) & length(unique(x)) <= 30})
-  if(any(cols)){
-    colData(xx.sce)[,cols] <- lapply(colData(xx.sce)[,cols,drop=F], function(x){
-        x <- as.factor(x)
-        x <- droplevels(x)
-        x
-      })
-	}
-  if(verbose) cat(' Finished\n')
-    
-
-  # Checking number of levels of ttoFactors for calculations ---- 
+  # Checking number of levels of ttoFactors for calculations
   # When `calcAllPartitions=FALSE`:
-  #   If none of the partitions in `partitionVars` have less than 31 levels, the function will stop.
-  #   However, if there is at least one partition with less than 31 levels, the function will continue by computing gene markers and DEGs only for those partitions while ignoring the rest.
+  #   If none of the partitions in `partitionVars` have less than 31 levels, the function will ask user if continuing or using scx.clust
+  #   If there is at least one partition with less than 31 levels, the function will continue by computing gene markers and DEGs only for those partitions while ignoring the rest.
   # When `calcAllPartitions=TRUE`:
   #   Compute gene markers and differentially expressed genes (DEGs) for all partitions in 'partitionVars' regardless of the maximum number of levels
-
-  if(!calcAllPartitions){
-    allToFactors <- sapply(ttoFactors, function(x){length(unique(colData(xx.sce)[,x]))})>30
+  
+  if(!csceo$usage$calcAllPartitions){
+    allToFactors <- sapply(ttoFactors, function(x){length(unique(colData(csceo$SCE)[,x]))})>30
     if(all(allToFactors)){
-      stop(paste0(paste0(names(allToFactors)[allToFactors], collapse =  ' & ')," has more than 30 levels. If you want to compute it anyway set 'calcAllPartitions' as TRUE"))
-    } else if(any(allToFactors)) {
-      warning(paste0(paste0(names(allToFactors)[allToFactors], collapse =  ' & ')," has more than 30 levels. They wont be used to compute markers and DEGs. If you want to compute it anyway set 'calcAllPartitions' as TRUE"))
-      ttoFactors <- ttoFactors[!allToFactors]
+  	  message("\n", paste0(names(allToFactors)[allToFactors], collapse =  ' & '), " have more than 30 levels.\nComputing markers and DEGs in this case could be very time-consuming, do you wish to proceed?")
+  	  user <- readline("If not, a quick clusterization will be considered instead (y/n): ")
+    	# if user input does not include the letter 'y', it is interpreted as 'no' and considers a quick cluster
+    	if(length(grep("y", user, ignore.case = T))==0) ttoFactors <- "scx.clust"
+      } else if(any(allToFactors)) {
+          message("\n", paste0(paste0(names(allToFactors)[allToFactors], collapse =  ' & ')," have more than 30 levels. They wont be used to compute markers and DEGs. If you want to compute it anyway set 'calcAllPartitions' as TRUE"))
+          ttoFactors <- ttoFactors[!allToFactors]
     }
   }
+  if(verbose) message('Finished')
   
+  csceo$usage$partitionVars <- ttoFactors
+  cat("* Partitions used for DEGs and markers analysis:\n\t", ttoFactors,"\n")
+  
+  if("scx.clust" %in% csceo$usage$partitionVars) csceo$usage$scx.clust = TRUE # if a quick clusterization is requierd or requested
+  
+  return(csceo)
+}
 
-  # QC ----
-  # Caluclate the number of counts and features per cell
-
-  if(verbose) cat('Computing QC metrics...')
-  if(!assay.name.raw %in% names(assays(xx.sce))){
-    if(assay.name.normalization %in% names(assays(xx.sce))){
-      warning(paste0('Assays ',assay.name.raw,' not found in SCE object'))
+# QC
+# Calculate the number of counts and features per cell
+#' @keywords internal
+#' @noRd
+qcMetrics <- function(csceo, verbose){
+  if(verbose) message('Computing QC metrics... ', appendLF = F)
+  if(!csceo$usage$assay.name.raw %in% assayNames(csceo$SCE)){
+    if(csceo$usage$assay.name.normalization %in% assayNames(csceo$SCE)){
+      warning("Assay ", csceo$usage$assay.name.raw, " not found in SCE object")
+	  cat("* nCounts and nFeatures are not available, since the assay is normalized\n")
       ## If there is no raw assay but the SCE object has a normalized assay then set `nCounts,nFeatures = NA`
-      xx.sce$nCounts   <- NA
-      xx.sce$nFeatures <- NA
+      csceo$SCE$nCounts   <- NA
+      csceo$SCE$nFeatures <- NA
     } else {
       ## If there is no raw or normalized assay available then the function will end
-      stop(paste0('Assay ',paste(assay.name.raw, assay.name.normalization, sep = ' & '),' not found in SCE object'))
+	  cat("! Error: Assays", paste(csceo$usage$assay.name.raw, csceo$usage$assay.name.normalization, sep = ' & '), "not found in SCE object")
+      stop("Assays ", paste(csceo$usage$assay.name.raw, csceo$usage$assay.name.normalization, sep = ' & '), " not found in SCE object")
     }
   } else {
       ## If there is a raw assay in the SCE object, calculate the number of counts
-      xx.sce$nCounts <- colSums(assay(xx.sce, assay.name.raw))
+	  cat("* nCounts and nFeatures are computed\n")
+    csceo$SCE$nCounts <- colSums(assay(csceo$SCE, csceo$usage$assay.name.raw))
       ## 'Apply()' converts a sparse matrix to dense, forcing us to calculate the number of features per cell in an alternate manner
-      if(class(assay(xx.sce, assay.name.raw))[1]%in%c("dgCMatrix")){
-          xx.sce$nFeatures <- diff(assay(xx.sce, assay.name.raw)@p)
+      if(class(assay(csceo$SCE, csceo$usage$assay.name.raw))[1]%in%c("dgCMatrix")){
+        csceo$SCE$nFeatures <- diff(assay(csceo$SCE, csceo$usage$assay.name.raw)@p)
       } else {
-          xx.sce$nFeatures <- apply(assay(xx.sce, assay.name.raw),2,function(x){sum(x>0)})
+        csceo$SCE$nFeatures <- colSums(assay(csceo$SCE, csceo$usage$assay.name.raw)>0)
       }
   }
-  if(verbose) cat(' Finished\n')
+  if(verbose) message('Finished')
   
-  
-  # Normalization ----
-  # If there is no normalized assay in the SCE object:
-  #   Perform a 'Normalization by deconvolution' (proposed in the OSCA book [https://bioconductor.org/books/3.17/OSCA.basic/normalization.html#normalization-by-deconvolution])
-  #   First, calculate clusters using the Walktrap community detection algorithm for graph-based clustering with default parameters from `scran::quickCluster`.
-  #   The resulting clusters are stored in colData() as "scx.clust".
-  #   Then compute scale factors for the cells using the clusters.
-  #   Finally, calculate the lognormalized expression matrix by applying a log2 transformation to the product of the raw matrix and scale factors, with the addition of 1.
-  # If a normalized assay exists and "scx.clust" is included in the `partitionVars`, the function described before will be applied to compute the clusters, which are stored in colData()
+  return(csceo)
+}
 
-  if(!assay.name.normalization %in% names(assays(xx.sce))){
-    if(assay.name.raw %in% names(assays(xx.sce))){
-      if(verbose) cat('Computing normalization...')
+
+# Normalization
+# If there is no normalized assay in the SCE object:
+#   Perform a 'Normalization by deconvolution' (proposed in the OSCA book [https://bioconductor.org/books/3.17/OSCA.basic/normalization.html#normalization-by-deconvolution])
+#   First, calculate clusters using the Walktrap community detection algorithm for graph-based clustering with default parameters from `scran::quickCluster`.
+#   The resulting clusters are stored in colData() as "scx.clust".
+#   Then compute scale factors for the cells using the clusters.
+#   Finally, calculate the lognormalized expression matrix by applying a log2 transformation to the product of the raw matrix and scale factors, with the addition of 1.
+# If a normalized assay exists and "scx.clust" is included in the `partitionVars`, the function described before will be applied to compute the clusters, which are stored in colData()
+#' @keywords internal
+#' @noRd
+expNormalization <- function(csceo, verbose){
+  if(!csceo$usage$assay.name.normalization %in% assayNames(csceo$SCE)){
+    if(csceo$usage$assay.name.raw %in% assayNames(csceo$SCE)){
+      if(verbose) message('Computing normalization... ', appendLF = F)
       set.seed(123457)
-      clust <- scran::quickCluster(xx.sce, assay.type = assay.name.raw)
-      xx.sce$scx.clust <- clust
-      xx.sce <- scran::computeSumFactors(xx.sce,cluster=clust,min.mean=0.1, assay.type = assay.name.raw)
-      xx.sce <- scater::logNormCounts(xx.sce, assay.type = assay.name.raw, name="logcounts")
-      if(verbose) cat(' Finished\n')
+      clust <- scran::quickCluster(csceo$SCE, assay.type = csceo$usage$assay.name.raw)
+      csceo$SCE <- scran::computeSumFactors(csceo$SCE,cluster=clust,min.mean=0.1, assay.type = csceo$usage$assay.name.raw)
+      csceo$SCE <- scater::logNormCounts(csceo$SCE, assay.type = csceo$usage$assay.name.raw, name="logcounts")
+      if(verbose) message('Finished')
+	  cat("* Normalized assay is computed from", csceo$usage$assay.name.raw,"using a quick cluster method\n")
     }
-  } else if ( "scx.clust" %in% ttoFactors ) {
-      if(verbose) cat('Computing clusters...')
-      clust <- scran::quickCluster(xx.sce, assay.type = assay.name.normalization)
-      xx.sce$scx.clust <- clust
-      if(verbose) cat(' Finished\n')
-  }
+  } 
   
-  
-  # HVGs ----
-  # If `chosen.hvg` are not specified calculate the `nHVGs` most variable genes with biological component > 0
-  # This is computed with `scran::modelGeneVar` which calculates the variance and mean of the lognormalized expression values.
-  # By fitting a trend of the variance against the mean, a biological component of variation for each gene 
-  # can be assigned as the residual from the trend.
+  return(csceo)
+}
 
-  if(is.null(chosen.hvg)){
-    if(verbose) cat('Computing HVGs...')
-    mgv <- scran::modelGeneVar(xx.sce,span=.8, assay.type = assay.name.normalization)
-    rowData(xx.sce) <- cbind(rowData(xx.sce), hvg.mvBio=mgv$bio)
-    chosen.hvg <- rank(-rowData(xx.sce)$hvg.mvBio) <= nHVGs & rowData(xx.sce)$hvg.mvBio>0
-    chosen.hvg <- rownames(xx.sce)[chosen.hvg]
-    if(verbose) cat(' Finished\n')
-  }
-  
-  
-  # Reduced dimensions ----
-  # If calcRedDim = TRUE: it calculates PCA, TSNE, UMAP, TSNE2D, UMAP2D
-  # If calcRedDim = FALSE: 
-  #   if there is no dimRed calculated or none dimRed has more than 3 columns -> it calculates PCA
-  #   except there is a dimRed 2D calculated
-  # PCA is calculated with `scater::runPCA()` using the `chosen.hvg` and retaining the first `nPCs` components
-  # TSNE and UMAP are calculated with `scater::runTSNE()` and `scater::runUMAP()` functions using the PCA matrix
 
-  runDim <- c("PCA", "TSNE", "UMAP", "TSNE2D", "UMAP2D")
-  if(!calcRedDim){
-    if(length(reducedDimNames(xx.sce))<1){
-      runDim <- c("PCA")
-      calcRedDim = TRUE
-    } else if( (all(sapply(reducedDims(xx.sce),ncol) < 4)) & (all(sapply(reducedDims(xx.sce),ncol) != 2))){
-      runDim <- c("PCA")
-      calcRedDim = TRUE
+# HVGs
+# If `chosen.hvg` are not specified calculate the `nHVGs` most variable genes with biological component > 0
+# This is computed with `scran::modelGeneVar` which calculates the variance and mean of the lognormalized expression values.
+# By fitting a trend of the variance against the mean, a biological component of variation for each gene 
+# can be assigned as the residual from the trend.
+#' @keywords internal
+#' @noRd
+defHVG <- function(csceo, verbose){
+    if(verbose) message('Computing HVGs... ', appendLF = F)
+	cat("* HVGs are computed from", csceo$usage$assay.name.normalization,"\n")
+    mgv <- scran::modelGeneVar(csceo$SCE,span=.8, assay.type = csceo$usage$assay.name.normalization)
+    rowData(csceo$SCE) <- cbind(rowData(csceo$SCE), hvg.mvBio=mgv$bio)
+    chosen.hvg <- rank(-rowData(csceo$SCE)$hvg.mvBio) <= csceo$usage$nHVGs & rowData(csceo$SCE)$hvg.mvBio>0
+    chosen.hvg <- rownames(csceo$SCE)[chosen.hvg]
+    csceo$usage$chosen.hvg <- chosen.hvg
+    
+    if(verbose) message('Finished')
+    
+    return(csceo)
+}
+
+
+#' @keywords internal
+#' @noRd
+scXcluster <- function(csceo, blusparam, verbose){
+  if(csceo$usage$scx.clust){
+    if(verbose) message('Computing clusters... ', appendLF = F)
+    if(is.null(blusparam)){ # if BLUSPARAM=NULL then it will use k and method from scx.graph.k/.method
+      blusparam=bluster::NNGraphParam(k = csceo$usage$scx.graph.k, cluster.fun=csceo$usage$scx.graph.cluster.method)
     }
+    if("SCX_PCA" %in% reducedDimNames(csceo$SCE)){
+      csceo$SCE$scx.clust <- scran::clusterCells(csceo$SCE, use.dimred = "SCX_PCA", BLUSPARAM = blusparam)
+    } else {
+      csceo$SCE$scx.clust <- scran::clusterCells(csceo$SCE, assay.type = csceo$usage$assay.name.normalization, BLUSPARAM = blusparam)
+    }
+    if(verbose) message(' Finished')
   }
-  
-  if(calcRedDim){
-    if(verbose) cat('Computing the following reduced dims:',paste(runDim, collapse = ' '),'\n')
-    xx.sce <- applyReducedDim(xx.sce, runDim, chosen.hvg, nPCs, assay.name.normalization, prefix.name="SCX_", verbose)
-    if(verbose) cat('Finished\n')
-  }
-  
+    
+  return(csceo)
+}
 
-  # Logcounts Normalized ----
-  
+# Logcounts Normalized
+#' @keywords internal
+#' @noRd
+lcNorm <- function(csceo, verbose){
   ##Changing name for normalized matrix to be input in shiny app
-  if(assay.name.normalization!="logcounts" & "logcounts" %in% assayNames(xx.sce)){
-    assay(xx.sce, "logcounts") <- NULL
+  if(csceo$usage$assay.name.normalization!="logcounts" & "logcounts" %in% assayNames(csceo$SCE)){
+    assay(csceo$SCE, "logcounts") <- NULL
   }
-  assayNames(xx.sce)[which(assayNames(xx.sce)==assay.name.normalization)] <- "logcounts"
+  assayNames(csceo$SCE)[which(assayNames(csceo$SCE)==csceo$usage$assay.name.normalization)] <- "logcounts"
   ##Compute a row-normalization of the lognormalized expression matrix to be able to compare between gene expression profiles
   ##The row expression values are divided by their maximum value
-  if(verbose) cat('Computing logcounts normalized...')
-  if(!"logcounts.norm" %in% names(assays(xx.sce))){
-		sparse_mat <- as(assay(xx.sce, "logcounts"), "sparseMatrix")
-		row_maxs <- qlcMatrix::rowMax(sparse_mat)
-		maxdiag <- Diagonal(x = 1/as.vector(row_maxs))
-		scaled_sparse <- maxdiag %*% sparse_mat
-		rownames(scaled_sparse) <- rownames(sparse_mat)
+  if(!"logcounts.norm" %in% assayNames(csceo$SCE)){
+    if(verbose) message('Computing normalized logcounts... ', appendLF = F)
+    sparse_mat <- as(assay(csceo$SCE, "logcounts"), "sparseMatrix")
+    row_maxs <- sparseRowMax(sparse_mat)
+    maxdiag <- Diagonal(x = 1/as.vector(row_maxs))
+    scaled_sparse <- maxdiag %*% sparse_mat
+    rownames(scaled_sparse) <- rownames(sparse_mat)
+      
     ##Store the row-normalized expression values in `logcounts.norm` assay
-		assays(xx.sce)$logcounts.norm <- scaled_sparse
+    assays(csceo$SCE)$logcounts.norm <- scaled_sparse
+    if(verbose) message('Finished')
   }
-  if(verbose) cat(' Finished\n')
   
+  return(csceo)
+}
 
-  # Subsetting SCE object ----
-  # Keep only names in `partitionVars` and `metadataVars` which are in colData to be used for colouring plots
-  # Transform character to factors to be able to plot in shiny app
-
-  if(!is.null(metadataVars)){
-    coldatanames <- names(colData(xx.sce))
-    if(!all(metadataVars%in%coldatanames)) warning(" Can't find '",paste0(metadataVars[!metadataVars%in%coldatanames],collapse = ' & '),"' in coldata.\n '",paste0(metadataVars[metadataVars%in%coldatanames],collapse = ' & '), "' will be available for coloring plots in the app.")
-    if(all(!metadataVars%in%coldatanames)) warning(" Can't find 'metadataVars' in coldata.\n Only 'partitionVars' will be available for coloring plots in the app.")
-    coldatanames <- coldatanames[coldatanames%in%c("nCounts", "nFeatures", ttoFactors, metadataVars)]
-    colData(xx.sce) <- colData(xx.sce)[,coldatanames]
-    # transform to character to factors to be able to plot in shiny app
-    colsK <- sapply(colData(xx.sce), function(x){(is.character(x))})
-    if(any(colsK)){
-      colData(xx.sce)[,colsK] <- lapply(colData(xx.sce)[,colsK,drop=F], function(x){
-      x <- as.factor(x)
-      x <- droplevels(x)
-      x})
-	  }
+#' @keywords internal
+#' @noRd
+colPlotShiny <- function(csceo, verbose){
+  # Transform columns to factors to be available for coloring plots in app
+  if(!is.null(csceo$usage$metadataVars)){
+	# Keep only names in `partitionVars` and `metadataVars` which are in colData
+    coldatanames <- names(colData(csceo$SCE))
+    if(!all(csceo$usage$metadataVars%in%coldatanames)) warning("Can't find ",paste0(csceo$usage$metadataVars[!csceo$usage$metadataVars%in%coldatanames],collapse = ' & ')," in data")
+    
+	# Subsetting SCE object
+    colData(csceo$SCE) <- colData(csceo$SCE)[, coldatanames%in%c("nCounts", "nFeatures", "scx.clust", csceo$usage$partitionVars, csceo$usage$metadataVars)]
   }
+  
+  # Keep names in `partitionVars` which are in colData and any other column (character or numeric) with less than or equal to 30 levels
+  colsK <- sapply(colData(csceo$SCE), function(x){(is.character(x) | is.numeric(x)) & length(unique(x)) <= 30})
+  colsK[c("nCounts", "nFeatures")] <- F # added in QC and shouldn't be considered in any case
+  if(any(colsK)){
+    colData(csceo$SCE)[,colsK] <- lapply(colData(csceo$SCE)[,colsK,drop=F], function(x){
+		x <- as.factor(x)
+		x <- droplevels(x)
+		x
+	})
+  }
+  if(verbose) message(paste0(names(colData(csceo$SCE))[sapply(colData(csceo$SCE), function(x){(is.factor(x))})], collapse = ' & ')," will be available for coloring")
+  
+  return(csceo)
+}
 
-
-  # Attaching SCE to output ----
-
-  csceo[["SCE"]] <- xx.sce
-  
-  
-  # DEGs ----
-  # List of dataframes used by the shiny app to be able to plot volcano graphs of DEGs between clusters.
-  # The list contains the output of `scran::findMarkers' by setting the direction to "any" and pval.type to "all", 
-  # the test.type is specified by the user in `paramFindMarkers', with the exception that if the user 
-  # had specified "wilcox" as test.type, the logFC values would be extracted from the function with test.type="t".
-  
-  if(!'test.type'%in%names(paramFindMarkers)) paramFindMarkers$test.type <- 'wilcox'
-  if(!'pval.type'%in%names(paramFindMarkers)) paramFindMarkers$pval.type <- 'all'
-  if(!'direction'%in%names(paramFindMarkers)) paramFindMarkers$direction <- 'up'
-  
-  if(verbose) cat('Computing differential expression markers:\n')
-  if(verbose) cat('Computing cluster markers...')
+# DEGs
+#' @keywords internal
+#' @noRd
+degs <- function(csceo, verbose){
+  if(verbose) message('Computing differential expression markers... ', appendLF = F)
+  sce.degs <- list()
+  partitionNames <- c(csceo$usage$partitionVars,"scx.clust")[c(csceo$usage$partitionVars,"scx.clust")%in%names(colData(csceo$SCE))]
+  partitionNames <- unique(partitionNames)
   ##If test.type = wilcox, calculate FDR with that test and extract logFC values from t test.
-  if (paramFindMarkers$test.type == "wilcox"){
-    sce.degs <- list()
-    for(i in ttoFactors){
-      tout <- scran::findMarkers(xx.sce, 
+  if (csceo$usage$paramFindMarkers$test.type == "wilcox"){
+    for(i in partitionNames){
+      tout <- scran::findMarkers(csceo$SCE, 
                                  assay.type = "logcounts",
-                                 group = colData(xx.sce)[,i],
+                                 group = colData(csceo$SCE)[,i],
                                  test.type="t",
                                  direction="any",
                                  pval.type="all",
                                  log.p=T,full.stats=T,
-                                 BPPARAM=BPPARAM)
-      wout <- scran::findMarkers(xx.sce, 
+                                 BPPARAM=csceo$usage$BPPARAM)
+      wout <- scran::findMarkers(csceo$SCE, 
                                  assay.type = "logcounts",
-                                 group = colData(xx.sce)[,i],
+                                 group = colData(csceo$SCE)[,i],
                                  test.type="wilcox",
                                  direction="any",
                                  pval.type="all",
                                  log.p=T,full.stats=T,
-                                 BPPARAM=BPPARAM)
+                                 BPPARAM=csceo$usage$BPPARAM)
       l = length(wout)
       for (ii in 1:l){
         wout[[ii]][rownames(tout[[ii]]),"summary.stats"] = tout[[ii]][,"summary.stats"]
@@ -531,125 +397,112 @@ createSCEobject <- function(xx,
       sce.degs[[i]] = wout
     }
   }else{
-    sce.degs <- list()
-    for(i in ttoFactors){
-      sce.degs[[i]] <- scran::findMarkers(xx.sce,
+    for(i in partitionNames){
+      sce.degs[[i]] <- scran::findMarkers(csceo$SCE,
                                           assay.type = "logcounts",
-                                          group = colData(xx.sce)[,i],
-                                          test.type=paramFindMarkers$test.type,
+                                          group = colData(csceo$SCE)[,i],
+                                          test.type=csceo$usage$paramFindMarkers$test.type,
                                           direction="any",
                                           pval.type="all",
                                           log.p=T,full.stats=T,
-                                          BPPARAM = BPPARAM)
+                                          BPPARAM = csceo$usage$BPPARAM)
     }
   }
   
-  if(verbose) cat(' Finished\n')
+  if(verbose) message('Finished')
+  return(sce.degs)
+}
 
-
-  # Attaching sce.degs to output ----
-  csceo[["sce.degs"]] <- sce.degs
+# Markers
+# `sce.markers` is a list of lists of dataframes for every cluster in all partitions in `partitionVars` used by the shiny app to be able to identify gene markers for clusters.
+# Every element in the list is a list of data The list is constructed using the output of `scran::findMarkers' with parameters specified by the user in `paramFindMarkers'.
+# Only genes with FDR<0.05 are selected for each cluster, and the boxcor is calculated for those genes.
+# Boxcor:
+#   The boxcor is the correlation between a gene's expression vector (logcounts) and a binary vector, where only the cells from the selected cluster
+#   mark 1 while the rest of the cells mark 0.
+#' @keywords internal
+#' @noRd
+markers <- function(csceo, verbose){
   
+  # if marker list
+  if(!is.null(csceo$usage$markerList)){
+    partitions <- unique(csceo$usage$markerList$Partition)
+    if(!all(partitions %in% csceo$usage$partitionVars)){
+      message(paste0(paste(partitions[!partitions %in% csceo$usage$partitionVars], collapse = ", ")," not present in 'partitionVars' and will be ignored.\n"), appendLF = F)
+    }
+  }
   
-  # Markers ----
-  # `sce.markers` is a list of lists of dataframes for every cluster in all partitions in `partitionVars` used by the shiny app to be able to identify gene markers for clusters.
-  # Every element in the list is a list of data The list is constructed using the output of `scran::findMarkers' with parameters specified by the user in `paramFindMarkers'.
-  # Only genes with FDR<0.05 are selected for each cluster, and the boxcor is calculated for those genes.
-  # Boxcor:
-  #   The boxcor is the correlation between a gene's expression vector (logcounts) and a binary vector, where only the cells from the selected cluster
-  #   mark 1 while the rest of the cells mark 0.
+  # run marker_fun
   sce.markers <- list()
-  for(i in ttoFactors){
-    sce.markers[[i]] <- markers_func(xx.sce, i, paramFindMarkers, bpparam = BPPARAM, minsize = minSize)
-  }
-  if(verbose) cat('Finished\n')
-  
-  
-  # Attaching sce.markers to output ----
-
-  csceo[["sce.markers"]] <- sce.markers
-  
-
-  # Attaching text to output ----
-  # `descriptionText` is useful when working with multiple tabs because it is displayed in the browser hosting the app
-
-  if(!is.null(descriptionText)){
-    if(class(descriptionText)=="character"){
-      csceo[["text"]] <- descriptionText
-    } else {
-      warning("'descriptionText' is not a character vector.. setting 'text' to NULL")
+  partitionNames <- c(csceo$usage$partitionVars,"scx.clust")[c(csceo$usage$partitionVars,"scx.clust")%in%names(colData(csceo$SCE))]
+  partitionNames <- unique(partitionNames)
+  for(i in partitionNames){
+    if(!is.null(csceo$usage$markerList)){
+      if(i %in% partitions){
+        sce.markers[[i]] <- markers_func(csceo$SCE, i, csceo$usage$markerList[csceo$usage$markerList$Partition==i,2:3], csceo$usage$paramFindMarkers, bpparam = csceo$usage$BPPARAM, minsize = csceo$usage$minSize, verbose = verbose)
+      } else {
+        sce.markers[[i]] <- markers_func(csceo$SCE, i, markerList = NULL, csceo$usage$paramFindMarkers, bpparam = csceo$usage$BPPARAM, minsize = csceo$usage$minSize, verbose = verbose)
+      }
+    } else { 
+        sce.markers[[i]] <- markers_func(csceo$SCE, i, markerList = NULL, csceo$usage$paramFindMarkers, bpparam = csceo$usage$BPPARAM, minsize = csceo$usage$minSize, verbose = verbose)
     }
   }
+  if(verbose) message('Finished')
   
-
-  # Attaching CELLS2KEEP to output ----
-  # If the SCE object contains over 50,000 cells, a random sample of 50,000 cells will be chosen for visualization in the application. 
-  # Please note that all calculations are already completed, and this step is solely for promoting smooth and efficient visualization.
-
-  if(ncol(xx.sce)>nSubCells){
-      if(verbose) cat(paste('Subsampling SCE object, it exceeds',nSubCells,'cells\n'))
-      csceo$CELLS2KEEP <- subsampling_func(xx.sce, cellsToKeep = cells2keep, nmaxcell = nSubCells)
-      if(verbose) cat('Finished\n')
-  } else {
-    csceo$CELLS2KEEP <- "all"
-  }
-
-
-  ##Free memory
-  gc() 
-  return(csceo)
+  return(sce.markers)
 }
 
 #' @import SingleCellExperiment
 
-# Reduced Dimensions ----
+# Reduced Dimensions
 #' @keywords internal
 #' @noRd
 applyReducedDim <- function(sce, reddimstocalculate, chosen.hvgs, nPCs, assayname, prefix.name="SCX_",verbose=TRUE){
+  if(verbose) message('Computing the following reduced dims: ',paste(reddimstocalculate, collapse = ' '))
   namepca <- paste0(prefix.name,"PCA")
   if("PCA"%in%reddimstocalculate){
-    if(verbose) cat("\t PCA...")
+    if(verbose) message("\tPCA... ", appendLF = F)
     set.seed(12534)
     sce <- scater::runPCA(sce, subset_row=chosen.hvgs, ncomponents=nPCs, name=namepca, exprs_values=assayname)
-    if(verbose) cat(' Finished','\n')
+    if(verbose) message('Finished')
   }
   if("TSNE"%in%reddimstocalculate){
-    if(verbose) cat("\t TSNE...")
+    if(verbose) message("\tTSNE... ", appendLF = F)
     set.seed(1111011)
     sce <- scater::runTSNE(sce,dimred=namepca,n_dimred=20,ncomponents=3,name=paste0(prefix.name,"TSNE"),exprs_values=assayname)
-    if(verbose) cat(' Finished','\n')
+    if(verbose) message('Finished')
   }
   if("UMAP"%in%reddimstocalculate){
-    if(verbose) cat("\t UMAP...")
+    if(verbose) message("\tUMAP... ", appendLF = F)
     set.seed(1111011)
     sce <- scater::runUMAP(sce,dimred=namepca,n_dimred=20,ncomponents=3,name=paste0(prefix.name,"UMAP"),exprs_values=assayname)
-    if(verbose) cat(' Finished','\n')
+    if(verbose) message('Finished')
   }
   if("TSNE2D"%in%reddimstocalculate){
-    if(verbose) cat("\t TSNE2D...")
+    if(verbose) message("\tTSNE2D... ", appendLF = F)
     set.seed(1111011)
     sce <- scater::runTSNE(sce,dimred=namepca,name=paste0(prefix.name,"TSNE2D"),exprs_values=assayname)
-    if(verbose) cat(' Finished','\n')
+    if(verbose) message('Finished')
   }
   if("UMAP2D"%in%reddimstocalculate){
-    if(verbose) cat("\t UMAP2D...")
+    if(verbose) message("\tUMAP2D... ", appendLF = F)
     set.seed(1111011)
     sce <- scater::runUMAP(sce,dimred=namepca,name=paste0(prefix.name,"UMAP2D"),exprs_values=assayname)
-    if(verbose) cat(' Finished','\n')
+    if(verbose) message('Finished')
   }
-  
+  if(verbose) message('Finished')
   return(sce)
 }
 
-# markers func for cluster markers ----
+# markers func for cluster markers
 # returns: markers, robustness, correlation with a binary vector "turned on" in that cluster
 #' @keywords internal
 #' @noRd
-markers_func <- function(sce, partition, paramFindMarkers, bpparam, minsize=10){ # previously ldf_func
+markers_func <- function(sce, partition, markerList, paramFindMarkers, bpparam, minsize=10, verbose = TRUE){ # previously ldf_func
 
-  cat(partition, ":\n", sep = "")
+  if(verbose) message(" ", partition, ":")
   
-  # calculate lfmrk ----
+  # calculate lfmrk 
   lfmrk <- list()
   lfmrk[[paramFindMarkers$pval.type]]    <- scran::findMarkers(sce,
                                                                assay.type = "logcounts",
@@ -662,7 +515,7 @@ markers_func <- function(sce, partition, paramFindMarkers, bpparam, minsize=10){
                                                                )
   
   
-  # calculate sce.markers ----
+  # calculate sce.markers 
   scemarkers_t <-list()
   
   lab   <- colData(sce)[,partition]
@@ -675,16 +528,24 @@ markers_func <- function(sce, partition, paramFindMarkers, bpparam, minsize=10){
   if(length(lfmrk[[1]])>0){ #At least one group to calculate
     for(ic in seq_along(lfmrk[[1]])){ #acá se podría hacer una paralelizacion
       coi <- names(lfmrk[[1]])[ic]
-      cat('\t', coi,'- ')
+      if(verbose) message('\t', coi,' - ', appendLF = F)
+      
       if(paramFindMarkers$pval.type=="any"){
         u <- rownames(lfmrk[[1]][[coi]])[lfmrk[[1]][[coi]][,'FDR']<0.05 & 
                                                 lfmrk[[1]][[coi]][,'Top']<=10]
       } else {
         u <- rownames(lfmrk[[1]][[coi]])[lfmrk[[1]][[coi]][,'FDR']<0.05]
       }
+      if(!is.null(markerList)){
+        u <- markerList[markerList$Cluster==coi, "Gene"]
+        if(!all(u%in%rownames(sce))){
+          message(paste0(paste(u[!u%in%rownames(sce)], collapse = ", "))," ignored because not in sce rownames.\n")
+          u <- u[u%in%rownames(sce)]
+        }
+      }
       
-      # (6.1.1) Boxcor ----
-      cat("Computing correlation\n")
+      # (6.1.1) Boxcor 
+      if(verbose) message("Computing correlation")
       
       if(length(u) > 0){
         Z   <- assay(sce, "logcounts")[u,,drop=FALSE]  
@@ -716,13 +577,14 @@ markers_func <- function(sce, partition, paramFindMarkers, bpparam, minsize=10){
 # subsampling cells for visual purposes
 #' @keywords internal
 #' @noRd
-subsampling_func = function(sce, cellsToKeep=NULL, nmaxcell=50000){
-
+subsampling_func <- function(sce, cellsToKeep=NULL, nmaxcell=50000){
+	cat("* SCE is subsampled because it exceeds", nmaxcell, "cells\n")
   if(is.null(cellsToKeep)){
       set.seed(123457) # seed
       ccells2keep <- sample(colnames(sce), nmaxcell, replace=FALSE)
       ccells2keep <- match(ccells2keep, colnames(sce))
   }else{
+	cat("  maintaining the user-defined cells to keep\n")
     ccells2keep <- cellsToKeep[cellsToKeep%in%colnames(sce)]
       if(length(ccells2keep)<nmaxcell){
         naddcells <- nmaxcell-length(ccells2keep)
@@ -731,5 +593,6 @@ subsampling_func = function(sce, cellsToKeep=NULL, nmaxcell=50000){
         ccells2keep <- match(ccells2keep, colnames(sce))
       }
   }
-  return(ccells2keep)
+ 
+   return(ccells2keep)
 }

@@ -51,20 +51,23 @@ genesList <- function(dataPath){
 #' @keywords internal
 #' @noRd
 make_box <- function(ssce, selected.cells){
-  # Create a vector that have a selected if the cell were selected
+  # Create a vector that has 'selected' for selected cells
   ncells <- ncol(ssce)
   cells.v <- rep("unselected", ncells);names(cells.v) <- colnames(ssce)
   cells.v[selected.cells] <- "selected"
   names(cells.v) <- NULL
   # add the vector to SCE as a factor
-  ssce$cajitasdeluz <- cells.v
-  ssce$cajitasdeluz <- as.factor(ssce$cajitasdeluz)
-  clusterss <- "cajitasdeluz"
-  lengths <- table(colData(ssce)[,clusterss])
+  ssce$selectionbox <- cells.v
+  ssce$selectionbox <- as.factor(ssce$selectionbox)
+  
+  # Note: this code was made for partitions with more than 2 levels
+  # For just 2 levels (selected/unselected), it's redundant but still works
+  partition <- "selectionbox"
+  lengths <- table(colData(ssce)[,partition])
   ies <- rep(0, sum(lengths))
   contador <- 1
   for (cluster in names(lengths)){
-    idx <- which(colData(ssce)[,clusterss] == cluster)
+    idx <- which(colData(ssce)[,partition] == cluster)
     ies[contador:(contador+length(idx)-1)] <- idx
     contador <- contador+length(idx)
   }
@@ -74,40 +77,82 @@ make_box <- function(ssce, selected.cells){
   paraCorr <- Matrix::sparseMatrix(i = ies,
                            j = jotas,
                            x = 1,
-                           dims = c(ncol(ssce), length(levels(colData(ssce)[,clusterss])))
+                           dims = c(ncells, length(lengths)),
+						   dimnames = list(colnames(ssce), names(lengths))
               )
-  rownames(paraCorr) <- colnames(ssce)
-  
-  return(list(paraCorr,
-              ssce))
+			  
+  return(list(boxes=paraCorr,
+              sce=ssce))
 }
 
 #' @keywords internal
 #' @noRd
-generar_correlacion <- function(mtx,mtx.cor,ssce, cluster){
-  correlacion <- qlcMatrix::corSparse(t(mtx), mtx.cor[colnames(mtx),])
-  colnames(correlacion) <- names(table(colData(ssce)[,cluster]))
-  rownames(correlacion) <- rownames(mtx)
-  correlacion[is.na(correlacion)] <- 0
-  return(correlacion)
-}
-
-#' @keywords internal
-#' @noRd
-cajitasdeluz <- function(ssce, selected.cells, corr = 0.7){
-  if(!("logcounts" %in% names(assays(ssce)))){
+box_correlation <- function(ssce, selected.cells, corr = 0.7){
+  if(!("logcounts" %in% assayNames(ssce))){
     stop("No 'logcounts' in the sce object")
   }
   lista <- make_box(ssce, selected.cells)
-  correlationMarker <- generar_correlacion(mtx = logcounts(lista[[2]]),
-                                           mtx.cor = lista[[1]],
-                                           ssce = lista[[2]],
-                                           cluster = "cajitasdeluz")
+  
+  correlationMarker <- sparseCor(t(logcounts(lista[["sce"]])),
+								lista[["boxes"]])
+  correlationMarker[is.na(correlationMarker)] <- 0
+  
   correlationMarker <- data.frame(correlationMarker)
   df <- correlationMarker[correlationMarker$selected > corr,1,drop=F]
   df <- df[order(df$selected, decreasing = TRUE),,drop=F]
   names(df)[1] <- "box.cor"
   return(df)
+}
+
+#' @keywords internal
+#' @noRd
+sparseColMax <- function(X){
+  X <- as(X,"dgCMatrix")
+  sapply(seq(ncol(X)), function(k){
+    p0 <- X@p[k]
+    pf <- X@p[k+1]
+    if(p0==pf){ # column k has no elements
+      0
+    }else{
+      max(X@x[(p0+1):pf])
+    }
+  })
+  # as(*, "sparseVector") unnecessary?
+}
+
+#' @keywords internal
+#' @noRd
+sparseRowMax <- function(X){
+  X <- t(X)
+  sparseColMax(X)
+}
+
+#' @keywords internal
+#' @noRd
+sparseCor <- function(X,Y=NULL){
+  X <- as(X,"dgCMatrix")
+  N <- nrow(X)
+  
+  Xmeans <- colMeans(X)
+  
+  if(!is.null(Y)){
+    if(nrow(Y)!=N) stop("X and Y have different number of rows")
+    Y <- as(Y,"dgCMatrix")
+    Ymeans <- colMeans(Y)
+    
+    # almost standard deviation, (n-1) missing
+    Xsd <- sqrt(colSums(X^2) - N*Xmeans^2)
+    Ysd <- sqrt(colSums(Y^2) - N*Ymeans^2)
+    
+    # almost cov, (n-1) missing, would cancel out with Xsd*Ysd:
+    covn1 <- as.matrix(crossprod(X, Y)) - N*tcrossprod(Xmeans, Ymeans) # # t(X) %*% Y - N * (Xmeans %o% Ymeans)
+    return(covn1/tcrossprod(Xsd, Ysd)) # (Xsd %o% Ysd)
+  } else {
+    # almost cov, (n-1) missing 
+    covn1 <- as.matrix(crossprod(X)) - N*tcrossprod(Xmeans) # t(X) %*% X - N * (Xmeans %o% Xmeans) 
+    Xsd <- sqrt(diag(covn1)) # almost standard dev, (n-1) missing, would cancel out with cov
+    return(covn1/tcrossprod(Xsd)) # (Xsd %o% Xsd)
+  }
 }
 
 #CoExpression DF ----

@@ -124,15 +124,21 @@ Clusters_Server <- function(id,sce) {
                         choices = names(colData(sce))[sapply(colData(sce), is.factor)])
     
     observeEvent(input$partitionType1,ignoreInit = T,{
-      req(input$partitionType1)
       prt <- names(colData(sce))[sapply(colData(sce), is.factor)]
       
-      updatePickerInput(session,inputId = "partitionType2", 
-                        choices = c("None",prt[-(match(input$partitionType1,prt))])
+      updatePickerInput(session,inputId = "partitionType2",
+			selected = input$partitionType2,
+			choices = c("None",prt[-(match(input$partitionType1,prt))])
       )
     })
     
     observeEvent(input$partitionType2, {
+	  prt <- names(colData(sce))[sapply(colData(sce), is.factor)]
+	  updatePickerInput(session,inputId = "partitionType1", 
+			selected = input$partitionType1,
+			choices = prt[!prt %in% input$partitionType2]
+	  )
+	  
       if(input$partitionType2 == "None"){
         hideTab(inputId = "barplot_matrix", target = "matrix")  
       } else {

@@ -125,8 +125,7 @@ COExpServer <- function(id,sce,point.size=20) {
       updatePickerInput(session,inputId = "DimType", choices = opt)
     })
     
-    observeEvent(c(input$DimType,dimVector()), {
-      req(!is.null(dimVector()))
+    observeEvent(input$DimType, {
       req(input$DimType)
 	  updatePickerInput(session,inputId = "plotType", choices = rev(names(which(dimVector() == as.numeric(input$DimType)  | dimVector() > 3))))
     })
@@ -166,9 +165,9 @@ COExpServer <- function(id,sce,point.size=20) {
     })
     
         #### Scatter ----
-    ClusterPlot <- eventReactive(c(input$DimType,input$plotType,input$partitionType),{
+    output$plot_cluster <- renderPlotly({
       #3D
-      if(input$DimType == "3"){
+      if(isolate(input$DimType) == "3"){
         plot_ly(type = "scatter3d", mode = "markers",source = "PlotMix")  %>%
           layout(dragmode = "select",
                  scene = list(xaxis = list(title = 'Dim1',showgrid=F,visible=F),
@@ -185,7 +184,7 @@ COExpServer <- function(id,sce,point.size=20) {
                       name = ~colData(sce)[,input$partitionType],
                       # customdata= ~colData(sce)[,input$partitionType],
                       size = I(25),span=I(0),text=~colData(sce)[,input$partitionType],hoverinfo='text') %>% 
-          toWebGL()
+          suppressWarnings(toWebGL())
       } else { #2D
         plot_ly(type = "scatter", mode = "markers",source="PlotMix")  %>%
           layout(dragmode = "select",
@@ -202,13 +201,11 @@ COExpServer <- function(id,sce,point.size=20) {
       
     })
     
-    
-    
-    CoExpressionPlot <- eventReactive(c(input$DimType,input$plotType,CoExpressionL(),input$partitionType),{
+    output$plot_expression <- renderPlotly({
       req(!is.null(CoExpressionL()))
       req(input$plotType)
       #3D
-      if(input$DimType == "3"){
+      if(isolate(input$DimType) == "3"){
         plot_ly(type = "scatter3d", mode = "markers")  %>%
           layout(dragmode = "select",
                  scene = list(xaxis = list(title = 'Dim1',showgrid=F,visible=F),
@@ -229,7 +226,7 @@ COExpServer <- function(id,sce,point.size=20) {
                     hoverinfo = 'text',
                     marker = list(color = ~I(CoExpressionL()$Colors))
                 ) %>% 
-          toWebGL()
+          suppressWarnings(toWebGL())
         
       } else { #2D
         plot_ly(type = "scatter", mode = "markers")  %>%
@@ -247,16 +244,6 @@ COExpServer <- function(id,sce,point.size=20) {
           toWebGL()
       }
       
-    })
-    
-    output$plot_cluster <- renderPlotly({
-      req(!is.null(ClusterPlot()))
-        ClusterPlot()
-    })
-    
-    output$plot_expression <- renderPlotly({
-      req(!is.null(CoExpressionPlot()))
-      CoExpressionPlot()
     })
     
      output$plot_gradient <- renderPlot({

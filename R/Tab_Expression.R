@@ -304,8 +304,7 @@ ExpressionServer <- function(id,sce,point.size=20) {
         sapply(reducedDims(x = sce),FUN = ncol) 
     })
     
-    observeEvent(c(dimVector()),{
-      #req(input$scatter_heatmap == "scatter")
+    observeEvent(dimVector(),{
       if(any(dimVector() > 3)){
         opt <- c('3','2')
       } else{
@@ -314,15 +313,12 @@ ExpressionServer <- function(id,sce,point.size=20) {
       updatePickerInput(session,inputId = "DimType", choices =opt)
     })
     
-    observeEvent(c(input$DimType,dimVector()), {
-      #req(input$scatter_heatmap == "scatter")
-      req(!is.null(dimVector()))
+    observeEvent(input$DimType, {
       req(input$DimType)
-	    updatePickerInput(session,inputId = "plotType", choices = rev(names(which(dimVector() == as.numeric(input$DimType)  | dimVector() > 3))))
+	  updatePickerInput(session,inputId = "plotType", choices = rev(names(which(dimVector() == as.numeric(input$DimType)  | dimVector() > 3))))
     })
     
     observeEvent(input$Cell_Exp,{
-      req(input$Cell_Exp)
       switch(input$Cell_Exp,
              'Violin'    = updateTabsetPanel(inputId = "switcher2",  selected = "Violin_panel"),
              'SpikePlot' = updateTabsetPanel(inputId = "switcher2", selected = "SpikePlot_panel")
@@ -338,11 +334,10 @@ ExpressionServer <- function(id,sce,point.size=20) {
     })
     
     ExpressionL <- eventReactive(genes.L(),{
-      #req(input$scatter_heatmap == "scatter")
       req(input$GL_T == F)
       req(!is.null(genes.L()))
       if(length(genes.L()) > 1) {
-        exp_vtor <- apply(logcounts(sce)[genes.L(),],2,mean)
+        exp_vtor <- colSums(logcounts(sce)[genes.L(),])/length(genes.L())
       } else {
         exp_vtor <- logcounts(sce)[genes.L(),]
       }
@@ -350,7 +345,6 @@ ExpressionServer <- function(id,sce,point.size=20) {
     })
     
     HeatmapL <- eventReactive(c(genes.L(),input$norm_heat),{
-      #req(input$scatter_heatmap == "heatmap")
       req(input$GL_T == F)
       req(!is.null(genes.L()))
       value <- ifelse(input$norm_heat,yes = "logcounts.norm",no = "logcounts") #To swtich between norm ot not normalize expression gene.
@@ -382,12 +376,11 @@ ExpressionServer <- function(id,sce,point.size=20) {
     })
     
     ExpressionGL <- eventReactive(genes.GL(),{
-      #req(input$scatter_heatmap == "scatter")
       req(input$GL_T == T)
       req(length(genes.GL()$genes) > 0)
       
       if(length(genes.GL()$genes) > 1) {
-        exp_vtor <- apply(logcounts(sce)[genes.GL()$genes,],2,mean)
+        exp_vtor <- colSums(logcounts(sce)[genes.GL()$genes,])/length(genes.GL()$genes)
       } else {
         exp_vtor <- logcounts(sce)[genes.GL()$genes,]
       }
@@ -396,7 +389,6 @@ ExpressionServer <- function(id,sce,point.size=20) {
     })
     
     HeatmapGL <- eventReactive(c(genes.GL(),input$norm_heat),{
-      #req(input$scatter_heatmap == "heatmap")
       req(input$GL_T == T)
       req(length(genes.GL()$genes) > 0)
       value <- ifelse(input$norm_heat,yes = "logcounts.norm",no = "logcounts") #To swtich between norm ot not normalize expression gene.
@@ -412,7 +404,6 @@ ExpressionServer <- function(id,sce,point.size=20) {
     #### Selecting ----
     #I do that because if it change, it haven't to calculated everything again, just change the dataframe
     HeatmapF <- reactive({
-      #req(input$scatter_heatmap == "heatmap")
       if(input$GL_T){
         HeatmapGL()    
       } else { 
@@ -437,10 +428,9 @@ ExpressionServer <- function(id,sce,point.size=20) {
     })
     
     ### Scatter ----
-    ClusterPlot <- eventReactive(c(input$DimType,input$plotType,input$partitionType),{
-      #req(input$scatter_heatmap == "scatter")
+    output$plot_cluster <- renderPlotly({
       #3D
-      if(input$DimType == "3"){
+      if(isolate(input$DimType) == "3"){
         plot_ly(type = "scatter3d", mode = "markers",source = "PlotMix")  %>%
           layout(dragmode = "select",
                  scene = list(xaxis = list(title = 'Dim1',showgrid=F,visible=F),
@@ -457,7 +447,7 @@ ExpressionServer <- function(id,sce,point.size=20) {
                       name = ~colData(sce)[,input$partitionType],
                       # customdata= ~colData(sce)[,input$partitionType],
                       size = I(point.size),span=I(0),text=~colData(sce)[,input$partitionType],hoverinfo='text') %>% 
-          toWebGL()
+          suppressWarnings(toWebGL())
       } else { #2D
         plot_ly(type = "scatter", mode = "markers",source="PlotMix")  %>%
           layout(dragmode = "select",
@@ -474,11 +464,11 @@ ExpressionServer <- function(id,sce,point.size=20) {
       
     })
     
-    ExpressionPlot <- eventReactive(c(input$DimType,input$plotType,ExpressionF(),input$partitionType),{
+    output$plot_expression <- renderPlotly({
       req(!is.null(ExpressionF()))
       req(input$plotType)
       #3D
-      if(input$DimType == "3"){
+      if(isolate(input$DimType) == "3"){
         plot_ly(type = "scatter3d", mode = "markers")  %>%
           layout(dragmode = "select",
                  scene = list(xaxis = list(title = 'Dim1',showgrid=F,visible=F),
@@ -500,8 +490,7 @@ ExpressionServer <- function(id,sce,point.size=20) {
                       name = ~colData(sce)[,input$partitionType],
                       size = I(point.size),span=I(0)) %>% 
           colorbar(title = "log(counts)",x=0,y=1) %>% 
-          toWebGL()
-        
+          suppressWarnings(toWebGL())
       } else { #2D
         plot_ly(type = "scatter", mode = "markers")  %>%
           layout(dragmode = "select",
@@ -520,17 +509,6 @@ ExpressionServer <- function(id,sce,point.size=20) {
       }
       
     })
-    
-    output$plot_cluster <- renderPlotly({
-      req(!is.null(ClusterPlot()))
-        ClusterPlot()
-    })
-    
-    output$plot_expression <- renderPlotly({
-      req(!is.null(ExpressionPlot()))
-      ExpressionPlot()
-    })
-    
     
     
     ### Heatmaps ----

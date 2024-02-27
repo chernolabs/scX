@@ -208,5 +208,6 @@ server <- function(input, output, session) {
 	COExpServer(id="Co-exp", sce=cseo$SCE, point.size = point.size)
 	VolcanoServer(id="volcano", sce=cseo$SCE, sce.degs=cseo$sce.degs)
 	Clusters_Server(id ="cluster", sce=cseo$SCE)
-	Fields_Server("fields",sce = cseo$SCE)                                                                                                                                                                                                     
+	Fields_Server("fields",sce = cseo$SCE)
+	session$onSessionEnded(function() {stopApp()})
 }

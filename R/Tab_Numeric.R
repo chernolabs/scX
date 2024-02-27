@@ -35,7 +35,7 @@ Fields_UI <- function(id) {
                                                           choices = NULL, 
                                                           options = list(maxItems = 10,
                                                                          maxOptions = 20,
-                                                                         placeholder = 'Please select columns to plot'),
+                                                                         placeholder = 'Please select fields to plot'),
                                                           width = NULL,
                                                           multiple=T)
                                     ),
@@ -233,16 +233,21 @@ Fields_Server <- function(id,sce) {
     updatePickerInput(session,inputId = "partitionType1", 
                       choices = names(colData(sce))[sapply(colData(sce), is.numeric)])
     
-    updatePickerInput(session,inputId = "partitionType1", 
-                        choices = names(colData(sce))[sapply(colData(sce), is.numeric)])
-    
     observeEvent(input$partitionType1,ignoreInit = T,{
-      req(input$partitionType1)
       prt <- names(colData(sce))[sapply(colData(sce), is.numeric)]
       
-      updatePickerInput(session,inputId = "partitionType2", 
-                        choices = c("None",prt[-(match(input$partitionType1,prt))])
+      updatePickerInput(session,inputId = "partitionType2",
+			selected = input$partitionType2,
+			choices = c("None",prt[-(match(input$partitionType1,prt))])
       )
+    })
+	
+	observeEvent(input$partitionType2,ignoreInit = T,{
+		prt <- names(colData(sce))[sapply(colData(sce), is.numeric)]
+		updatePickerInput(session,inputId = "partitionType1", 
+			selected = input$partitionType1,
+			choices = prt[!prt %in% input$partitionType2]
+		)
     })
     
     updateSelectizeInput(session, 'numeric_columns', choices =names(colData(sce))[sapply(colData(sce), is.numeric)], server = TRUE)
@@ -302,7 +307,7 @@ Fields_Server <- function(id,sce) {
     
     output$plot_numeric <- renderPlotly({
       req(!is.null(PlotNumeric()))
-      PlotNumeric() %>% ggplotly() %>% toWebGL()
+      PlotNumeric() %>% ggplotly() %>% suppressWarnings(toWebGL())
       })
     
     feature <- eventReactive(input$action,{
@@ -477,10 +482,10 @@ Fields_Server <- function(id,sce) {
       if(input$ord_stackVln & length(feature()) >1){ #Define the order if the input is selected and the is not a heatmap of 1 row, received the order vector
         dta <- apply(t(as.matrix(colData(sce)[,feature(),drop=F])),1,FUN =  function(x){
           tapply(X = x,
-                 INDEX = if(partitionColor == "None"){
+                 INDEX = if(input$partitionColor == "None"){
                           rep("All",ncol(sce))
                          } else{
-                           colData(sce)[,partitionColor]
+                           colData(sce)[,input$partitionColor]
                          },
                  FUN=mean)
         }

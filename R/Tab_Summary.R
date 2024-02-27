@@ -223,7 +223,7 @@ QC_Server <- function(id, sce, descriptionText, Npartition) {
       req(!is.null(BoxPlot()))
       g <- subplot(ggplotly(BoxPlot()$g1),ggplotly(BoxPlot()$g2),ggplotly(BoxPlot()$g3),nrows = 3,shareX = T,shareY = F,titleY = T,heights = c(0.4,0.3,0.3)) %>% 
         config(modeBarButtonsToRemove = c("select2d", "lasso2d"))
-      g %>% toWebGL()
+      g %>% suppressWarnings(toWebGL())
     })
     
     #### Download ----

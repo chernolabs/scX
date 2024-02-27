@@ -69,7 +69,7 @@ N_markersUI <- function(id) {
               dropdownButton(
                 plotlyOutput(NS(id,"plot1")) %>% withLoader(type='html',loader = 'dnaspin'),
                 circle = TRUE, status = "danger", icon = icon("magnifying-glass"), width = "300px",
-                tooltip = tooltipOptions(title = "Click to select other group of cells",
+                tooltip = tooltipOptions(title = "Click to select another group of cells",
                                          placement= "right"),
                 right = F
               ),
@@ -153,14 +153,9 @@ N_markersServer <- function(id,sce,point.size = 20) {
     })
     
     observeEvent(c(input$DimType,input$switcher), {
-      req(!is.null(dimVector()))
+      #req(!is.null(dimVector()))
       req(input$DimType)
       updatePickerInput(session,inputId = "plotType", choices = rev(names(which(dimVector() == as.numeric(input$DimType)  | dimVector() > 3))))
-      # if(input$DimType == "3"){
-      #   updatePickerInput(session,inputId = "plotType", choices = rev(names(which(dimVector() == as.numeric(input$DimType)  | dimVector() > 3))))
-      # } else if(input$DimType == "2") { 
-      #   updatePickerInput(session,inputId = "plotType", choices = rev(names(which(dimVector() == as.numeric(input$DimType)  | dimVector() > 3))))
-      # }
     })
     
     observeEvent(gene_marker_selected(),{
@@ -169,13 +164,11 @@ N_markersServer <- function(id,sce,point.size = 20) {
     
     #When I change the partition if I had selected a cluster, it deleted the previous selection.
     observeEvent(input$resetButton,ignoreInit = TRUE,{
-      req(!is.null(cells_selected()))
       updateTabsetPanel(inputId = "switcher", selected = "panel1")
       runjs("Shiny.setInputValue('plotly_selected-PlotMix', null);")
     })
     
     observeEvent(input$Cell_Exp,{
-      req(input$Cell_Exp)
       switch(input$Cell_Exp,
              'Violin'    = updateTabsetPanel(inputId = "switcher2",  selected = "Violin_panel"),
              'SpikePlot' = updateTabsetPanel(inputId = "switcher2", selected = "SpikePlot_panel")
@@ -217,7 +210,7 @@ N_markersServer <- function(id,sce,point.size = 20) {
     
     MarkersDT <- reactive({
       if(!is.null(cells_selected())){
-      a <- cajitasdeluz(ssce = sce,selected.cells =cells_selected(),corr = 0.3)  
+      a <- box_correlation(ssce = sce,selected.cells =cells_selected(),corr = 0.3)  
       a
       } 
       else { NULL }
@@ -231,7 +224,7 @@ N_markersServer <- function(id,sce,point.size = 20) {
                                  }, selection = 'single',
                                  extensions = 'Buttons',
                                  
-                                 options = list(language = list(zeroRecords = "Click on a cluster to analyze its markers (double-click to clear)"),
+                                 options = list(language = list(zeroRecords = "No markers found for this group of cells (double-click to clear)"),
                                                 dom = 'Bfrtip',
                                                 exportOptions = list(header = ""),
                                                 buttons = c('copy', 'csv', 'excel', 'pdf')
@@ -284,10 +277,9 @@ N_markersServer <- function(id,sce,point.size = 20) {
       
     })
     
-    ExpressionPlot <- eventReactive(c(input$DimType,input$plotType,input$partitionType,input$DTMarkers_rows_selected),{
-      req(input$DTMarkers_rows_selected)
+	output$plot2 <- renderPlotly({ #ExpressionPlot
       #3D
-      if(input$DimType == "3"){
+      if(isolate(input$DimType) == "3"){
         plot_ly(type = "scatter3d", mode = "markers")  %>%
           layout(dragmode = "select",
                  scene = list(xaxis = list(title = 'Dim1',showgrid=F,visible=F),
@@ -307,7 +299,7 @@ N_markersServer <- function(id,sce,point.size = 20) {
                       color = ~logcounts(sce)[gene_marker_selected(),],
                       size = I(point.size),span=I(0),text=~colData(sce)[,input$partitionType],hoverinfo='text') %>% 
           colorbar(title = "log(counts)",x=0,y=1) %>% 
-          toWebGL()
+          suppressWarnings(toWebGL())
       } else { #2D
         plot_ly(type = "scatter", mode = "markers")  %>%
           layout(dragmode = "select",
@@ -325,18 +317,12 @@ N_markersServer <- function(id,sce,point.size = 20) {
 		  config(modeBarButtonsToRemove = c("select2d", "lasso2d")) %>% 
           toWebGL()
       }
-      
     })
     
     output$plot <- renderPlotly(ClusterPlot())
     
     output$plot1 <- renderPlotly({
       ClusterPlot() %>% layout(showlegend = FALSE)})
-    
-    output$plot2 <- renderPlotly({
-      req(input$DTMarkers_rows_selected)
-      ExpressionPlot()
-    })
     
           #### Violin&SpikePlots ------
     
