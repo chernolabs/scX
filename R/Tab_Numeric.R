@@ -35,7 +35,7 @@ Fields_UI <- function(id) {
                                                           choices = NULL, 
                                                           options = list(maxItems = 10,
                                                                          maxOptions = 20,
-                                                                         placeholder = 'Please select columns to plot'),
+                                                                         placeholder = 'Please select fields to plot'),
                                                           width = NULL,
                                                           multiple=T)
                                     ),

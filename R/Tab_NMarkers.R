@@ -224,7 +224,7 @@ N_markersServer <- function(id,sce,point.size = 20) {
                                  }, selection = 'single',
                                  extensions = 'Buttons',
                                  
-                                 options = list(language = list(zeroRecords = "Click on a cluster to analyze its markers (double-click to clear)"),
+                                 options = list(language = list(zeroRecords = "No markers found for this group of cells (double-click to clear)"),
                                                 dom = 'Bfrtip',
                                                 exportOptions = list(header = ""),
                                                 buttons = c('copy', 'csv', 'excel', 'pdf')
