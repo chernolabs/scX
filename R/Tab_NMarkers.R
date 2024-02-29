@@ -272,7 +272,7 @@ N_markersServer <- function(id,sce,point.size = 20) {
                       name = ~colData(sce)[,input$partitionType],
                       customdata= ~I(colnames(sce)), 
                       size = I(point.size),span=I(0),text=~colData(sce)[,input$partitionType],hoverinfo='text') %>% 
-          event_register("plotly_selecting") %>% 
+          event_register("plotly_selecting") %>% layout(dragmode='lasso') %>% 
           toWebGL()
       
     })
