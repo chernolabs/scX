@@ -263,14 +263,14 @@ createSCEobject <- function(xx,
   # Please note that all calculations are already completed, and this step is solely for promoting smooth and efficient visualization.
   
   if(ncol(csceo$SCE)>csceo$usage$nSubCells){
-    if(verbose) message('Subsampling SCE object because it exceeds ', csceo$usage$nSubCells, ' cells')
+    if(verbose) message('Creating cell subset for plots because it exceeds ', csceo$usage$nSubCells, ' cells')
     csceo$CELLS2KEEP <- subsampling_func(csceo$SCE, cellsToKeep = csceo$usage$cells2keep, nmaxcell = csceo$usage$nSubCells)
     if(verbose) message('Finished')
   } else {
     csceo$CELLS2KEEP <- "all"
   }
   
-  
+  message('You can now launch the shiny server:\n e.g. launch_scX(cseo, point.size = 50, port = 9099, host = "0.0.0.0", launch.browser = F)')
   ##Free memory
   gc() 
   return(csceo)
