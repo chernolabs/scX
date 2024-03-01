@@ -4,7 +4,7 @@
 #' \code{\link{createSCEobject}} creates the input object (a \linkS4class{List}) for the function \code{\link{launch_scX}}. This list includes a \linkS4class{SingleCellExperiment} object with normalized expression, 
 #' reduced dimensions for visualization, and any additional data provided. Also, this object includes identified gene markers and differential expression analysis for each user-specified partition (if no partition was selected, a quick clusterization is computed and considered)
 #' 
-#' @param xx Either a numeric count matrix object (with genes as rows and cells as columns), a \linkS4class{SingleCellExperiment} object or a \linkS4class{Seurat} object.
+#' @param xx Either a numeric count matrix object (with genes as rows and cells as columns), a \linkS4class{SingleCellExperiment} object, a \linkS4class{Seurat} object or the directory containing the matrix.mtx, features.tsv, barcodes.tsv provided by CellRanger.
 #' @param assay.name.raw Assay name for the raw counts matrix if the input object is a \linkS4class{SingleCellExperiment}. Defaults to \code{counts}.
 #' @param assay.name.normalization Assay name for the normalized matrix if present in the \linkS4class{SingleCellExperiment}. If not present, it computes \code{logcounts} by default.
 #' @param metadata (Optional) A \linkS4class{DataFrame} containing cell metadata. The row names of the metadata data frame must include all cell names that appear as columns in \code{xx}.
@@ -16,9 +16,14 @@
 #' @param nHVGs Number of Highly Variable Genes to use if \code{chosen.hvg=NULL}. Defaults to 3000.
 #' @param nPCs Number of Principal Components to use in PCA. Defaults to 50.
 #' @param calcRedDim Logical. Indicates whether to compute reduced dimensions (PCA, UMAP, t-SNE, UMAP2D, t-SNE2D). Defaults to \code{TRUE}. (Note: If set to \code{FALSE}, but there are no 2D and >3D reduced dimensions provided in the input, PCA embedding will be estimated anyway).
+#' @param markerList (Optional) A \linkS4class{DataFrame} with three columns named: 'Partition', 'Cluster', 'Gene'. It will be used to subset the cluster marker list shown in cluster markers in Markers tab in the scX app.
 #' @param paramFindMarkers A named list of parameters to pass to \code{\link[scran]{findMarkers}} to compute cluster gene markers. 
 #' Defaults to \code{list(test.type="wilcox", pval.type="all", direction="up")}.
 #' @param BPPARAM A \linkS4class{BiocParallelParam} object indicating whether and how parallelization should be performed across genes in the \code{\link[scran]{findMarkers}} function.
+#' @param scx.clust Logical. Indicates whether to perform a community detection algorithm on the data. Defaults to \code{FALSE}. (Note: If set to \code{FALSE}, but there is no \code{partitionVars} to compute marker analysis, it will set to \code{TRUE}).
+#' @param scx.graph.k An integer scalar specifying the number of nearest neighbors to consider during graph construction. Defaults to 20
+#' @param scx.graph.cluster.method Function specifying the method to use to detect communities in the shared NN graph. Alternatively, this may be a string containing the suffix of any \pkg{igraph} community detection algorithm (for example: "walktrap" will use \code{\link[igraph]{cluster_walktrap}}). Defaults to "louvain".
+#' @param BLUSPARAM A \linkS4class{BlusterParam} object specifying the clustering algorithm to use, defaults to a graph-based method. If not \code{NULL} this parameter will be used instead \code{scx.graph.k} and \code{scx.graph.cluster.method}.
 #' @param minSize Numeric. The minimum cluster size for calculating gene marker statistics.
 #' @param calcAllPartitions Logical. Defaults to \code{FALSE}, which means that only partitions from \code{partitionVars} with 30 or fewer levels will be considered for marker and DEG calculations. If set to TRUE, it forces the computation of markers and DEGs for the entire list of \code{partitionVars}.
 #' @param cells2keep (Optional) A list of cell names to keep in case of subsampling. NOTE: Subsampling is only activated for visualization purposes in the case of large datasets; it is not used for computations. Only \code{nSubCells} cells will be used for visualization in the app, and their indexes are stored in the \code{CELLS2KEEP} element of the CSEO object.
@@ -46,14 +51,8 @@
 #' If there is no normalized assay in the \linkS4class{SingleCellExperiment} object or \linkS4class{Seurat} input object
 #' a \href{https://bioconductor.org/books/3.17/OSCA.basic/normalization.html#normalization-by-deconvolution}{Normalization by deconvolution} is performed as proposed in the OSCA book.
 #' First, we calculate clusters using the Walktrap community detection algorithm for graph-based clustering (default parameters from \code{\link[scran]{quickCluster}}).
-#' The resulting clusters are stored in \code{colData} as \code{"scx.clust"}.
 #' Then we compute scale factors for the cells using those clusters.
 #' Finally, we calculate the lognormalized expression matrix by applying a log2 transformation to the product of the raw matrix and scale factors considering a pseudocounts of 1.
-
-#' @section Clustering:
-#' If \code{partitionVars} is user-specified, those categories are used for clustering the data.
-#' If \code{partitionVars} is \code{NULL}, the quick clustering step (see "Normalization") is used to identify markers and DEGs.
-#' Additionally, if a normalized assay exists in the SCE object and "scx.clust" is included in the \code{partitionVars}, the previously described function will be applied to compute clustering, which is stored in \code{colData} as "scx.clust."
 
 #' @section Highly Variable Genes:
 #' If \code{chosen.hvg} is not specified, we will use \code{\link[scran]{modelGeneVar}} to calculate the variance and mean of the lognormalized expression values. 
@@ -66,6 +65,10 @@
 #' Principal Component Analysis is calculated with \code{\link[scater]{runPCA}} using the \code{chosen.hvg} and retaining the first \code{nPCs} components for the normalized expression matrix.
 #' TSNE and UMAP are calculated with \code{\link[scater]{runTSNE}} and \code{\link[scater]{runUMAP}} functions using the PCA matrix.
 
+#' @section Clustering:
+#' If \code{partitionVars} is user-specified, those categories are used for clustering the data.
+#' If \code{partitionVars} is \code{NULL}, none of the user-specified categories pass the filter (see "Partitions" for details) or \code{scx.clust} is set to \code{TRUE} a clustering performed with a graph-based community detection algorithm will be included in partitionVars to identify markers and DEGs. By default it computes \code{\link[igraph]{cluster_louvain}} on a shared nearest neighbors graph with \code{k=20}. Both the clustering algorithm and the number of first neighbors can be changed using the \code{scx.graph.cluster.method} and \code{scx.graph.k} parameters. Also, the user can specify any \linkS4class{BlusterParam} object through \code{BBLUSPARAM} that will be passed to \code{\link[scran]{clusterCells}} to compute clusters.
+
 #' @section Marker Genes Analysis:
 #' \link{createSCEobject} computes statistics to identify marker genes for every cluster
 #' for all partitions in \code{partitionVars}  
@@ -75,6 +78,7 @@
 #' \item{\code{boxcor}:}{The boxcor is the correlation between a gene's expression vector (logcounts) and a binary vector, where only the cells from the selected cluster
 #' mark 1 while the rest of the cells mark 0.}
 #' }
+#' The user can provide a \linkS4class{DataFrame} containing marker genes for each cluster in any partition through \code{markerList}. For each partition in \code{markerList} specified in \code{partitionVars}, the calculated marker statistics for each cluster will be subset to the genes in \code{markerList}. Note that the statistics were calculated using all genes.
 
 #' @section Differential Expression Analysis:
 #' We use the \code{\link[scran]{findMarkers}} function to identify DEGs between clusters specified in \code{partitionVars}
@@ -95,6 +99,9 @@
 #' \item{(optional) \code{text}:}{String if \code{descriptionText} not \code{NULL}.}
 #' \item{\code{CELLS2KEEP}:}{Numeric, the indices of the selected cells chosen for visualization in the \code{scX} application. 
 #' (Alternatively) Character, if 'all' no subsampling will be performed for visualization purposes.}
+#' \item{\code{call}:}{A named list containing all parameters and their values passed to the \code{createSCEobject} call.}
+#' \item{\code{usage}:}{A named list containing all parameters and their corresponding values that were finally utilized by \code{createSCEobject} during preprocessing.}
+
 #' }
 
 #' @author 
@@ -106,6 +113,7 @@
 #' \item{Preprocessing steps: }{\code{\link[scran]{quickCluster}}, \code{\link[scran]{computeSumFactors}} and \code{\link[scater]{logNormCounts}}.}
 #' \item{HVGs: }{\code{\link[scran]{modelGeneVar}}.}
 #' \item{Dimensionality Reduction Techniques: }{\code{\link[scater]{runPCA}}, \code{\link[scater]{runTSNE}} and \code{\link[scater]{runUMAP}}.}
+#' \item{Clustering: }{\code{\link[scran]{clusterCells}}, \linkS4class{BlusterParam}}
 #' \item{Marker genes and DEGs analyses: }{\code{\link[scran]{findMarkers}}, \code{\link[scran]{combineMarkers}}.}
 #' }
 
