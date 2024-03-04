@@ -180,8 +180,11 @@ createSCEobject <- function(xx,
   csceo$usage <- csceo$call
   
   on.exit(sink())
+  logdir <- file.path(getwd(),"scXlogs") # subdir for every preprocess log
+  dir.create(logdir, showWarnings = F)
+  
   xxname <- deparse(substitute(xx))
-  logfile <- paste0("scX-", xxname, "_", format(Sys.time(), "%Y-%m-%d_%H-%M-%S"), ".log")
+  logfile <- paste0(logdir,.Platform$file.sep, xxname, "_", format(Sys.time(), "%Y-%m-%d_%H-%M-%S"), ".log")
   sink(logfile)
   cat("scX preprocessing steps for object:", xxname, "\n*---------------------------------*\n")
   

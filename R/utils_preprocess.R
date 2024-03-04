@@ -502,7 +502,7 @@ markers <- function(csceo, verbose){
   }
   if(verbose) message('Finished')
   
-  cat("* Correlation computed between markers of each cluster and a vector of value 1 for cells in said cluster and 0 elsewhere\n")
+  cat("* Pavlidis Template Matching computed between markers of each cluster and a cluster template (max expression in cluster and 0 elsewhere)\n")
   
   return(sce.markers)
 }
