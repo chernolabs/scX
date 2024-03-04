@@ -140,6 +140,8 @@ sceConverter <- function(csceo, metadata, verbose){
     colData(xx.sce) <- cbind(colData(xx.sce), metadata[colnames(xx.sce),,drop=F])
   }
   
+  names(colData(xx.sce)) <- gsub(" ", "_", names(colData(xx.sce))) # replace spaces for _ in colData names to avoid future errors
+  
   if(verbose) message('Finished')
   return(xx.sce)
 }
@@ -151,6 +153,7 @@ defPartitions <- function(csceo, verbose){
 	if(verbose) message('Analyzing partitions... ', appendLF = F)
   ##Check for repeated partitions
   csceo$usage$partitionVars <- unique(csceo$call$partitionVars)
+  csceo$usage$partitionVars <- if(is.null(csceo$usage$partitionVars)) NULL else gsub(" ", "_", csceo$usage$partitionVars)
   
   ##Checking if partitions from 'partitionVars' are present in the metadata
   if(!all(csceo$usage$partitionVars %in% names(colData(csceo$SCE)))){ # Note: if partitionVars is NULL, condition is FALSE
@@ -370,6 +373,7 @@ lcNorm <- function(csceo, verbose){
 #' @keywords internal
 #' @noRd
 colPlotShiny <- function(csceo, verbose){
+	csceo$usage$metadataVars <- if(is.null(csceo$usage$metadataVars)) NULL else gsub(" ", "_", csceo$usage$metadataVars)
   # Transform columns to factors to be available for coloring plots in app
   if(!is.null(csceo$usage$metadataVars)){
 	# Keep only names in `partitionVars` and `metadataVars` which are in colData
