@@ -449,7 +449,7 @@ Numeric_ExpressionServer <- function(id,sce,point.size=20) {
                       size = I(point.size),
                       span=I(0)) %>% 
           colorbar(title = input$numericType) %>% 
-          toWebGL()
+          toWebGL() %>% config(modeBarButtonsToRemove = c("select2d", "lasso2d"))
       }
       
     })
@@ -495,7 +495,7 @@ Numeric_ExpressionServer <- function(id,sce,point.size=20) {
                       #name = ~colData(sce)[,input$partitionType],
                       hoverinfo = 'text') %>% 
           colorbar(title = "log(counts)") %>% 
-          toWebGL()
+          toWebGL() %>% config(modeBarButtonsToRemove = c("select2d", "lasso2d"))
       }
       
     })
@@ -584,7 +584,7 @@ Numeric_ExpressionServer <- function(id,sce,point.size=20) {
      output$plot_Lines  <- renderPlotly({
        #req(input$scatter_heatmap == "scatter")
        req(!is.null(LinesPlot()))
-       LinesPlot() %>% ggplotly() %>% toWebGL()
+       LinesPlot() %>% ggplotly() %>% config(modeBarButtonsToRemove = c("select2d", "lasso2d")) %>% toWebGL()
      })
      
      SpikePlot <-reactive({
@@ -659,7 +659,7 @@ Numeric_ExpressionServer <- function(id,sce,point.size=20) {
      
      output$plot_MultiLines <- renderPlotly({
        req(!is.null(MultiLinesPlot()))
-       MultiLinesPlot() %>% ggplotly() %>% toWebGL()
+       MultiLinesPlot() %>% ggplotly() %>% config(modeBarButtonsToRemove = c("select2d", "lasso2d")) %>% toWebGL()
      })
      
      ### Downloads -----

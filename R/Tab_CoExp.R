@@ -196,7 +196,7 @@ COExpServer <- function(id,sce,point.size=20) {
                       name = ~colData(sce)[,input$partitionType],
                       # customdata= ~colData(sce)[,input$partitionType], 
                       size = I(25),span=I(0),text=~colData(sce)[,input$partitionType],hoverinfo='text') %>% 
-          toWebGL()
+          toWebGL() %>% config(modeBarButtonsToRemove = c("select2d", "lasso2d"))
       }
       
     })
@@ -241,7 +241,7 @@ COExpServer <- function(id,sce,point.size=20) {
                     hoverinfo = 'text',
                     size = I(point.size),span=I(0),
                     marker = list(color =I(CoExpressionL()$Colors))) %>% 
-          toWebGL()
+          toWebGL() %>% config(modeBarButtonsToRemove = c("select2d", "lasso2d"))
       }
       
     })
