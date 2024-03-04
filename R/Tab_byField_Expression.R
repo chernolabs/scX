@@ -104,6 +104,13 @@ Numeric_ExpressionUI <- function(id) {
 			    )
 			  )
 			),
+			conditionalPanel("input.scatter_heatmap == 'MultiLines'",ns=NS(id),
+			  prettySwitch(NS(id,"dropouts"),
+                         "Include zeros",
+                         value = F,
+                         status = "primary",
+                         fill = TRUE)
+			),
       conditionalPanel("input.scatter_heatmap == 'heatmap'",ns=NS(id),
             prettySwitch(NS(id,"cluster_row"),
                          "Cluster Row",
@@ -637,11 +644,17 @@ Numeric_ExpressionServer <- function(id,sce,point.size=20) {
        df_plot <- reshape2::melt(df_plot, id.vars = c("Cell","Numeric"), measure.vars = feature,
                                 variable.name = "Feat", value.name = "Expr")
        
-       p <- df_plot %>% ggplot(aes(y=Expr,x=Numeric,col = Feat)) + geom_smooth(se = F, method = 'gam', formula = y ~ s(x, bs = "cs")) +
-         xlab(input$numericType) + 
-         ylab("log(counts)") +
-         ggtitle("Expression")   
-       p 
+	   p <- df_plot %>% ggplot(aes(y=Expr,x=Numeric,col = Feat))
+	   if(length(feature)==1){
+		p <- p + geom_point(shape=1, stroke = 0.1)
+	   }
+	   
+	   if (input$dropouts){
+			p <- p + geom_smooth(se = F, method = 'gam', formula = y ~ s(x, bs = "cs"))
+		} else {
+			p <- p + geom_smooth(data=subset(df_plot, Expr>0), se = F, method = 'gam', formula = y ~ s(x, bs = "cs"))
+		}
+       p + xlab(input$numericType) + ylab("log(counts)") + ggtitle("Expression")
      })
      
      output$plot_MultiLines <- renderPlotly({
