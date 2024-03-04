@@ -272,10 +272,11 @@ expNormalization <- function(csceo, verbose){
     if(csceo$usage$assay.name.raw %in% assayNames(csceo$SCE)){
       if(verbose) message('Computing normalization... ', appendLF = F)
       
-	  set.seed(123457)
+	    set.seed(123457)
       clust <- scran::quickCluster(csceo$SCE, assay.type = csceo$usage$assay.name.raw)
       csceo$SCE <- scran::computeSumFactors(csceo$SCE,cluster=clust,min.mean=0.1, assay.type = csceo$usage$assay.name.raw)
       csceo$SCE <- scater::logNormCounts(csceo$SCE, assay.type = csceo$usage$assay.name.raw, name="logcounts")
+      csceo$usage$assay.name.normalization <- "logcounts"
       
 	  if(verbose) message('Finished')
 	  
@@ -298,20 +299,20 @@ expNormalization <- function(csceo, verbose){
 #' @keywords internal
 #' @noRd
 defHVG <- function(csceo, verbose){
-    if(verbose) message('Computing HVGs... ', appendLF = F)
+  if(verbose) message('Computing HVGs... ', appendLF = F)
 	mgv <- scran::modelGeneVar(csceo$SCE,span=.8, assay.type = csceo$usage$assay.name.normalization)
-    rowData(csceo$SCE) <- cbind(rowData(csceo$SCE), hvg.mvBio=mgv$bio)
-    chosen.hvg <- rank(-rowData(csceo$SCE)$hvg.mvBio) <= csceo$usage$nHVGs & rowData(csceo$SCE)$hvg.mvBio>0
-    chosen.hvg <- rownames(csceo$SCE)[chosen.hvg]
-    csceo$usage$chosen.hvg <- chosen.hvg
+  rowData(csceo$SCE) <- cbind(rowData(csceo$SCE), hvg.mvBio=mgv$bio)
+  chosen.hvg <- rank(-rowData(csceo$SCE)$hvg.mvBio) <= csceo$usage$nHVGs & rowData(csceo$SCE)$hvg.mvBio>0
+  chosen.hvg <- rownames(csceo$SCE)[chosen.hvg]
+  csceo$usage$chosen.hvg <- chosen.hvg
 	
-    cat("* HVGs computed from", csceo$usage$assay.name.normalization,"using:
+  cat("* HVGs computed from", csceo$usage$assay.name.normalization,"using:
 	* scran modelGeneVar function to model variance of log-expression profiles for each gene
 	* order biological components of previous step to keep", csceo$usage$nHVGs,"best ranked genes\n\n")
     
-    if(verbose) message('Finished')
+  if(verbose) message('Finished')
     
-    return(csceo)
+  return(csceo)
 }
 
 
@@ -591,19 +592,19 @@ markers_func <- function(sce, partition, markerList, paramFindMarkers, bpparam, 
       coi <- names(lfmrk[[1]])[ic]
       if(verbose) message('\t', coi,' - ', appendLF = F)
       
-      if(paramFindMarkers$pval.type=="any"){
-        u <- rownames(lfmrk[[1]][[coi]])[lfmrk[[1]][[coi]][,'FDR']<0.05 & 
+      if(!is.null(markerList)){
+        u <- markerList[markerList$Cluster==coi, "Gene"]
+        if(any(!u%in%rownames(sce))){
+          message(paste0(paste(u[!u%in%rownames(sce)], collapse = ", "))," ignored because not in sce rownames. ", appendLF = F)
+          u <- u[u%in%rownames(sce)]
+        } else if(paramFindMarkers$pval.type=="any"){
+              u <- rownames(lfmrk[[1]][[coi]])[lfmrk[[1]][[coi]][,'FDR']<0.05 & 
                                                 lfmrk[[1]][[coi]][,'Top']<=10]
+        }
       } else {
         u <- rownames(lfmrk[[1]][[coi]])[lfmrk[[1]][[coi]][,'FDR']<0.05]
       }
-      if(!is.null(markerList)){
-        u <- markerList[markerList$Cluster==coi, "Gene"]
-        if(!all(u%in%rownames(sce))){
-          message(paste0(paste(u[!u%in%rownames(sce)], collapse = ", "))," ignored because not in sce rownames.\n")
-          u <- u[u%in%rownames(sce)]
-        }
-      }
+      
 		
       # (6.1.1) Boxcor 
       if(verbose) message("Computing correlation")

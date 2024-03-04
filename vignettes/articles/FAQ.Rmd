@@ -162,3 +162,60 @@ createSCEobject(
 )
 ```
 
+## 5. Can I remove bad quality cells within the app?
+
+You cannot filter cells inside the app. Instead you can identify and download the cells id selected with lasso or box tool in "Find new markers" tab inside "Markers". Then you can run this lines of code to filter those cells from the SCE object and redo the preprocessing steps.
+
+```R
+## Following the quick start guide example:
+#library(scX)
+#cseo <- createSCEobject(xx = scXample, 
+#                        partitionVars = "inferred_cell_type", 
+#                        metadataVars = c("source_name", "age", "sex", "strain", "treatment", "pseudotime"),
+#                        descriptionText = "Quick Start Guide")
+#launch_scX(cseo)
+## Inside the app select some cells with lasso or box tool in "Find new markers" tab and click 'Download Selected Cells'
+
+cells2filter <- read.csv("/path/to/downloaded/file.csv") # Load cells id
+ 
+sce <- cseo$SCE[,!colnames(cseo$SCE) %in% cells2filter$Selected_Cells] # Subsetting cells from SCE object
+
+# We run the function to compute all calculations again with the new object.
+# The input object now has "logcounts" assay. In order to compute a new normalization we set 'assay.name.normalization' to empty string and it will overwrite it.
+cseo <- createSCEobject(xx = sce,
+                        assay.name.normalization = "",
+                        partitionVars = "inferred_cell_type",
+                        metadataVars = c("source_name", "age", "sex", "strain", "treatment", "pseudotime"),
+                        descriptionText = "Quick Start Guide")
+launch_scX(cseo)
+```
+
+## 6. Can I use a list of marker genes to analyze within the scX app? 
+
+Yes, you can pass a list of marker genes for every cluster in any partition of the data you can pass it through `markerList` in form of DataFrame. The preprocess function will compute marker statistics per gene for all cluster in the partitions passed through `partitionVars` but it will subset the list of genes to those present in the DataFrame.
+
+```R
+# Custom marker genes for some clusters
+COP <- c("Neu4", "Bmp4", "Gpr17")
+NFOL1 <- c("Tcf7l2", "Frmd4a", "Pik3r3")
+NFOL2 <- c("Fam107b", "Rras2", "Tmem2", "Cnksr3")
+MFOL1 <- c("Ctps", "Mag", "RIPTIDE")
+MFOL2 <- c("Wfdc18")
+
+# data.frame preparation
+partition <- c(rep("inferred_cell_type", times = length(COP) + length(NFOL1) + length(NFOL2) + length(MFOL1) + length(MFOL2)))
+cluster <- c(rep("COP", length(COP)), rep("NFOL1", length(NFOL1)), rep("NFOL2", length(NFOL2)), rep("MFOL1", length(MFOL1)), rep("MFOL2", length(MFOL2)))
+gene <- c(COP, NFOL1, NFOL2, MFOL1, MFOL2)
+
+# data.frame creation
+ml <- data.frame(Partition = partition, Cluster = cluster, Gene = gene)
+
+# Code Example:
+library(scX)
+cseo <- createSCEobject(xx = scXample, 
+                        partitionVars = "inferred_cell_type", 
+                        metadataVars = c("source_name", "age", "sex", "strain", "treatment", "pseudotime"),
+                        markerList = ml
+                        descriptionText = "Quick Start Guide")
+launch_scX(cseo)
+```

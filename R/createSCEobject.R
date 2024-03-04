@@ -121,7 +121,7 @@
 #' \dontrun{
 #' # Quick start guide example:
 #' library(scX)
-#' cseo <- createSCEobject(xx = sce, 
+#' cseo <- createSCEobject(xx = scXample, 
 #'                         partitionVars = "inferred_cell_type", 
 #'                         metadataVars = c("source_name", "age", "sex", "strain", "treatment", "pseudotime"),
 #'                         descriptionText = "Quick Start Guide")
