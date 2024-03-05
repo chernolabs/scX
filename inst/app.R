@@ -94,7 +94,7 @@ ui <- function(){
       ### Styling ----
       tags$head(
         tags$link(rel="shortcut icon", href="www/scX.ico"),
-        tags$script(glue::glue('document.title = {dataset_name}')),
+        tags$script(paste0('document.title = {dataset_name}')),
         tags$style(
           HTML(".tab-content { padding-left: 20px; padding-right: 30px; }")
         ),

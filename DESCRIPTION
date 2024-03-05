@@ -25,6 +25,7 @@ Depends:
     SingleCellExperiment
 Imports: 
     bluster,
+    BiocParallel,
     circlize,
     ComplexHeatmap (>= 2.12.1),
     cowplot,
@@ -32,7 +33,6 @@ Imports:
     DT,
     ggcorrplot,
     ggplot2,
-    glue,
     htmltools,
     magick,
     magrittr,
@@ -53,10 +53,9 @@ Imports:
     shinyjs,
     shinyWidgets,
     tidyr,
-	  uwot,
+    uwot,
     viridis
 Suggests: 
-    doParallel,
     knitr,
     rmarkdown,
     Seurat
