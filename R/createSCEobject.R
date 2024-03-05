@@ -184,7 +184,7 @@ createSCEobject <- function(xx,
   dir.create(logdir, showWarnings = F)
   
   xxname <- deparse(substitute(xx))
-  logfile <- paste0(logdir,.Platform$file.sep, xxname, "_", format(Sys.time(), "%Y-%m-%d_%H-%M-%S"), ".log")
+  logfile <- paste0(logdir,.Platform$file.sep, make.names(xxname), "_", format(Sys.time(), "%Y-%m-%d_%H-%M-%S"), ".log")
   sink(logfile)
   cat("scX preprocessing steps for object:", xxname, "\n*---------------------------------*\n")
   
@@ -281,7 +281,8 @@ createSCEobject <- function(xx,
     csceo$CELLS2KEEP <- "all"
   }
   
-  message('You can now launch the shiny server:\n e.g. launch_scX(cseo, point.size = 50, port = 9099, host = "0.0.0.0", launch.browser = F)')
+  message("Preprocess log available in '", logfile,
+	"'\nYou can now launch the shiny server:\n e.g. launch_scX(cseo, point.size = 50, port = 9099, host = '0.0.0.0', launch.browser = F)")
   ##Free memory
   gc() 
   return(csceo)
