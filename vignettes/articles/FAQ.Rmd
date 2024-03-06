@@ -219,3 +219,61 @@ cseo <- createSCEobject(xx = scXample,
                         descriptionText = "Quick Start Guide")
 launch_scX(cseo)
 ```
+
+## 7. How can I use scX docker image for singlecell analysis?
+
+Firstly, you have to pull scX docker image from DockerHub:
+
+```console
+docker pull chernolabs/scx
+```
+After that you will need a R script to run scX analysis and a Dockerfile to build the container. 
+Suppose you have your SCE object saved in /path/to/host/directory/data/sce.rds and a R script called analysis_scX.R as follows:
+
+```R
+# Library
+suppressPackageStartupMessages(library(scX))
+
+# Loading SCE object
+sce <- readRDS("/home/data/sce.rds")
+
+# Analysis
+cseo <- createSCEobject(
+    xx = sce,
+    descriptionText = "Using scX with Docker!"
+)
+
+#Launch app
+launch_scX(cseo, port = 9192, host = "0.0.0.0", launch.browser = FALSE)
+```
+We are setting the port 9192 (you can choose your favorite port) and launch.browser = FALSE. In the same directory, you have to create a Dockerfile similar to this one: 
+
+```dockerfile
+FROM msbeckel/scx:0.3.0
+
+RUN mkdir /home/shiny-app
+
+COPY scx_analysis.R /home/shiny-app/make_scX.R
+
+RUN chmod -R 755 /home/shiny-app/
+RUN mkdir /data && chown shiny:shiny /data
+
+EXPOSE 9192
+
+CMD Rscript /home/shiny-app/scx_analysis.R
+```
+With the Dockerfile complete, image is built with:
+
+```console
+docker build -t scx_example ./path/to/Dockerfile/directory
+```
+and can be run as a standalone container with:
+
+```console
+docker run --name scx_example_app \
+	-v /path/to/host/directory/data:/home/data \
+	-p 9192:9192 \
+	scx_example
+```
+
+
