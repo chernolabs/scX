@@ -1,6 +1,6 @@
 Package: scX
 Title: Interactive Visualization and Analysis of Single-Cell Experiment Data
-Version: 0.2.0
+Version: 0.3.0
 Authors@R: c(
     person(given = "Tomás",family = "Vega Waichman", email = "tomas.vegawaichman@mail.mcgill.ca", role = c("aut", "cre"),
            comment = c(ORCID = "0009-0000-7002-9413")),
