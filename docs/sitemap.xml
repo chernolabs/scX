@@ -4,10 +4,31 @@
     <loc>https://chernolabs.github.io/scX/404.html</loc>
   </url>
   <url>
-    <loc>https://chernolabs.github.io/scX/LICENSE-text.html</loc>
+    <loc>https://chernolabs.github.io/scX/articles/articles/Differential_Expression.html</loc>
   </url>
   <url>
-    <loc>https://chernolabs.github.io/scX/LICENSE.html</loc>
+    <loc>https://chernolabs.github.io/scX/articles/articles/Exploratory_Data_Analysis.html</loc>
+  </url>
+  <url>
+    <loc>https://chernolabs.github.io/scX/articles/articles/FAQ.html</loc>
+  </url>
+  <url>
+    <loc>https://chernolabs.github.io/scX/articles/articles/Gene_Expression.html</loc>
+  </url>
+  <url>
+    <loc>https://chernolabs.github.io/scX/articles/articles/get_started.html</loc>
+  </url>
+  <url>
+    <loc>https://chernolabs.github.io/scX/articles/articles/install.html</loc>
+  </url>
+  <url>
+    <loc>https://chernolabs.github.io/scX/articles/articles/Markers.html</loc>
+  </url>
+  <url>
+    <loc>https://chernolabs.github.io/scX/articles/articles/Summary.html</loc>
+  </url>
+  <url>
+    <loc>https://chernolabs.github.io/scX/articles/articles/Visual_Tools.html</loc>
   </url>
   <url>
     <loc>https://chernolabs.github.io/scX/articles/Differential_Expression.html</loc>
@@ -22,42 +43,6 @@
     <loc>https://chernolabs.github.io/scX/articles/Gene_Expression.html</loc>
   </url>
   <url>
-    <loc>https://chernolabs.github.io/scX/articles/Markers.html</loc>
-  </url>
-  <url>
-    <loc>https://chernolabs.github.io/scX/articles/Summary.html</loc>
-  </url>
-  <url>
-    <loc>https://chernolabs.github.io/scX/articles/Visual_Tools.html</loc>
-  </url>
-  <url>
-    <loc>https://chernolabs.github.io/scX/articles/articles/Differential_Expression.html</loc>
-  </url>
-  <url>
-    <loc>https://chernolabs.github.io/scX/articles/articles/Exploratory_Data_Analysis.html</loc>
-  </url>
-  <url>
-    <loc>https://chernolabs.github.io/scX/articles/articles/FAQ.html</loc>
-  </url>
-  <url>
-    <loc>https://chernolabs.github.io/scX/articles/articles/Gene_Expression.html</loc>
-  </url>
-  <url>
-    <loc>https://chernolabs.github.io/scX/articles/articles/Markers.html</loc>
-  </url>
-  <url>
-    <loc>https://chernolabs.github.io/scX/articles/articles/Summary.html</loc>
-  </url>
-  <url>
-    <loc>https://chernolabs.github.io/scX/articles/articles/Visual_Tools.html</loc>
-  </url>
-  <url>
-    <loc>https://chernolabs.github.io/scX/articles/articles/get_started.html</loc>
-  </url>
-  <url>
-    <loc>https://chernolabs.github.io/scX/articles/articles/install.html</loc>
-  </url>
-  <url>
     <loc>https://chernolabs.github.io/scX/articles/get_started.html</loc>
   </url>
   <url>
@@ -67,10 +52,25 @@
     <loc>https://chernolabs.github.io/scX/articles/install.html</loc>
   </url>
   <url>
+    <loc>https://chernolabs.github.io/scX/articles/Markers.html</loc>
+  </url>
+  <url>
+    <loc>https://chernolabs.github.io/scX/articles/Summary.html</loc>
+  </url>
+  <url>
+    <loc>https://chernolabs.github.io/scX/articles/Visual_Tools.html</loc>
+  </url>
+  <url>
     <loc>https://chernolabs.github.io/scX/authors.html</loc>
   </url>
   <url>
     <loc>https://chernolabs.github.io/scX/index.html</loc>
+  </url>
+  <url>
+    <loc>https://chernolabs.github.io/scX/LICENSE-text.html</loc>
+  </url>
+  <url>
+    <loc>https://chernolabs.github.io/scX/LICENSE.html</loc>
   </url>
   <url>
     <loc>https://chernolabs.github.io/scX/reference/createSCEobject.html</loc>
@@ -83,8 +83,5 @@
   </url>
   <url>
     <loc>https://chernolabs.github.io/scX/reference/scXample.html</loc>
-  </url>
-  <url>
-    <loc>https://chernolabs.github.io/scX/reference/sce.html</loc>
   </url>
 </urlset>

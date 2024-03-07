@@ -11,6 +11,18 @@ knitr::opts_chunk$set(
 )
 ```
 
+```{css echo=FALSE}
+/* Define a margin before h2 element */
+h2  {
+  margin-top: 1em;
+}
+
+/* Define a margin before every first h4 elements */
+h4:first-of-type {
+  margin-top: 1em;
+}
+``` 
+
 ## 1. What type of input does scX accept?
 
 scX is a "plug and play" tool that pre-processes the data using only the raw count matrix, allowing the dataset to be explored in depth.
@@ -146,7 +158,7 @@ Another option could be R Shiny Server, for more details please visit the follow
 
 ## 4. If I want to change any preprocessing parameters, do I need to go through all the steps again to relaunch the app?
 
-No! createSCEobject() can take as input a SingleCellExpression object previously normalized (logcounts assay) and with reduced dim already estimated. In this case normalization and dimensionality reduction steps could be avoided.
+No! createSCEobject() can take as input a SingleCellExpression object previously normalized (logcounts assay) and with reduced dims already estimated. In this case normalization and dimensionality reduction steps could be avoided.
 
 For instance, if you initiated the application by using test.type = "wilcox" in paramFindMarkers but now intend to re-launch it utilizing a different sort of test, like t-test, just use the createSCEobject() function with the updated parameter, indicating that you do not require the other features to be recalculated.
 
@@ -164,7 +176,7 @@ createSCEobject(
 
 ## 5. Can I remove bad quality cells within the app?
 
-You cannot filter cells inside the app. Instead you can identify and download the cells id selected with lasso or box tool in "Find new markers" tab inside "Markers". Then you can run this lines of code to filter those cells from the SCE object and redo the preprocessing steps.
+You cannot filter cells inside the app. Instead you can identify and download the cells id selected with lasso or box tool in "Find new markers" tab inside "Markers". Then you can run these lines of code to filter those cells from the SCE object and redo the preprocessing steps.
 
 ```R
 ## Following the quick start guide example:
@@ -176,12 +188,14 @@ You cannot filter cells inside the app. Instead you can identify and download th
 #launch_scX(cseo)
 ## Inside the app select some cells with lasso or box tool in "Find new markers" tab and click 'Download Selected Cells'
 
-cells2filter <- read.csv("/path/to/downloaded/file.csv") # Load cells id
+# Load cells id:
+cells2filter <- read.csv("/path/to/downloaded/file.csv")
  
-sce <- cseo$SCE[,!colnames(cseo$SCE) %in% cells2filter$Selected_Cells] # Subsetting cells from SCE object
+# Subsetting cells from SCE object:
+sce <- cseo$SCE[,!colnames(cseo$SCE) %in% cells2filter$Selected_Cells]
 
-# We run the function to compute all calculations again with the new object.
-# The input object now has "logcounts" assay. In order to compute a new normalization we set 'assay.name.normalization' to empty string and it will overwrite it.
+# We run the function to compute all calculations again with the new object. The input object now has "logcounts" assay. 
+# In order to compute a new normalization we set 'assay.name.normalization' to empty string and it will overwrite it:
 cseo <- createSCEobject(xx = sce,
                         assay.name.normalization = "",
                         partitionVars = "inferred_cell_type",
@@ -192,7 +206,7 @@ launch_scX(cseo)
 
 ## 6. Can I use a list of marker genes to analyze within the scX app? 
 
-Yes, you can pass a list of marker genes for every cluster in any partition of the data you can pass it through `markerList` in form of DataFrame. The preprocess function will compute marker statistics per gene for all cluster in the partitions passed through `partitionVars` but it will subset the list of genes to those present in the DataFrame.
+Yes, you can pass a list of marker genes for every cluster in any partition of the data in the form of DataFrame through `markerList`. The preprocess function will compute marker statistics per gene for all clusters in the partitions passed through `partitionVars` but it will subset the list of genes to those present in the DataFrame.
 
 ```R
 # Custom marker genes for some clusters
@@ -227,8 +241,8 @@ Firstly, you have to pull scX docker image from DockerHub:
 ```console
 docker pull chernolabs/scx
 ```
-After that you will need a R script to run scX analysis and a Dockerfile to build the container. 
-Suppose you have your SCE object saved in /path/to/host/directory/data/sce.rds and a R script called analysis_scX.R as follows:
+After that you will need an R script to run scX analysis and a Dockerfile to build the container. 
+Suppose you have your SCE object saved in /path/to/host/directory/data/sce.rds and an R script called analysis_scX.R as follows:
 
 ```R
 # Library

@@ -1,17 +1,17 @@
-pandoc: '2.18'
-pkgdown: 2.0.6
+pandoc: 3.1.1
+pkgdown: 2.0.7
 pkgdown_sha: ~
 articles:
   Differential_Expression: Differential_Expression.html
   Exploratory_Data_Analysis: Exploratory_Data_Analysis.html
   FAQ: FAQ.html
   Gene_Expression: Gene_Expression.html
+  get_started: get_started.html
+  install: install.html
   Markers: Markers.html
   Summary: Summary.html
   Visual_Tools: Visual_Tools.html
-  get_started: get_started.html
-  install: install.html
-last_built: 2023-11-07T19:07Z
+last_built: 2024-03-07T19:18Z
 urls:
   reference: https://chernolabs.github.io/scX/reference
   article: https://chernolabs.github.io/scX/articles

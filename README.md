@@ -18,4 +18,4 @@
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"chernolabs/scX"</span><span class="op">)</span></span></code></pre></div>
 
-<p>You can also check the <a href="https://chernolabs.github.io/scX/" class="external-link">detailed explanation</a> of what the app can do using an available example!</p>
+<p>You can also check the <a href="https://chernolabs.github.io/scX/articles/get_started.html" class="external-link">detailed explanation</a> of what the app can do using the package example data, or interact with our available <a href="http://scx.leloir.org.ar/" class="external-link">app example</a>.</p>
