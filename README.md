@@ -19,3 +19,7 @@
 <code class="sourceCode R"><span><span class="fu">devtools</span><span class="fu">::</span><span class="fu"><a href="https://remotes.r-lib.org/reference/install_github.html" class="external-link">install_github</a></span><span class="op">(</span><span class="st">"chernolabs/scX"</span><span class="op">)</span></span></code></pre></div>
 
 <p>You can also check the <a href="https://chernolabs.github.io/scX/articles/get_started.html" class="external-link">detailed explanation</a> of what the app can do using the package example data, or interact with our available <a href="http://scx.leloir.org.ar/" class="external-link">app example</a>.</p>
+
+---
+<h2>Citation</h2>
+Tomás Vega Waichman, M Luz Vercesi, Ariel A Berardino, Maximiliano S Beckel, Damiana Giacomini, Natalí B Rasetto, Magalí Herrero, Daniela J Di Bella, Paola Arlotta, Alejandro F Schinder, Ariel Chernomoretz, scX: a user-friendly tool for scRNA-seq exploration, Bioinformatics Advances, 2024;, vbae062, https://doi.org/10.1093/bioadv/vbae062
