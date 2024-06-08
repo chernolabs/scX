@@ -301,19 +301,32 @@ expNormalization <- function(csceo, verbose){
 # can be assigned as the residual from the trend.
 #' @keywords internal
 #' @noRd
-defHVG <- function(csceo, verbose){
-  if(verbose) message('Computing HVGs... ', appendLF = F)
-	mgv <- scran::modelGeneVar(csceo$SCE,span=.8, assay.type = csceo$usage$assay.name.normalization)
-  rowData(csceo$SCE) <- cbind(rowData(csceo$SCE), hvg.mvBio=mgv$bio)
-  chosen.hvg <- rank(-rowData(csceo$SCE)$hvg.mvBio) <= csceo$usage$nHVGs & rowData(csceo$SCE)$hvg.mvBio>0
-  chosen.hvg <- rownames(csceo$SCE)[chosen.hvg]
-  csceo$usage$chosen.hvg <- chosen.hvg
-	
-  cat("* HVGs computed from", csceo$usage$assay.name.normalization,"using:
-	* scran modelGeneVar function to model variance of log-expression profiles for each gene
-	* order biological components of previous step to keep", csceo$usage$nHVGs,"best ranked genes\n\n")
-    
-  if(verbose) message('Finished')
+defHVG <- function(csceo, verbose){ 
+  
+  # check if 'chosen.hvg' are in rownames of the object
+  if(!is.null(csceo$call$chosen.hvg)){
+    csceo$usage$chosen.hvg <- csceo$call$chosen.hvg[csceo$call$chosen.hvg%in%rownames(csceo$SCE)]
+    if(length(csceo$usage$chosen.hvg)<1){ # if there are no 'chosen.hvg', set to NULL
+      csceo$usage$chosen.hvg <- NULL
+    }
+  }
+  
+  if(csceo$usage$calcRedDim){
+    if(is.null(csceo$usage$chosen.hvg)){
+      if(verbose) message('Computing HVGs... ', appendLF = F)
+      mgv <- scran::modelGeneVar(csceo$SCE,span=.8, assay.type = csceo$usage$assay.name.normalization)
+      rowData(csceo$SCE) <- cbind(rowData(csceo$SCE), hvg.mvBio=mgv$bio)
+      chosen.hvg <- rank(-rowData(csceo$SCE)$hvg.mvBio) <= csceo$usage$nHVGs & rowData(csceo$SCE)$hvg.mvBio>0
+      chosen.hvg <- rownames(csceo$SCE)[chosen.hvg]
+      csceo$usage$chosen.hvg <- chosen.hvg
+       
+      cat("* HVGs computed from", csceo$usage$assay.name.normalization,"using:
+       * scran modelGeneVar function to model variance of log-expression profiles for each gene
+       * order biological components of previous step to keep", csceo$usage$nHVGs,"best ranked genes\n\n")
+        
+      if(verbose) message('Finished')
+    }
+  }
     
   return(csceo)
 }

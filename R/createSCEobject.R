@@ -228,6 +228,11 @@ createSCEobject <- function(xx,
   }
   
   if(calcRedDim){
+
+    if(is.null(csceo$usage$chosen.hvg)){
+      csceo <- defHVG(csceo, verbose)
+    }
+    
     csceo$SCE <- applyReducedDim(csceo$SCE, 
                                  runDim, 
                                  csceo$usage$chosen.hvg, 
